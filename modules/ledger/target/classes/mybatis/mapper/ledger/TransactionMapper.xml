@@ -1,36 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.payv.ledger.infrastructure.persistence.mybatis.TransactionMapper">
+
+<mapper namespace="com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapper">
 
     <resultMap id="TransactionRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
-        <id column="transaction_id" property="transactionId"/>
+        <id column="transaction_id" property="id"/>
         <result column="transaction_date" property="transactionDate" javaType="java.time.LocalDate"/>
         <result column="memo" property="memo"/>
     </resultMap>
 
     <select id="existsById" parameterType="string" resultType="boolean">
-        SELECT COUNT(1)
-        FROM transaction
-        WHERE transaction_id = #{transactionId}
+        SELECT COUNT(1) FROM transaction WHERE transaction_id = #{id}
     </select>
 
-    <select id="selectById" resultMap="TransactionRecordMap">
+    <select id="selectById" parameterType="string" resultMap="TransactionRecordMap">
         SELECT transaction_id, transaction_date, memo
         FROM transaction
-        WHERE transaction_id = #{transactionId}
+        WHERE transaction_id = #{id}
     </select>
 
     <insert id="insert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
         INSERT INTO transaction (transaction_id, transaction_date, memo)
-        VALUES (#{transactionId}, #{transactionDate}, #{memo})
+        VALUES (#{id}, #{transactionDate}, #{memo})
     </insert>
 
     <update id="update" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
         UPDATE transaction
-        SET
-            transaction_date = #{transactionDate},
-            memo = #{memo}
-        WHERE transaction_id = #{transactionId}
+        SET transaction_date = #{transactionDate}, memo = #{memo}
+        WHERE transaction_id = #{id}
     </update>
 
 </mapper>

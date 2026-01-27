@@ -25,9 +25,6 @@ public class TransactionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Transaction> getById(@PathVariable String id) {
-
-        System.out.println("======= " + id + " ========");
-
         Transaction transaction = queryService.getTransaction(id);
         return ResponseEntity.ok(transaction);
     }
