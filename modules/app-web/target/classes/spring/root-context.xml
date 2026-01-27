@@ -26,7 +26,7 @@
     <!-- 3) DataSource (HikariCP) -->
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driverClassName}"/>
-        <property name="url" value="${jdbc.url}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
 
@@ -47,8 +47,8 @@
     <!-- 5) MyBatis SqlSessionFactory -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="configLocation" value="${mybatis.configLocation}"/>
-        <property name="mapperLocations" value="${mybatis.mapperLocations}"/>
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath*:mybatis/mapper/**/*.xml"/>
     </bean>
 
     <!-- 6) Mapper interface scan (모듈별 mapper package 규칙 고정) -->
@@ -65,7 +65,8 @@
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
 
-    <!-- 7) security-context.xml import -->
+    <!-- 7) security-context.xml import
     <import resource="classpath:spring/security-context.xml" />
+    -->
 
 </beans>

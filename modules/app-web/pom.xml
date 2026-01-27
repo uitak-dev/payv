@@ -31,7 +31,7 @@
             <artifactId>spring-webmvc</artifactId>
         </dependency>
 
-        <!-- Spring Security -->
+        <!-- Spring Security
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
@@ -40,6 +40,7 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
+        -->
 
         <!-- DataSource/Tx 조립을 app-web에서 한다면 -->
         <dependency>
@@ -66,15 +67,17 @@
         </dependency>
 
         <!-- DB Driver -->
+        <!--
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- JSP/JSTL (컨테이너 제공 범위 정책에 따라 조정) -->

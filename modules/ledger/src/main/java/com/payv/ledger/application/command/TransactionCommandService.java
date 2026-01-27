@@ -12,7 +12,7 @@ public class TransactionCommandService {
 
     private final TransactionRepository transactionRepository;
 
-    public Transaction create(CreateTransactionCommand command) {
+    public Transaction createTransaction(CreateTransactionCommand command) {
         Transaction transaction = Transaction.of(command.getTransactionDate(),
                 command.getMemo());
         return transactionRepository.save(transaction);

@@ -55,7 +55,7 @@
         <security:access-denied-handler error-page="/error/403" />
     </security:http>
 
-    <!-- 인증 관리자 설정 - 실제 데이터베이스 사용 -->
+    <!-- 인증 관리자 설정 -->
     <security:authentication-manager>
         <security:authentication-provider user-service-ref="customUserDetailsService">
             <security:password-encoder ref="passwordEncoder" />

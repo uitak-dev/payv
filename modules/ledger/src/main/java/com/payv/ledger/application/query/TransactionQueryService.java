@@ -14,7 +14,7 @@ public class TransactionQueryService {
 
     private final TransactionRepository transactionRepository;
 
-    public Transaction findById(String transactionId) {
+    public Transaction getTransaction(String transactionId) {
         return transactionRepository
                 .findById(TransactionId.of(transactionId))
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found: " + transactionId));
