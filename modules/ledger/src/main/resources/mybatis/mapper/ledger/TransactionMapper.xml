@@ -14,14 +14,37 @@
     </select>
 
     <select id="selectById" parameterType="string" resultMap="TransactionRecordMap">
-        SELECT transaction_id, transaction_date, memo
+        SELECT *
         FROM transaction
         WHERE transaction_id = #{id}
     </select>
 
     <insert id="insert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
-        INSERT INTO transaction (transaction_id, transaction_date, memo)
-        VALUES (#{id}, #{transactionDate}, #{memo})
+        INSERT INTO ledger_transaction (
+            transaction_id,
+            owner_user_id,
+            transaction_type,
+            amount,
+            transaction_date,
+            asset_id,
+            memo,
+            category_id_level1,
+            category_id_level2,
+            source_type,
+            fixed_cost_template_id
+        ) VALUES (
+            #{id},
+            #{ownerUserId},
+            #{transactionType},
+            #{amount},
+            #{transactionDate},
+            #{assetId},
+            #{memo},
+            #{categoryIdLevel1},
+            #{categoryIdLevel2},
+            #{sourceType},
+            #{fixedCostTemplateId}
+        )
     </insert>
 
     <update id="update" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">

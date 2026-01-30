@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface TransactionRepository {
 
-    Transaction save(Transaction transaction);
+    void save(Transaction transaction);
 
-    Optional<Transaction> findById(TransactionId transactionId);
+    Optional<Transaction> findById(TransactionId id, String ownerUserId);
 
 }

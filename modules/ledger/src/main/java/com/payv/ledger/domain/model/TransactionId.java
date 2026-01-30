@@ -1,8 +1,11 @@
 package com.payv.ledger.domain.model;
 
+import lombok.Getter;
+
 import java.util.Objects;
 import java.util.UUID;
 
+@Getter
 public final class TransactionId {
 
     private final String value;
@@ -11,7 +14,7 @@ public final class TransactionId {
         this.value = value;
     }
 
-    public static TransactionId of() {
+    public static TransactionId generate() {
         return new TransactionId(UUID.randomUUID().toString());
     }
 
@@ -22,18 +25,10 @@ public final class TransactionId {
         return new TransactionId(value);
     }
 
-    public String getValue() {
-        return value;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TransactionId)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof TransactionId)) return false;
         TransactionId that = (TransactionId) o;
         return Objects.equals(value, that.value);
     }

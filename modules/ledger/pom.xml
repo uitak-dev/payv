@@ -30,8 +30,7 @@
         </dependency>
         -->
 
-        <!-- Spring core(도메인 모듈이 Spring에 의존할지 정책 결정 필요)
-             권장: domain은 spring 의존 최소화, application/infrastructure만 사용 -->
+        <!-- Spring Core -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -53,6 +52,16 @@
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-spring</artifactId>
+        </dependency>
+
+        <!-- Bean Validation API (JSR-380) -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
         </dependency>
 
         <!-- 테스트 -->
