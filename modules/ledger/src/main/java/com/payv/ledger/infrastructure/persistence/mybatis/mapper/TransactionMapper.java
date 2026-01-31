@@ -6,8 +6,8 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface TransactionMapper {
-    boolean existsById(@Param("id") String id);
-    TransactionRecord selectTransaction(@Param("id") String id,
+    boolean existsById(@Param("transactionId") String transactionId);
+    TransactionRecord selectTransaction(@Param("transactionId") String transactionId,
                                         @Param("ownerUserId") String ownerUserId);
     int insert(TransactionRecord record);
     int update(TransactionRecord record);

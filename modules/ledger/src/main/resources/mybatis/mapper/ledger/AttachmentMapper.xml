@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.ledger.infrastructure.persistence.mybatis.mapper.AttachmentMapper">
+
+    <resultMap id="AttachmentRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.AttachmentRecord">
+        <id     property="attachmentId"     column="attachment_id" />
+        <result property="transactionId"    column="transaction_id" />
+        <result property="uploadFileName"   column="upload_file_name" />
+        <result property="storedFileName"   column="stored_file_name" />
+        <result property="storagePath"      column="storage_path" />
+        <result property="contentType"      column="content_type" />
+        <result property="sizeBytes"        column="size_bytes" />
+    </resultMap>
+
+    <delete id="deleteByTransactionId">
+        delete from attachment where transaction_id = #{transactionId}
+    </delete>
+
+    <insert id="insertAttachments">
+        insert into attachment (
+            attachment_id,
+            transaction_id,
+            upload_file_name,
+            stored_file_name,
+            storage_path,
+            content_type,
+            size_bytes
+        )
+        values
+        <foreach collection="records" item="r" separator=",">
+        (
+            #{r.attachmentId},
+            #{r.transactionId},
+            #{r.uploadFileName},
+            #{r.storedFileName},
+            #{r.storagePath},
+            #{r.contentType},
+            #{r.sizeBytes}
+        )
+        </foreach>
+    </insert>
+
+    <select id="selectByTransactionId" resultMap="AttachmentRecordMap">
+        select
+            attachment_id,
+            transaction_id,
+            upload_file_name,
+            stored_file_name,
+            storage_path,
+            content_type,
+            size_bytes
+        from attachment
+        where transaction_id = #{transactionId}
+    </select>
+
+</mapper>

@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public final class AttachmentRecord {
 
-    private String id;
+    private String attachmentId;
     private String transactionId;
     private String uploadFileName;
     private String storedFileName;
@@ -18,9 +18,9 @@ public final class AttachmentRecord {
     private long sizeBytes;
 
     @Builder
-    private AttachmentRecord(String id, String transactionId, String uploadFileName,
+    private AttachmentRecord(String attachmentId, String transactionId, String uploadFileName,
                              String storedFileName, String storagePath, String contentType, long sizeBytes) {
-        this.id = id;
+        this.attachmentId = attachmentId;
         this.transactionId = transactionId;
         this.uploadFileName = uploadFileName;
         this.storedFileName = storedFileName;
@@ -31,7 +31,7 @@ public final class AttachmentRecord {
 
     public static AttachmentRecord toRecord(Attachment attachment) {
         return AttachmentRecord.builder()
-                .id(attachment.getId().getValue())
+                .attachmentId(attachment.getId().getValue())
                 .transactionId(attachment.getTransactionId().getValue())
                 .uploadFileName(attachment.getUploadFileName())
                 .storedFileName(attachment.getStoredFileName())
@@ -43,7 +43,7 @@ public final class AttachmentRecord {
 
     public Attachment toEntity() {
         return Attachment.builder()
-                .id(AttachmentId.of(id))
+                .id(AttachmentId.of(attachmentId))
                 .transactionId(TransactionId.of(transactionId))
                 .uploadFileName(uploadFileName)
                 .storedFileName(storedFileName)

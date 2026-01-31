@@ -4,23 +4,43 @@
 <mapper namespace="com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapper">
 
     <resultMap id="TransactionRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
-        <id column="transaction_id" property="id"/>
-        <result column="transaction_date" property="transactionDate" javaType="java.time.LocalDate"/>
-        <result column="memo" property="memo"/>
+        <id     property="transactionId"        column="transaction_id" />
+        <result property="ownerUserId"          column="owner_user_id" />
+        <result property="transactionType"      column="transaction_type" />
+        <result property="amount"               column="amount" />
+        <result property="transactionDate"      column="transaction_date" />
+        <result property="assetId"              column="asset_id" />
+        <result property="categoryIdLevel1"     column="category_id_level1" />
+        <result property="categoryIdLevel2"     column="category_id_level2" />
+        <result property="memo"                 column="memo" />
+        <result property="sourceType"           column="source_type" />
+        <result property="fixedCostTemplateId"  column="fixed_cost_template_id" />
     </resultMap>
 
     <select id="existsById" parameterType="string" resultType="boolean">
-        SELECT COUNT(1) FROM transaction WHERE transaction_id = #{id}
+        SELECT COUNT(1) FROM transaction WHERE transaction_id = #{transactionId}
     </select>
 
-    <select id="selectById" parameterType="string" resultMap="TransactionRecordMap">
-        SELECT *
+    <select id="selectTransaction" resultMap="TransactionRecordMap">
+        SELECT
+            transaction_id,
+            owner_user_id,
+            transaction_type,
+            amount,
+            transaction_date,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            source_type,
+            fixed_cost_template_id
         FROM transaction
-        WHERE transaction_id = #{id}
+        WHERE transaction_id = #{transactionId}
+        AND owner_user_id = #{ownerUserId}
     </select>
 
     <insert id="insert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
-        INSERT INTO ledger_transaction (
+        INSERT INTO transaction (
             transaction_id,
             owner_user_id,
             transaction_type,
@@ -33,7 +53,7 @@
             source_type,
             fixed_cost_template_id
         ) VALUES (
-            #{id},
+            #{transactionId},
             #{ownerUserId},
             #{transactionType},
             #{amount},
@@ -48,9 +68,16 @@
     </insert>
 
     <update id="update" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
-        UPDATE transaction
-        SET transaction_date = #{transactionDate}, memo = #{memo}
-        WHERE transaction_id = #{id}
+        UPDATE transaction SET
+            transaction_type = #{transactionType},
+            amount = #{amount},
+            transaction_date = #{transactionDate},
+            asset_id = #{assetId},
+            category_id_level1 = #{categoryIdLevel1},
+            category_id_level2 = #{categoryIdLevel2},
+            memo = #{memo}
+        WHERE transaction_id = #{transactionId}
+        AND owner_user_id = #{ownerUserId}
     </update>
 
 </mapper>
