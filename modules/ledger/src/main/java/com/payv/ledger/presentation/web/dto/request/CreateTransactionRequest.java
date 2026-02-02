@@ -1,6 +1,5 @@
 package com.payv.ledger.presentation.web.dto.request;
 
-import com.payv.ledger.domain.model.TransactionType;
 import com.sun.istack.internal.NotNull;
 import lombok.*;
 
@@ -9,10 +8,7 @@ import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@Builder
+@Data
 public final class CreateTransactionRequest {
 
     @NotNull

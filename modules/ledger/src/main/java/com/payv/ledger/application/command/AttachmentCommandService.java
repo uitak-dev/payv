@@ -1,15 +1,114 @@
 package com.payv.ledger.application.command;
 
+import com.payv.ledger.application.port.AttachmentStoragePort;
+import com.payv.ledger.domain.model.Attachment;
+import com.payv.ledger.domain.model.AttachmentId;
+import com.payv.ledger.domain.model.TransactionId;
+import com.payv.ledger.domain.repository.AttachmentRepository;
 import com.payv.ledger.domain.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class AttachmentCommandService {
 
-    private final TransactionRepository transactionRepository;
+    private static final int MAX_ATTACHMENTS = 2;
 
-    private final PlatformTransactionManager transactionManager;
+    private final TransactionRepository transactionRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final AttachmentStoragePort storagePort;
+    private final TransactionTemplate txTemplate;
+
+    @Transactional
+    public AttachmentId upload(TransactionId transactionId, String ownerUserId, MultipartFile file) {
+
+        // 0) 거래 존재/소유권 확인(첨부는 거래에 종속)
+//        if (!transactionRepository.existsOwned(transactionId, ownerUserId)) {
+//            throw new IllegalArgumentException("transaction not found");
+//        }
+
+        // 1) 개수 제한(UPLOADING+STORED)
+        int activeCount = attachmentRepository.countActiveByTransactionId(transactionId, ownerUserId);
+        if (activeCount >= MAX_ATTACHMENTS) {
+            throw new IllegalStateException("attachment limit exceeded");
+        }
+
+        // 2) 식별자/파일명/경로 계획 수립
+        AttachmentId attachmentId = AttachmentId.generate();
+
+        String uploadFileName = safeDisplayName(file.getOriginalFilename());
+        String contentType = (file.getContentType() != null) ? file.getContentType() : "application/octet-stream";
+        long sizeBytes = file.getSize();
+
+        AttachmentStoragePort.StoragePlan plan =
+                storagePort.plan(ownerUserId, transactionId, attachmentId, uploadFileName, contentType);
+
+        // 3) staging 저장 (DB 커밋 전)
+        storagePort.saveToStaging(plan, file);
+
+        // 4) meta insert(UPLOADING)
+        Attachment uploading = Attachment.createForUpload(
+                attachmentId,
+                transactionId,
+                ownerUserId,
+                uploadFileName,
+                plan.getStoredFileName(),
+                plan.getStoragePath(),
+                plan.getStagingPath(),
+                plan.getStagingFileName(),
+                contentType,
+                sizeBytes,
+                Attachment.Status.UPLOADING,
+                null
+        );
+        attachmentRepository.insertUploading(uploading);
+
+        // 5) 커밋 이후 finalize(move) + status update (새 트랜잭션)
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                txTemplate.execute(status -> {
+                    try {
+                        storagePort.moveStagingToFinal(plan);
+                        attachmentRepository.markStored(attachmentId, ownerUserId);
+                    } catch (Exception ex) {
+                        attachmentRepository.markFailed(attachmentId, ownerUserId, shortReason(ex));
+                        // 정책: staging 남김(재시도/운영점검) or 삭제
+                        // storagePort.deleteStagingQuietly(plan);
+                    }
+                    return null;
+                });
+            }
+
+            @Override
+            public void afterCompletion(int status) {
+                if (status == TransactionSynchronization.STATUS_ROLLED_BACK) {
+                    storagePort.deleteStagingQuietly(plan);
+                }
+            }
+        });
+
+        return attachmentId;
+    }
+
+    private String safeDisplayName(String original) {
+        if (original == null) return "unknown";
+        String s = original.replace("\\", "/");
+        int idx = s.lastIndexOf('/');
+        String name = (idx >= 0) ? s.substring(idx + 1) : s;
+        if (name.length() > 150) name = name.substring(0, 150);
+        return name;
+    }
+
+    private String shortReason(Exception ex) {
+        String msg = ex.getMessage();
+        if (msg == null) return ex.getClass().getSimpleName();
+        return msg.length() > 200 ? msg.substring(0, 200) : msg;
+    }
 }

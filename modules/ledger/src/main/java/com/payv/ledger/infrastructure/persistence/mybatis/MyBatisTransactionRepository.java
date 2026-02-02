@@ -62,7 +62,7 @@ public class MyBatisTransactionRepository implements TransactionRepository {
         if (record == null) return Optional.empty();
 
         List<TransactionTagRecord> tags = transactionTagMapper.selectByTransactionId(record.getTransactionId());
-        List<AttachmentRecord> atts = attachmentMapper.selectByTransactionId(record.getTransactionId());
+        List<AttachmentRecord> atts = attachmentMapper.selectStoredByTransactionId(record.getTransactionId(), ownerUserId);
 
         return Optional.of(TransactionAssembler.toEntity(record, tags, atts));
     }

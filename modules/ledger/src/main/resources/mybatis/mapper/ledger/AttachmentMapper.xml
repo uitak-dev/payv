@@ -6,52 +6,130 @@
     <resultMap id="AttachmentRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.AttachmentRecord">
         <id     property="attachmentId"     column="attachment_id" />
         <result property="transactionId"    column="transaction_id" />
+        <result property="ownerUserId"      column="owner_user_id" />
         <result property="uploadFileName"   column="upload_file_name" />
         <result property="storedFileName"   column="stored_file_name" />
         <result property="storagePath"      column="storage_path" />
+        <result property="stagingPath"      column="staging_path" />
+        <result property="stagingFileName"  column="staging_file_name" />
         <result property="contentType"      column="content_type" />
         <result property="sizeBytes"        column="size_bytes" />
+        <result property="status"           column="status" />
+        <result property="failureReason"    column="failure_reason" />
     </resultMap>
 
+    <select id="countActiveByTransactionId" resultType="int">
+        select count(*)
+        from attachment
+        where transaction_id = #{transactionId}
+        and owner_user_id  = #{ownerUserId}
+        and status in ('UPLOADING','STORED')
+    </select>
+
     <delete id="deleteByTransactionId">
-        delete from attachment where transaction_id = #{transactionId}
+        delete from attachment
+        where transaction_id = #{transactionId}
     </delete>
+
+    <insert id="insertUploading" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.AttachmentRecord">
+        insert into attachment (
+            attachment_id,
+            transaction_id,
+            owner_user_id,
+            status,
+            upload_file_name,
+            stored_file_name,
+            storage_path,
+            staging_path,
+            staging_file_name,
+            content_type,
+            size_bytes,
+            failure_reason
+        )
+        values (
+            #{attachmentId},
+            #{transactionId},
+            #{ownerUserId},
+            #{status},
+            #{uploadFileName},
+            #{storedFileName},
+            #{storagePath},
+            #{stagingPath},
+            #{stagingFileName},
+            #{contentType},
+            #{sizeBytes},
+            #{failureReason}
+        )
+    </insert>
 
     <insert id="insertAttachments">
         insert into attachment (
             attachment_id,
             transaction_id,
+            owner_user_id,
+            status,
             upload_file_name,
             stored_file_name,
             storage_path,
+            staging_path,
+            staging_file_name,
             content_type,
-            size_bytes
+            size_bytes,
+            failure_reason
         )
         values
         <foreach collection="records" item="r" separator=",">
         (
             #{r.attachmentId},
             #{r.transactionId},
+            #{r.ownerUserId},
+            #{r.status},
             #{r.uploadFileName},
             #{r.storedFileName},
             #{r.storagePath},
+            #{r.stagingPath},
+            #{r.stagingFileName},
             #{r.contentType},
-            #{r.sizeBytes}
+            #{r.sizeBytes},
+            #{r.failureReason}
         )
         </foreach>
     </insert>
 
-    <select id="selectByTransactionId" resultMap="AttachmentRecordMap">
+    <select id="selectStoredByTransactionId" resultMap="AttachmentRecordMap">
         select
             attachment_id,
             transaction_id,
+            owner_user_id,
+            status,
             upload_file_name,
             stored_file_name,
             storage_path,
+            staging_path,
+            staging_file_name,
             content_type,
-            size_bytes
+            size_bytes,
+            failure_reason
         from attachment
         where transaction_id = #{transactionId}
+        and owner_user_id = #{ownerUserId}
+        and status = 'STORED'
     </select>
+
+    <update id="markStored">
+        update attachment set
+            status = 'STORED',
+            failure_reason = null
+        where attachment_id = #{attachmentId}
+        and owner_user_id  = #{ownerUserId}
+    </update>
+
+    <update id="markFailed">
+        update attachment set
+            status = 'FAILED',
+            failure_reason = #{failureReason}
+        where attachment_id = #{attachmentId}
+        and owner_user_id  = #{ownerUserId}
+    </update>
 
 </mapper>
