@@ -58,7 +58,7 @@ public class MyBatisTransactionRepository implements TransactionRepository {
 
     @Override
     public Optional<Transaction> findById(TransactionId id, String ownerUserId) {
-        TransactionRecord record = transactionMapper.selectTransaction(id.getValue(), ownerUserId);
+        TransactionRecord record = transactionMapper.selectDetail(id.getValue(), ownerUserId);
         if (record == null) return Optional.empty();
 
         List<TransactionTagRecord> tags = transactionTagMapper.selectByTransactionId(record.getTransactionId());

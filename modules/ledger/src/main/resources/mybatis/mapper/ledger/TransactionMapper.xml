@@ -17,28 +17,73 @@
         <result property="fixedCostTemplateId"  column="fixed_cost_template_id" />
     </resultMap>
 
+    <sql id="txColumns">
+        transaction_id          as transactionId,
+        owner_user_id           as ownerUserId,
+        transaction_type        as transactionType,
+        amount                  as amount,
+        transaction_date        as transactionDate,
+        asset_id                as assetId,
+        memo                    as memo,
+        category_id_level1      as categoryIdLevel1,
+        category_id_level2      as categoryIdLevel2,
+        source_type             as sourceType,
+        fixed_cost_template_id  as fixedCostTemplateId
+    </sql>
+
+    <!-- ==== Query ==== -->
     <select id="existsById" parameterType="string" resultType="boolean">
         SELECT COUNT(1) FROM transaction WHERE transaction_id = #{transactionId}
     </select>
 
-    <select id="selectTransaction" resultMap="TransactionRecordMap">
-        SELECT
-            transaction_id,
-            owner_user_id,
-            transaction_type,
-            amount,
-            transaction_date,
-            asset_id,
-            category_id_level1,
-            category_id_level2,
-            memo,
-            source_type,
-            fixed_cost_template_id
-        FROM transaction
-        WHERE transaction_id = #{transactionId}
-        AND owner_user_id = #{ownerUserId}
+    <select id="selectList" resultMap="TransactionRecordMap">
+        select
+            <include refid="txColumns"/>
+        from transaction
+        where owner_user_id = #{ownerUserId}
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+        <if test="assetId != null and assetId != ''">
+            and asset_id = #{assetId}
+        </if>
+        order by transaction_date desc, transaction_id desc
+        offset #{offset} limit #{limit}
     </select>
 
+    <select id="countList" resultType="int">
+        select count(*)
+        from transaction
+        where owner_user_id = #{ownerUserId}
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+        <if test="assetId != null and assetId != ''">
+            and asset_id = #{assetId}
+        </if>
+    </select>
+
+    <select id="selectDetail" resultMap="TransactionRecordMap">
+        select <include refid="txColumns"/>
+        from transaction
+        where transaction_id = #{transactionId}
+        and owner_user_id = #{ownerUserId}
+    </select>
+
+    <select id="selectTagIds" resultType="string">
+        select tag_id
+        from transaction_tag
+        where transaction_id = #{transactionId}
+        and owner_user_id = #{ownerUserId}
+    </select>
+
+    <!-- ==== Command ==== -->
     <insert id="insert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
         INSERT INTO transaction (
             transaction_id,

@@ -1,4 +1,4 @@
-package com.payv.ledger.presentation.web.dto.request;
+package com.payv.ledger.presentation.dto.request;
 
 import com.sun.istack.internal.NotNull;
 import lombok.*;

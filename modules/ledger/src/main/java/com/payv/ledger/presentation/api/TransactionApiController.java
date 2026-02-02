@@ -5,7 +5,7 @@ import com.payv.ledger.application.command.model.CreateTransactionCommand;
 import com.payv.ledger.domain.model.Money;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.domain.model.TransactionType;
-import com.payv.ledger.presentation.web.dto.request.CreateTransactionRequest;
+import com.payv.ledger.presentation.dto.request.CreateTransactionRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
