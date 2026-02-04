@@ -137,7 +137,6 @@ public class TransactionQueryService {
         );
     }
 
-
     @Data
     @AllArgsConstructor
     public static class PagedResult<T> {

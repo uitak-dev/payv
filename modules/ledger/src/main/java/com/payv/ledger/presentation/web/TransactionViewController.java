@@ -36,7 +36,7 @@ public class TransactionViewController {
         model.addAttribute("to", to);
         model.addAttribute("assetId", assetId);
 
-        return "ledger/tx/list";
+        return "ledger/transaction/list";
     }
 
     @GetMapping("/{transactionId}")
@@ -45,6 +45,6 @@ public class TransactionViewController {
                          Model model) {
 
         model.addAttribute("tx", queryService.detail(TransactionId.of(transactionId), ownerUserId));
-        return "ledger/tx/detail";
+        return "ledger/transaction/detail";
     }
 }

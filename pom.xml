@@ -11,7 +11,7 @@
     <modules>
 <!--        <module>modules/iam</module>-->
 <!--        <module>modules/asset</module>-->
-<!--        <module>modules/classification</module>-->
+        <module>modules/classification</module>
 <!--        <module>modules/transfer</module>-->
 <!--        <module>modules/budget</module>-->
 <!--        <module>modules/automation</module>-->
@@ -30,6 +30,7 @@
         <hikari.version>4.0.3</hikari.version>
         <postgresql.driver.version>42.7.4</postgresql.driver.version>
         <junit.version>4.13.2</junit.version>
+        <mockito.version>3.12.4</mockito.version>
         <log4j2.version>2.17.2</log4j2.version>
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.32</lombok.version>
@@ -164,6 +165,18 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>3.24.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- Lombok (compile-time only) -->
