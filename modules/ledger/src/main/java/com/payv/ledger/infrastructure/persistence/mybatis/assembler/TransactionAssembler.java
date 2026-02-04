@@ -1,4 +1,4 @@
-package com.payv.ledger.domain.repository;
+package com.payv.ledger.infrastructure.persistence.mybatis.assembler;
 
 import com.payv.ledger.domain.model.*;
 import com.payv.ledger.infrastructure.persistence.mybatis.record.AttachmentRecord;

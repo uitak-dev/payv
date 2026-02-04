@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.classification.infrastructure.persistence.mybatis.mapper.CategoryMapper">
+
+    <resultMap id="CategoryRecordMap" type="com.payv.classification.infrastructure.persistence.mybatis.record.CategoryRecord">
+        <id     property="categoryId" column="category_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="name"       column="name"/>
+        <result property="parentId"   column="parent_id"/>
+        <result property="depth"      column="depth"/>
+        <result property="isSystem"   column="is_system"/>
+        <result property="isActive"   column="is_active"/>
+        <result property="createdAt"  column="created_at"/>
+        <result property="updatedAt"  column="updated_at"/>
+    </resultMap>
+
+    <insert id="upsert" parameterType="com.payv.classification.infrastructure.persistence.mybatis.record.CategoryRecord">
+        INSERT INTO category (
+            category_id,
+            owner_user_id,
+            name,
+            parent_id,
+            depth,
+            is_system,
+            is_active,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{categoryId},
+            #{ownerUserId},
+            #{name},
+            #{parentId},
+            #{depth},
+            #{isSystem},
+            #{isActive},
+            COALESCE(#{createdAt}, NOW()),
+            NOW()
+        )
+        ON CONFLICT (category_id)
+        DO UPDATE SET
+            owner_user_id = EXCLUDED.owner_user_id,
+            name          = EXCLUDED.name,
+            parent_id     = EXCLUDED.parent_id,
+            depth         = EXCLUDED.depth,
+            is_system     = EXCLUDED.is_system,
+            is_active     = EXCLUDED.is_active,
+            updated_at    = NOW()
+    </insert>
+
+    <update id="deleteParentAndChildrenById">
+        UPDATE category SET
+            is_active = FALSE,
+            updated_at = NOW()
+        WHERE is_active = TRUE
+        AND (category_id = #{categoryId} OR parent_id = #{categoryId})
+    </update>
+
+    <select id="selectRootById" resultMap="CategoryRecordMap">
+        SELECT
+            category_id,
+            owner_user_id,
+            name,
+            parent_id,
+            depth,
+            is_system,
+            is_active,
+            created_at,
+            updated_at
+        FROM category
+        WHERE category_id = #{categoryId}
+        AND owner_user_id = #{ownerUserId}
+        AND depth = 1
+    </select>
+
+    <select id="selectRootsByOwner" resultMap="CategoryRecordMap">
+        SELECT
+            category_id,
+            owner_user_id,
+            name,
+            parent_id,
+            depth,
+            is_system,
+            is_active,
+            created_at,
+            updated_at
+        FROM category
+        WHERE owner_user_id = #{ownerUserId}
+        AND depth = 1
+        AND is_active = TRUE
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="selectChildrenByOwner" resultMap="CategoryRecordMap">
+        SELECT
+            category_id,
+            owner_user_id,
+            name,
+            parent_id,
+            depth,
+            is_system,
+            is_active,
+            created_at,
+            updated_at
+        FROM category
+        WHERE owner_user_id = #{ownerUserId}
+        AND parent_id = #{parentId}
+        AND depth = 2
+        AND is_active = TRUE
+        ORDER BY created_at ASC
+    </select>
+
+    <update id="deleteByIds">
+        UPDATE category SET
+            is_active = FALSE,
+            updated_at = NOW()
+        WHERE is_active = TRUE
+        AND category_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="countRootsByOwner" resultType="int">
+        SELECT COUNT(*)
+        FROM category
+        WHERE owner_user_id = #{ownerUserId}
+        AND depth = 1
+        AND is_active = TRUE
+    </select>
+
+    <select id="countChildrenByOwner" resultType="int">
+        SELECT COUNT(*)
+        FROM category
+        WHERE owner_user_id = #{ownerUserId}
+        AND parent_id = #{parentId}
+        AND depth = 2
+        AND is_active = TRUE
+    </select>
+
+</mapper>

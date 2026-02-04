@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.classification.infrastructure.persistence.mybatis.mapper.TagMapper">
+
+    <resultMap id="TagRecordMap" type="com.payv.classification.infrastructure.persistence.mybatis.record.TagRecord">
+        <id     property="tagId"      column="tag_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="name"       column="name"/>
+        <result property="isActive"   column="is_active"/>
+        <result property="createdAt"  column="created_at"/>
+        <result property="updatedAt"  column="updated_at"/>
+    </resultMap>
+
+    <insert id="upsert" parameterType="com.payv.classification.infrastructure.persistence.mybatis.record.TagRecord">
+        INSERT INTO tag (
+            tag_id,
+            owner_user_id,
+            name,
+            is_active,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{tagId},
+            #{ownerUserId},
+            #{name},
+            #{isActive},
+            COALESCE(#{createdAt}, NOW()),
+            NOW()
+        )
+        ON CONFLICT (tag_id)
+        DO UPDATE SET
+            owner_user_id = EXCLUDED.owner_user_id,
+            name          = EXCLUDED.name,
+            is_active     = EXCLUDED.is_active,
+            updated_at    = NOW()
+    </insert>
+
+    <update id="deleteById">
+        UPDATE tag SET
+            is_active = FALSE,
+            updated_at = NOW()
+        WHERE tag_id = #{tagId}
+        AND is_active = TRUE
+    </update>
+
+    <select id="selectById" resultMap="TagRecordMap">
+        SELECT
+            tag_id,
+            owner_user_id,
+            name,
+            is_active,
+            created_at,
+            updated_at
+        FROM tag
+        WHERE tag_id = #{tagId}
+        AND owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+    </select>
+
+    <select id="selectAllByOwner" resultMap="TagRecordMap">
+        SELECT
+            tag_id,
+            owner_user_id,
+            name,
+            is_active,
+            created_at,
+            updated_at
+        FROM tag
+        WHERE owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="countByOwner" resultType="int">
+        SELECT COUNT(*)
+        FROM tag
+        WHERE owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+    </select>
+
+</mapper>

@@ -2,7 +2,7 @@ package com.payv.ledger.infrastructure.persistence.mybatis;
 
 import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
-import com.payv.ledger.domain.repository.TransactionAssembler;
+import com.payv.ledger.infrastructure.persistence.mybatis.assembler.TransactionAssembler;
 import com.payv.ledger.domain.repository.TransactionRepository;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.AttachmentMapper;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapper;
