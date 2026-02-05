@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>거래 수정</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="home" class="bg-slate-100 text-slate-900">
+  <div class="app-shell shadow-sm">
+    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
+      <div class="flex items-center justify-between px-4 py-3">
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="메뉴">
+          <span class="h-4 w-5 rounded bg-slate-200"></span>
+        </button>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-semibold">거래 수정</h1>
+          <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <span>2026년 1월</span>
+            <span class="h-3 w-3 rounded bg-slate-200"></span>
+          </button>
+        </div>
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="알림">
+          <span class="h-5 w-5 rounded-full bg-slate-200"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="px-4 pb-28 pt-4">
+      
+    <form class="space-y-4">
+      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="grid gap-4">
+          <label class="block">
+            <div class="text-sm font-medium">유형</div>
+            <select data-tx-type class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+              <option value="EXPENSE">지출</option>
+              <option value="INCOME">수입</option>
+              <option value="TRANSFER">이체</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <div class="text-sm font-medium">금액</div>
+            <input inputmode="numeric" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="0" />
+          </label>
+
+          <label class="block">
+            <div class="text-sm font-medium">날짜</div>
+            <input type="date" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" value="2026-01-24" />
+          </label>
+
+          <div data-section="tx" class="grid gap-4">
+            <label class="block">
+              <div class="text-sm font-medium">자산</div>
+              <select class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">선택</option>
+                <option>현금</option>
+                <option>카드(신한)</option>
+                <option>은행A</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <div class="text-sm font-medium">1단계 카테고리 <span class="text-red-600">*</span></div>
+              <select name="categoryLevel1" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">선택</option>
+                <option value="FOOD">식비</option>
+                <option value="TRANSPORT">교통</option>
+                <option value="FIXED">고정비</option>
+              </select>
+              <p class="mt-1 text-xs text-slate-500">거래 생성/수정에서 1단계 카테고리는 필수입니다.</p>
+            </label>
+
+            <label class="block">
+              <div class="text-sm font-medium">2단계 카테고리(선택)</div>
+              <select class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">선택</option>
+                <option>점심</option>
+                <option>저녁</option>
+                <option>카페</option>
+              </select>
+            </label>
+          </div>
+
+          <div data-section="transfer" class="hidden grid gap-4">
+            <label class="block">
+              <div class="text-sm font-medium">출금 자산</div>
+              <select name="fromAsset" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">선택</option>
+                <option value="BANK_A">은행A</option>
+                <option value="CARD_SHINHAN">카드(신한)</option>
+              </select>
+            </label>
+            <label class="block">
+              <div class="text-sm font-medium">입금 자산</div>
+              <select name="toAsset" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                <option value="">선택</option>
+                <option value="BANK_B">은행B</option>
+                <option value="CASH">현금</option>
+              </select>
+              <p class="mt-1 text-xs text-slate-500">출금/입금 자산은 동일할 수 없습니다.</p>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <button type="button" data-accordion-trigger="moreOptions" aria-expanded="false" class="flex w-full items-center justify-between px-4 py-3">
+          <div class="text-sm font-semibold">추가 옵션</div>
+          <div class="h-5 w-5 rounded bg-slate-200"></div>
+        </button>
+        <div id="moreOptions" class="hidden border-t border-slate-100 px-4 py-4">
+          <div class="grid gap-4">
+            <div>
+              <div class="text-sm font-medium">태그(최대 3개)</div>
+              <div class="mt-2 flex gap-2">
+                <input data-tag-input class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="태그 입력" />
+                <button data-tag-add type="button" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">추가</button>
+              </div>
+              <p data-tag-hint class="mt-1 text-xs text-slate-500"></p>
+              <div data-tag-wrap class="mt-2 flex flex-wrap gap-2"></div>
+              <p class="mt-2 text-xs text-slate-500">비활성 태그는 신규 선택지에서 노출되지 않습니다.</p>
+            </div>
+
+            <div>
+              <div class="text-sm font-medium">첨부(이미지, 최대 2개)</div>
+              <div class="mt-2 flex items-center gap-2">
+                <input data-attach-input type="file" accept="image/*" multiple class="block w-full text-sm" />
+              </div>
+              <p data-attach-hint class="mt-1 text-xs text-slate-500">이미지 0/2</p>
+              <div data-attach-grid class="mt-3 grid grid-cols-2 gap-3"></div>
+            </div>
+
+            <label class="block">
+              <div class="text-sm font-medium">메모</div>
+              <textarea class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" rows="3" placeholder="메모를 입력하세요"></textarea>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <div class="fixed left-1/2 bottom-20 w-full max-w-[var(--app-max-w)] -translate-x-1/2 px-4 z-40">
+        <button data-save-btn type="button" disabled class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white opacity-50">저장</button>
+      </div>
+    </form>
+
+    <!-- Image preview modal -->
+    <div data-modal aria-hidden="true" class="hidden fixed inset-0 z-50 bg-black/50 p-6">
+      <div class="mx-auto w-full max-w-[var(--app-max-w)] rounded-2xl bg-white p-4">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-semibold">미리보기</div>
+          <button type="button" data-modal-close class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">닫기</button>
+        </div>
+        <img data-modal-img alt="첨부 미리보기" class="mt-3 w-full rounded-xl border border-slate-200 object-contain" />
+      </div>
+    </div>
+
+    </main>
+  </div>
+
+
+
+  <nav class="app-bottom-nav border-t border-slate-200 bg-white/95 backdrop-blur">
+    <div class="grid grid-cols-4 text-center text-xs">
+      <a href="index.html" data-nav="home" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">홈</div>
+      </a>
+      <a href="report.html" data-nav="report" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">리포트</div>
+      </a>
+      <a href="plan.html" data-nav="plan" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">계획</div>
+      </a>
+      <a href="settings.html" data-nav="settings" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">설정</div>
+      </a>
+    </div>
+  </nav>
+
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>홈 / 원장</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body data-page="home" class="bg-slate-100 text-slate-900">
+  <div class="app-shell shadow-sm">
+    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
+      <div class="flex items-center justify-between px-4 py-3">
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="메뉴">
+          <span class="h-4 w-5 rounded bg-slate-200"></span>
+        </button>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-semibold">홈 / 원장</h1>
+          <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <span>2026년 1월</span>
+            <span class="h-3 w-3 rounded bg-slate-200"></span>
+          </button>
+        </div>
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="알림">
+          <span class="h-5 w-5 rounded-full bg-slate-200"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="px-4 pb-28 pt-4">
+      
+    <div class="space-y-4">
+      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-2">
+          <input class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="검색(메모/태그 등)" />
+          <button class="h-10 w-10 rounded-xl border border-slate-200" aria-label="필터">
+            <span class="mx-auto block h-5 w-5 rounded bg-slate-200"></span>
+          </button>
+        </div>
+        <div class="mt-3 flex gap-2 overflow-auto pb-1 text-sm">
+          <button class="whitespace-nowrap rounded-full border border-slate-200 px-3 py-1.5">전체</button>
+          <button class="whitespace-nowrap rounded-full border border-slate-200 px-3 py-1.5">자산</button>
+          <button class="whitespace-nowrap rounded-full border border-slate-200 px-3 py-1.5">카테고리</button>
+          <button class="whitespace-nowrap rounded-full border border-slate-200 px-3 py-1.5">태그</button>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">01월 24일</div>
+        <div class="divide-y divide-slate-100">
+          <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+              <div>
+                <div class="text-sm font-medium">식비 · 점심</div>
+                <div class="mt-0.5 text-xs text-slate-500">현금 · 태그 2 · 첨부 1</div>
+              </div>
+            </div>
+            <div class="text-sm font-semibold">-12,000</div>
+          </a>
+
+          <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+              <div>
+                <div class="text-sm font-medium">이체 · 자산 이동</div>
+                <div class="mt-0.5 text-xs text-slate-500">은행A → 은행B</div>
+              </div>
+            </div>
+            <div class="text-sm font-semibold">100,000</div>
+          </a>
+
+          <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+              <div>
+                <div class="text-sm font-medium">고정비 · 구독료</div>
+                <div class="mt-0.5 text-xs text-slate-500">카드 · 자동 생성</div>
+              </div>
+            </div>
+            <div class="text-sm font-semibold">-9,900</div>
+          </a>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">01월 23일</div>
+        <div class="divide-y divide-slate-100">
+          <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+              <div>
+                <div class="text-sm font-medium">교통 · 지하철</div>
+                <div class="mt-0.5 text-xs text-slate-500">현금</div>
+              </div>
+            </div>
+            <div class="text-sm font-semibold">-1,250</div>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    </main>
+  </div>
+
+
+  <div class="app-fab">
+    <div class="flex justify-end px-4">
+      <a href="transaction_add.html" class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg">
+        <span class="text-2xl leading-none">+</span>
+        <span class="sr-only">거래 추가</span>
+      </a>
+    </div>
+  </div>
+
+
+  <nav class="app-bottom-nav border-t border-slate-200 bg-white/95 backdrop-blur">
+    <div class="grid grid-cols-4 text-center text-xs">
+      <a href="index.html" data-nav="home" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">홈</div>
+      </a>
+      <a href="report.html" data-nav="report" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">리포트</div>
+      </a>
+      <a href="plan.html" data-nav="plan" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">계획</div>
+      </a>
+      <a href="settings.html" data-nav="settings" class="py-3">
+        <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+        <div class="mt-1">설정</div>
+      </a>
+    </div>
+  </nav>
+
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
