@@ -10,13 +10,13 @@
 
     <modules>
 <!--        <module>modules/iam</module>-->
-<!--        <module>modules/asset</module>-->
+        <module>modules/asset</module>
         <module>modules/classification</module>
 <!--        <module>modules/transfer</module>-->
 <!--        <module>modules/budget</module>-->
 <!--        <module>modules/automation</module>-->
 <!--        <module>modules/reporting</module>-->
-<!--        <module>modules/common</module>-->
+        <module>modules/common</module>
         <module>modules/ledger</module>
         <module>modules/app-web</module>
     </modules>
@@ -46,9 +46,25 @@
             <!-- 내부 모듈 버전 중앙 관리 (필수) -->
             <dependency>
                 <groupId>com.payv</groupId>
+                <artifactId>common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.payv</groupId>
                 <artifactId>ledger</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.payv</groupId>
+                <artifactId>classification</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.payv</groupId>
+                <artifactId>asset</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
 
             <!-- Spring Framework -->
             <dependency>
