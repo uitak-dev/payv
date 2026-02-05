@@ -92,7 +92,7 @@ public class Category {
     /** * * * * * * * * * * * * * * * * *  *
      * Policy / Commands (domain behavior) *
      * * * * * * * * * * * * * * * * * * * */
-    public Category createChild(String name, String ownerUserId) {
+    public Category createChild(String ownerUserId, String name) {
         requireCanAddChild(ownerUserId, name);
         Category child = Category.builder()
                 .id(CategoryId.generate())
