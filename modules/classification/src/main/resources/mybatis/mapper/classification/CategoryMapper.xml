@@ -16,6 +16,11 @@
         <result property="updatedAt"  column="updated_at"/>
     </resultMap>
 
+    <resultMap id="CategoryNameMap" type="com.payv.classification.infrastructure.persistence.mybatis.record.CategoryRecord">
+        <id     property="categoryId" column="category_id"/>
+        <result property="name"       column="name"/>
+    </resultMap>
+
     <insert id="upsert" parameterType="com.payv.classification.infrastructure.persistence.mybatis.record.CategoryRecord">
         INSERT INTO category (
             category_id,
@@ -48,14 +53,6 @@
             is_active     = EXCLUDED.is_active,
             updated_at    = NOW()
     </insert>
-
-    <update id="deleteParentAndChildrenById">
-        UPDATE category SET
-            is_active = FALSE,
-            updated_at = NOW()
-        WHERE is_active = TRUE
-        AND (category_id = #{categoryId} OR parent_id = #{categoryId})
-    </update>
 
     <select id="selectRootById" resultMap="CategoryRecordMap">
         SELECT
@@ -139,4 +136,16 @@
         AND is_active = TRUE
     </select>
 
+    <select id="selectNamesByIds" resultMap="CategoryNameMap">
+        SELECT
+            category_id,
+            name
+        FROM category
+        WHERE owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+        AND category_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

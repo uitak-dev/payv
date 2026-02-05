@@ -11,9 +11,6 @@ public interface CategoryMapper {
 
     /** ---- Command ---- */
     int upsert(CategoryRecord record);
-    int deleteParentAndChildrenById(@Param("categoryId") String categoryId);
-    int deleteByIds(@Param("ids") List<String> ids);
-
 
     /** ---- Query ---- */
     CategoryRecord selectRootById(@Param("categoryId") String categoryId,
@@ -28,4 +25,8 @@ public interface CategoryMapper {
 
     int countChildrenByOwner(@Param("parentId") String parentId,
                              @Param("ownerUserId") String ownerUserId);
+
+    List<CategoryRecord> selectNamesByIds(@Param("ownerUserId") String ownerUserId,
+                                          @Param("ids") List<String> ids);
+
 }

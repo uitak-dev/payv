@@ -9,6 +9,7 @@ import java.util.Objects;
 public class Tag {
 
     private static final int MAX_NAME_LENGTH = 20;
+    private static final int MAX_CNT = 8;
 
     private TagId id;
     private String ownerUserId;
@@ -58,8 +59,12 @@ public class Tag {
      * Policy / Commands (domain behavior) *
      * * * * * * * * * * * * * * * * * * * */
     public void rename(String newName) {
-        // 서비스 계층에서 검증 수행 필요.
-        this.name = newName;
+        requireActive();
+        this.name = normalizeName(newName);
+    }
+
+    public void deactivate() {
+        this.isActive = false;
     }
 
     public void ensureBelongsTo(String requesterOwnerUserId) {
@@ -72,7 +77,20 @@ public class Tag {
     /** * * * * * * * * * * *
      * Internal validations *
      * * * * * * * * * * *  */
-    private static String normalizeName(String name) {
+
+    private void requireActive() {
+        if (!isActive) {
+            throw new IllegalStateException("inactive category");
+        }
+    }
+
+    public static void assertCanCreateNewTag(int existingTagCount) {
+        if (existingTagCount + 1 > MAX_CNT) {
+            throw new IllegalStateException("max tags exceeded: " + MAX_CNT);
+        }
+    }
+
+    public static String normalizeName(String name) {
         String ret = (name == null) ? null : name.trim();
         if (ret == null || ret.isEmpty())
             throw new IllegalArgumentException("name must not be blank");

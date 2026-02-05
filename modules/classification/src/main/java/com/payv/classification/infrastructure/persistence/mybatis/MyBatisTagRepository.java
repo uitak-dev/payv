@@ -52,6 +52,22 @@ public class MyBatisTagRepository implements TagRepository {
 
     @Override
     public Map<TagId, String> findNamesByIds(String ownerUserId, Collection<TagId> tagIds) {
-        return null;
+        if (tagIds == null || tagIds.isEmpty())
+            return Collections.emptyMap();
+
+        List<String> ids = tagIds.stream()
+                .filter(Objects::nonNull)
+                .map(id -> id.getValue())
+                .collect(Collectors.toList());
+
+        List<TagRecord> records = tagMapper.selectAllByOwner(ownerUserId);
+
+        Map<TagId, String> ret = new HashMap<>();
+        for (TagRecord r : records) {
+            if (ids.contains(r.getTagId())) {
+                ret.put(TagId.of(r.getTagId()), r.getName());
+            }
+        }
+        return ret;
     }
 }

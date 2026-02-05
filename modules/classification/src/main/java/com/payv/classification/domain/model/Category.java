@@ -104,49 +104,58 @@ public class Category {
                 .isActive(true)
                 .build();
 
-        assertChildOwnershipCompatibility(child);
         this.children.add(child);
-
         return child;
     }
 
-    public void rename(String newName) {
+    private void rename(String newName) {
+        this.name = newName;
+    }
+
+    public void renameRoot(String newName) {
+        requireRootOnly();
         requireEditable();
         requireActive();
 
         String normalized = normalizeName(newName);
-
-        if (isChild()) {
-            requireNonNull(parent, "parent");
-            parent.ensureNoDuplicateChildName(normalized, this.id);
-        }
-        // parent 카테고리에 대한 rename()은 서비스 계층에서 검증 수행 필요.
-        this.name = normalized;
+        rename(normalized);
     }
 
-    public void removeChild(CategoryId childId) {
+    public void renameChild(CategoryId childId, String newName) {
+        requireRootOnly();
         requireEditable();
         requireActive();
-        requireRootOnly();
 
         Category child = findChildOrThrow(childId);
-        child.requireEditable(); // 시스템 자식 삭제 금지
-        this.children.remove(child);
+        child.requireActive();
+
+        String normalized = normalizeName(newName);
+        ensureNoDuplicateChildName(normalized, childId);
+
+        child.rename(normalized);
     }
 
-    public void deactivate() {
-        requireEditable();
-
-        // 시스템은 비활성화 금지 정책(필요하면 완화 가능)
-        if (isSystemCategory()) {
-            throw new IllegalStateException("system category cannot be deactivated");
-        }
+    private void deactivate() {
         this.isActive = false;
     }
 
-    public void activate() {
+    public void deactivateRoot() {
+        requireRootOnly();
         requireEditable();
-        this.isActive = true;
+
+        for (Category child : children) {
+            child.deactivate();
+        }
+        deactivate();
+    }
+
+    public void deactivateChild(CategoryId childId) {
+        requireRootOnly();
+        requireEditable();
+
+        Category child = findChildOrThrow(childId);
+        child.requireEditable();
+        child.deactivate();
     }
 
     public void ensureBelongsTo(String requesterOwnerUserId) {
@@ -157,25 +166,11 @@ public class Category {
         }
     }
 
-
     /** * * * * * * * * *  *
      * Convenience / Query *
      * * * * * * * * * * * */
     public boolean isRoot() {
         return depth != null && depth == 1;
-    }
-
-    public boolean isChild() {
-        return depth != null && depth == 2;
-    }
-
-    public List<Category> childrenView() {
-        return Collections.unmodifiableList(children);
-    }
-
-    public boolean ownedBy(String ownerUserId) {
-        if (this.ownerUserId == null) return false;
-        return this.ownerUserId.equals(ownerUserId);
     }
 
     public boolean isSystemCategory() {
@@ -241,20 +236,7 @@ public class Category {
         throw new IllegalStateException("child category not found: " + childId);
     }
 
-    private void assertChildOwnershipCompatibility(Category child) {
-        // parent(this)와 child의 owner/system 정합성: 둘 다 시스템이거나, 둘 다 동일 owner
-        if (this.ownerUserId == null) {
-            if (child.ownerUserId != null) {
-                throw new IllegalStateException("system parent cannot have user child");
-            }
-        } else {
-            if (!Objects.equals(this.ownerUserId, child.ownerUserId)) {
-                throw new IllegalStateException("child owner mismatch");
-            }
-        }
-    }
-
-    private static String normalizeName(String name) {
+    public static String normalizeName(String name) {
         String ret = (name == null) ? null : name.trim();
         if (ret == null || ret.isEmpty()) throw new IllegalArgumentException("name must not be blank");
         // 추후, 길이 제한/금칙어/특수문자 정책 추가.
@@ -265,13 +247,10 @@ public class Category {
         return Objects.requireNonNull(v, name + " must not be null");
     }
 
-
-    /** * * * * * * * * * * * * * * * * * *  *
-     * Cross-check helpers for service layer *
-     * * * * * * * * * * * * * * * * * * * * */
     public static void assertCanCreateNewRoot(int existingRootCount) {
         if (existingRootCount + 1 > MAX_PARENTS_CNT) {
             throw new IllegalStateException("max parent categories exceeded: " + MAX_PARENTS_CNT);
         }
     }
+
 }

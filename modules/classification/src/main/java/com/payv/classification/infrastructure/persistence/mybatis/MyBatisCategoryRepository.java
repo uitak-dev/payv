@@ -27,32 +27,9 @@ public class MyBatisCategoryRepository implements CategoryRepository {
         syncChildren(category, ownerUserId);
     }
 
-    @Override
-    public void delete(CategoryId categoryId) {
-        categoryMapper.deleteParentAndChildrenById(categoryId.getValue());
-    }
-
     private void syncChildren(Category root, String ownerUserId) {
-        String rootId = root.getId().getValue();
-
-        List<CategoryRecord> existingRecords = categoryMapper.selectChildrenByOwner(rootId, ownerUserId);
-        Set<String> existing = existingRecords.stream()
-                .map(r -> r.getCategoryId())
-                .collect(Collectors.toSet());
-
-        List<Category> incomingChildren = root.getChildren() == null ? Collections.emptyList() : root.getChildren();
-        Set<String> incoming = incomingChildren.stream()
-                .map(c -> c.getId().getValue())
-                .collect(Collectors.toSet());
-
-        // 삭제 대상 = existing - incoming
-        existing.removeAll(incoming);
-        if (!existing.isEmpty()) {
-            categoryMapper.deleteByIds(new ArrayList<>(existing));
-        }
-
         // upsert children
-        for (Category child : incomingChildren) {
+        for (Category child : root.getChildren()) {
             CategoryRecord childRecord = assembler.toRecord(child, ownerUserId);
             categoryMapper.upsert(childRecord);
         }
@@ -92,7 +69,7 @@ public class MyBatisCategoryRepository implements CategoryRepository {
     }
 
     @Override
-    public int countParents(CategoryId parentId, String ownerUserId) {
+    public int countParents(String ownerUserId) {
         // 인터페이스의 parentId는 의미상 불필요(무시)
         return categoryMapper.countRootsByOwner(ownerUserId);
     }
@@ -104,6 +81,21 @@ public class MyBatisCategoryRepository implements CategoryRepository {
 
     @Override
     public Map<CategoryId, String> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
-        return null;
+
+        if (categoryIds == null || categoryIds.isEmpty()) return Collections.emptyMap();
+
+        List<String> ids = categoryIds.stream()
+                .filter(Objects::nonNull)
+                .map(CategoryId::getValue)
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) return Collections.emptyMap();
+
+        List<CategoryRecord> rows = categoryMapper.selectNamesByIds(ownerUserId, ids);
+
+        Map<CategoryId, String> ret = new HashMap<>();
+        for (CategoryRecord r : rows) {
+            ret.put(CategoryId.of(r.getCategoryId()), r.getName());
+        }
+        return ret;
     }
 }

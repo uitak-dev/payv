@@ -13,8 +13,6 @@ public interface CategoryRepository {
      * - 내부 children(depth=2)을 포함한 AR 전체를 저장한다.
      */
     void save(Category rootCategory, String ownerUserId);
-    void delete(CategoryId categoryId);
-
 
     // parentId 로, AR 로드(children 포함).
     Optional<Category> findRootById(CategoryId parentId, String ownerUserId);
@@ -26,7 +24,7 @@ public interface CategoryRepository {
     List<Category> findAllParentByOwner(String ownerUserId);
 
     // 전체 상위 카테고리(parent) 수.
-    int countParents(CategoryId parentId, String ownerUserId);
+    int countParents(String ownerUserId);
 
     // 특정 parent의 children 수.
     int countChildren(CategoryId parentId, String ownerUserId);
