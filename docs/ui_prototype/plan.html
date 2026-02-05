@@ -27,10 +27,10 @@
       </div>
     </header>
 
-    <main class="px-4 pb-28 pt-4">
+    <main class="px-4 pt-4 pv-safe-bottom">
       
     <div class="space-y-4">
-      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section class="pv-card p-4">
         <div class="text-sm font-semibold">계획</div>
         <div class="mt-3 space-y-2">
           <a href="budget.html" class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
@@ -44,12 +44,52 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="text-sm font-semibold">자동 생성 상태(최소 UX)</div>
-        <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
-          이번 달 자동 생성 지연/실패 가능
-          <div class="mt-2 text-xs text-slate-500">상세는 고정비 템플릿 화면에서 확인합니다.</div>
+      <section class="pv-card p-4">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-semibold">자동 생성 상태</div>
+          <span class="pv-badge"><span class="pv-dot"></span>2026년 1월</span>
         </div>
+
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <div class="rounded-xl border border-slate-200 p-3">
+            <div class="text-xs text-slate-500">예정</div>
+            <div class="mt-1 text-sm font-semibold">6건</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-3">
+            <div class="text-xs text-slate-500">완료</div>
+            <div class="mt-1 text-sm font-semibold">4건</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-3">
+            <div class="text-xs text-slate-500">실패</div>
+            <div class="mt-1 text-sm font-semibold pv-amount negative">2건</div>
+          </div>
+        </div>
+
+        <div class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-200">
+          <div class="flex items-center justify-between px-4 py-3 text-sm">
+            <div>
+              <div class="font-medium">통신비</div>
+              <div class="mt-0.5 text-xs text-slate-500">매월 25일 · 카드(신한)</div>
+            </div>
+            <span class="pv-badge">예정</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3 text-sm">
+            <div>
+              <div class="font-medium">넷플릭스</div>
+              <div class="mt-0.5 text-xs text-slate-500">매월 24일 · 카드(신한)</div>
+            </div>
+            <span class="pv-badge">완료</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3 text-sm">
+            <div>
+              <div class="font-medium">월세</div>
+              <div class="mt-0.5 text-xs text-slate-500">매월 1일 · 계좌이체</div>
+            </div>
+            <span class="pv-badge"><span class="pv-dot" style="background: rgba(239, 68, 68, 0.65)"></span>실패</span>
+          </div>
+        </div>
+
+        <p class="mt-3 text-xs text-slate-500">실패 항목은 템플릿 설정(자산/카테고리/태그) 또는 중복 생성 정책을 확인하세요.</p>
       </section>
     </div>
 

@@ -27,10 +27,41 @@
       </div>
     </header>
 
-    <main class="px-4 pb-28 pt-4">
-      
+    <main class="px-4 pt-4 pv-safe-bottom">
+
     <div class="space-y-4">
-      <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <!-- Summary / KPI -->
+      <section class="pv-card-subtle p-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-xs text-slate-500">이번 달 남은 예산</div>
+            <div class="mt-1 flex items-end gap-2">
+              <div class="text-2xl font-semibold">₩ 620,000</div>
+              <span class="pv-badge"><span class="pv-dot"></span>사용률 66%</span>
+            </div>
+            <div class="mt-2 pv-bar" style="--w: 66%"><span></span></div>
+          </div>
+          <a href="budget.html" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">예산 보기</a>
+        </div>
+
+        <div class="mt-4 grid grid-cols-3 gap-2">
+          <div class="pv-card p-3">
+            <div class="text-xs text-slate-500">총수입</div>
+            <div class="mt-1 text-sm font-semibold pv-amount positive">+2,900,000</div>
+          </div>
+          <div class="pv-card p-3">
+            <div class="text-xs text-slate-500">총지출</div>
+            <div class="mt-1 text-sm font-semibold pv-amount negative">-1,920,000</div>
+          </div>
+          <div class="pv-card p-3">
+            <div class="text-xs text-slate-500">순현금흐름</div>
+            <div class="mt-1 text-sm font-semibold">980,000</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search / filters -->
+      <section class="pv-card p-4">
         <div class="flex items-center gap-2">
           <input class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="검색(메모/태그 등)" />
           <button class="h-10 w-10 rounded-xl border border-slate-200" aria-label="필터">
@@ -45,7 +76,7 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section class="pv-card">
         <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">01월 24일</div>
         <div class="divide-y divide-slate-100">
           <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
@@ -56,7 +87,7 @@
                 <div class="mt-0.5 text-xs text-slate-500">현금 · 태그 2 · 첨부 1</div>
               </div>
             </div>
-            <div class="text-sm font-semibold">-12,000</div>
+            <div class="text-sm font-semibold pv-amount negative">-12,000</div>
           </a>
 
           <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
@@ -78,12 +109,23 @@
                 <div class="mt-0.5 text-xs text-slate-500">카드 · 자동 생성</div>
               </div>
             </div>
-            <div class="text-sm font-semibold">-9,900</div>
+            <div class="text-sm font-semibold pv-amount negative">-9,900</div>
+          </a>
+
+          <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+              <div>
+                <div class="text-sm font-medium">수입 · 급여</div>
+                <div class="mt-0.5 text-xs text-slate-500">은행B · 태그 1</div>
+              </div>
+            </div>
+            <div class="text-sm font-semibold pv-amount positive">+2,900,000</div>
           </a>
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section class="pv-card">
         <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">01월 23일</div>
         <div class="divide-y divide-slate-100">
           <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
@@ -94,7 +136,18 @@
                 <div class="mt-0.5 text-xs text-slate-500">현금</div>
               </div>
             </div>
-            <div class="text-sm font-semibold">-1,250</div>
+            <div class="text-sm font-semibold pv-amount negative">-1,250</div>
+          </a>
+
+          <a href="transaction_detail.html" class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+              <div>
+                <div class="text-sm font-medium">식비 · 마트</div>
+                <div class="mt-0.5 text-xs text-slate-500">카드(신한) · 태그 2</div>
+              </div>
+            </div>
+            <div class="text-sm font-semibold pv-amount negative">-48,320</div>
           </a>
         </div>
       </section>
