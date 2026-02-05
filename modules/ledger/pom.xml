@@ -15,20 +15,18 @@
 
     <dependencies>
         <!-- 모듈 간 참조 (버전은 reactor/parent가 관리) -->
-        <!--
         <dependency>
             <groupId>com.payv</groupId>
             <artifactId>common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.payv</groupId>
-            <artifactId>classification</artifactId>
+            <artifactId>asset</artifactId>
         </dependency>
         <dependency>
             <groupId>com.payv</groupId>
-            <artifactId>asset</artifactId>
+            <artifactId>classification</artifactId>
         </dependency>
-        -->
 
         <!-- Spring Core -->
         <dependency>
