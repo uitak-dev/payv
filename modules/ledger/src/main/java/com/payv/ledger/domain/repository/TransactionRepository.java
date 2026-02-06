@@ -12,4 +12,6 @@ public interface TransactionRepository {
 
     Optional<Transaction> findById(TransactionId id, String ownerUserId);
 
+    void deleteById(TransactionId id, String ownerUserId);
+
 }

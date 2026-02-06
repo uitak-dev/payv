@@ -35,8 +35,10 @@ public class TransactionApiController {
                         .memo(req.getMemo())
                         .build();
 
-        for (String tagId : req.getTagIds()) {
-            command.addTagId(tagId);
+        if (req.getTagIds() != null) {
+            for (String tagId : req.getTagIds()) {
+                command.addTagId(tagId);
+            }
         }
 
         TransactionId id = transactionCommandService.createManual(command, ownerUserId);
@@ -58,13 +60,18 @@ public class TransactionApiController {
                 .memo(req.getMemo())
                 .build();
 
-        if (req.getTagIds() != null) {
-            for (String tagId : req.getTagIds()) {
-                command.addTagId(tagId);
-            }
+        for (String tagId : req.getTagIds()) {
+            command.addTagId(tagId);
         }
 
         transactionCommandService.updateTransaction(TransactionId.of(transactionId), command, ownerUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{transactionId}")
+    public ResponseEntity<Void> delete(@RequestHeader("X-User-Id") String ownerUserId,
+                                       @PathVariable String transactionId) {
+        transactionCommandService.deleteTransaction(TransactionId.of(transactionId), ownerUserId);
         return ResponseEntity.noContent().build();
     }
 

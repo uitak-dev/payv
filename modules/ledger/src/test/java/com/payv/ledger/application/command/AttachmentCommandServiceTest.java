@@ -223,6 +223,10 @@ public class AttachmentCommandServiceTest {
         public Optional<Transaction> findById(TransactionId id, String ownerUserId) {
             return Optional.empty();
         }
+
+        @Override
+        public void deleteById(TransactionId id, String ownerUserId) {
+        }
     }
 
     private static class StubMultipartFile implements MultipartFile {

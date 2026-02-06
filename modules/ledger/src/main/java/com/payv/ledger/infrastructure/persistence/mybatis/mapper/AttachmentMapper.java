@@ -15,6 +15,8 @@ public interface AttachmentMapper {
     void insertAttachments(@Param("records") List<AttachmentRecord> records);
     List<AttachmentRecord> selectStoredByTransactionId(@Param("transactionId") String transactionId,
                                                        @Param("ownerUserId") String ownerUserId);
+    void deleteByTransactionId(@Param("transactionId") String transactionId,
+                               @Param("ownerUserId") String ownerUserId);
     AttachmentRecord selectById(@Param("attachmentId") String attachmentId,
                                 @Param("ownerUserId") String ownerUserId);
     void deleteById(@Param("attachmentId") String attachmentId,

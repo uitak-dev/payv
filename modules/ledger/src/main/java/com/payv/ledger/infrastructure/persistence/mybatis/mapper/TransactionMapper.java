@@ -32,4 +32,7 @@ public interface TransactionMapper {
 
     /** ---- Command ---- */
     int upsert(TransactionRecord record);
+
+    int deleteByIdAndOwner(@Param("transactionId") String transactionId,
+                           @Param("ownerUserId") String ownerUserId);
 }

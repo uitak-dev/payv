@@ -120,4 +120,10 @@
             fixed_cost_template_id = EXCLUDED.fixed_cost_template_id
     </insert>
 
+    <delete id="deleteByIdAndOwner">
+        delete from transaction
+        where transaction_id = #{transactionId}
+        and owner_user_id = #{ownerUserId}
+    </delete>
+
 </mapper>

@@ -75,4 +75,12 @@ public class MyBatisTransactionRepository implements TransactionRepository {
         return Optional.of(TransactionAssembler.toEntity(record, tags, atts));
     }
 
+    @Override
+    public void deleteById(TransactionId id, String ownerUserId) {
+        String txId = id.getValue();
+        transactionTagMapper.deleteByTransactionId(txId);
+        attachmentMapper.deleteByTransactionId(txId, ownerUserId);
+        transactionMapper.deleteByIdAndOwner(txId, ownerUserId);
+    }
+
 }

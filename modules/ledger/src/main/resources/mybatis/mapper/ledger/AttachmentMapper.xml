@@ -111,6 +111,12 @@
         and status = 'STORED'
     </select>
 
+    <delete id="deleteByTransactionId">
+        delete from attachment
+        where transaction_id = #{transactionId}
+        and owner_user_id = #{ownerUserId}
+    </delete>
+
     <select id="selectById" resultMap="AttachmentRecordMap">
         select
             attachment_id,

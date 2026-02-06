@@ -2,7 +2,9 @@ package com.payv.ledger.application.command;
 
 import com.payv.ledger.application.command.model.CreateTransactionCommand;
 import com.payv.ledger.application.port.AssetValidationPort;
+import com.payv.ledger.application.port.AttachmentStoragePort;
 import com.payv.ledger.application.port.ClassificationValidationPort;
+import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.Money;
 import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
@@ -29,7 +31,8 @@ public class TransactionCommandServiceTest {
         service = new TransactionCommandService(
                 repository,
                 new NoOpClassificationValidationPort(),
-                new NoOpAssetValidationPort()
+                new NoOpAssetValidationPort(),
+                new NoOpAttachmentStoragePort()
         );
     }
 
@@ -76,6 +79,21 @@ public class TransactionCommandServiceTest {
         assertNull(saved.getCategoryIdLevel2());
         assertNull(saved.getMemo());
         assertTrue(saved.getTagIds().isEmpty());
+    }
+
+    @Test
+    public void deleteTransaction_removesOwnedTransaction() {
+        // Given
+        CreateTransactionCommand command = TransactionTestDataBuilder
+                .manual("asset-3", "cat-3")
+                .build();
+        TransactionId id = service.createManual(command, OWNER);
+
+        // When
+        service.deleteTransaction(id, OWNER);
+
+        // Then
+        assertFalse(repository.findById(id, OWNER).isPresent());
     }
 
     private static class TransactionTestDataBuilder {
@@ -131,6 +149,13 @@ public class TransactionCommandServiceTest {
             if (ownerStore == null) return Optional.empty();
             return Optional.ofNullable(ownerStore.get(id));
         }
+
+        @Override
+        public void deleteById(TransactionId id, String ownerUserId) {
+            Map<TransactionId, Transaction> ownerStore = storeByOwner.get(ownerUserId);
+            if (ownerStore == null) return;
+            ownerStore.remove(id);
+        }
     }
 
     private static class NoOpClassificationValidationPort implements ClassificationValidationPort {
@@ -139,13 +164,36 @@ public class TransactionCommandServiceTest {
         }
 
         @Override
-        public void validateCategorization(String categoryIdLevel1, String categoryIdLevel2, String ownerUserId) {
+        public void validateCategoryIds(Collection<String> categoryIds, String ownerUserId) {
         }
     }
 
     private static class NoOpAssetValidationPort implements AssetValidationPort {
         @Override
         public void validateAssertId(String assetId, String ownerUserId) {
+        }
+    }
+
+    private static class NoOpAttachmentStoragePort implements AttachmentStoragePort {
+        @Override
+        public StoragePlan plan(String ownerUserId, TransactionId transactionId, AttachmentId attachmentId, String uploadFileName, String contentType) {
+            return null;
+        }
+
+        @Override
+        public void saveToStaging(StoragePlan plan, org.springframework.web.multipart.MultipartFile file) {
+        }
+
+        @Override
+        public void moveStagingToFinal(StoragePlan plan) {
+        }
+
+        @Override
+        public void deleteStagingQuietly(StoragePlan plan) {
+        }
+
+        @Override
+        public void deleteFinalQuietly(StoragePlan plan) {
         }
     }
 }
