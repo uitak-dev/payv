@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,11 +22,6 @@ public class MybatisAttachmentRepository implements AttachmentRepository {
     @Override
     public int countActiveByTransactionId(TransactionId id, String ownerUserId) {
         return mapper.countActiveByTransactionId(id.getValue(), ownerUserId);
-    }
-
-    @Override
-    public void deleteByTransactionId(TransactionId id) {
-
     }
 
     @Override
@@ -41,6 +37,18 @@ public class MybatisAttachmentRepository implements AttachmentRepository {
             result.add(r.toEntity());
         }
         return result;
+    }
+
+    @Override
+    public Optional<Attachment> findById(AttachmentId id, String ownerUserId) {
+        AttachmentRecord record = mapper.selectById(id.getValue(), ownerUserId);
+        if (record == null) return Optional.empty();
+        return Optional.of(record.toEntity());
+    }
+
+    @Override
+    public void deleteById(AttachmentId id, String ownerUserId) {
+        mapper.deleteById(id.getValue(), ownerUserId);
     }
 
     @Override

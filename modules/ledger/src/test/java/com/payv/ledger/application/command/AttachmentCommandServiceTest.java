@@ -136,14 +136,11 @@ public class AttachmentCommandServiceTest {
         AttachmentId markStoredId;
         AttachmentId markFailedId;
         String markFailedReason;
+        Attachment storedAttachment;
 
         @Override
         public int countActiveByTransactionId(TransactionId id, String ownerUserId) {
             return activeCount;
-        }
-
-        @Override
-        public void deleteByTransactionId(TransactionId id) {
         }
 
         @Override
@@ -154,6 +151,15 @@ public class AttachmentCommandServiceTest {
         @Override
         public List<Attachment> findStoredByTransactionId(TransactionId id, String ownerUserId) {
             return Collections.emptyList();
+        }
+
+        @Override
+        public Optional<Attachment> findById(AttachmentId id, String ownerUserId) {
+            return Optional.ofNullable(storedAttachment);
+        }
+
+        @Override
+        public void deleteById(AttachmentId id, String ownerUserId) {
         }
 
         @Override
@@ -200,6 +206,11 @@ public class AttachmentCommandServiceTest {
         @Override
         public void deleteStagingQuietly(StoragePlan plan) {
             this.deletedStaging = true;
+        }
+
+        @Override
+        public void deleteFinalQuietly(StoragePlan plan) {
+            this.movedToFinal = true;
         }
     }
 

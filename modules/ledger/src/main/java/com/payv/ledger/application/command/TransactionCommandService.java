@@ -1,6 +1,7 @@
 package com.payv.ledger.application.command;
 
 import com.payv.ledger.application.command.model.CreateTransactionCommand;
+import com.payv.ledger.application.command.model.UpdateTransactionCommand;
 import com.payv.ledger.application.port.AssetValidationPort;
 import com.payv.ledger.application.port.ClassificationValidationPort;
 import com.payv.ledger.domain.model.Transaction;
@@ -54,5 +55,30 @@ public class TransactionCommandService {
 
         transactionRepository.save(transaction);
         return transaction.getId();
+    }
+
+    @Transactional
+    public void updateTransaction(TransactionId transactionId, UpdateTransactionCommand command, String ownerUserId) {
+        Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
+                .orElseThrow(() -> new IllegalStateException("transaction not found"));
+
+        tx.updateBasics(
+                command.getTransactionType(),
+                command.getAmount(),
+                command.getTransactionDate(),
+                command.getAssetId()
+        );
+
+        if (command.getMemo() != null) {
+            tx.updateMemo(command.getMemo());
+        }
+        if (command.getCategoryIdLevel1() != null) {
+            tx.updateCategorize(command.getCategoryIdLevel1(), command.getCategoryIdLevel2());
+        }
+        if (command.isTagIdsProvided()) {
+            tx.updateTags(command.getTagIds());
+        }
+
+        transactionRepository.save(tx);
     }
 }

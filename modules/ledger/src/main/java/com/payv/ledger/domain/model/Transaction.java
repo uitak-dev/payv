@@ -108,6 +108,13 @@ public final class Transaction {
         this.memo = memo;
     }
 
+    public void updateBasics(TransactionType type, Money amount, LocalDate date, String assetId) {
+        this.transactionType = type;
+        this.amount = amount;
+        this.transactionDate = date;
+        this.assetId = assetId;
+    }
+
     public void updateCategorize(String level1, String level2) {
         if (level1 == null || level1.trim().isEmpty()) throw new IllegalArgumentException("categoryIdLevel1 required");
         this.categoryIdLevel1 = level1;

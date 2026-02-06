@@ -26,11 +26,6 @@
         and status in ('UPLOADING','STORED')
     </select>
 
-    <delete id="deleteByTransactionId">
-        delete from attachment
-        where transaction_id = #{transactionId}
-    </delete>
-
     <insert id="insertUploading" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.AttachmentRecord">
         insert into attachment (
             attachment_id,
@@ -115,6 +110,31 @@
         and owner_user_id = #{ownerUserId}
         and status = 'STORED'
     </select>
+
+    <select id="selectById" resultMap="AttachmentRecordMap">
+        select
+            attachment_id,
+            transaction_id,
+            owner_user_id,
+            status,
+            upload_file_name,
+            stored_file_name,
+            storage_path,
+            staging_path,
+            staging_file_name,
+            content_type,
+            size_bytes,
+            failure_reason
+        from attachment
+        where attachment_id = #{attachmentId}
+        and owner_user_id = #{ownerUserId}
+    </select>
+
+    <delete id="deleteById">
+        delete from attachment
+        where attachment_id = #{attachmentId}
+        and owner_user_id = #{ownerUserId}
+    </delete>
 
     <update id="markStored">
         update attachment set

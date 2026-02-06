@@ -11,7 +11,6 @@ import java.util.List;
 public interface TransactionMapper {
 
     /** ---- Query ---- */
-    boolean existsById(@Param("transactionId") String transactionId);
 
     List<TransactionRecord> selectList(@Param("ownerUserId") String ownerUserId,
                                        @Param("from") LocalDate from,
@@ -32,7 +31,5 @@ public interface TransactionMapper {
                               @Param("ownerUserId") String ownerUserId);
 
     /** ---- Command ---- */
-    int insert(TransactionRecord record);
-    int update(TransactionRecord record);
+    int upsert(TransactionRecord record);
 }
-

@@ -97,6 +97,33 @@ public class AttachmentCommandService {
         return attachmentId;
     }
 
+    @Transactional
+    public void delete(AttachmentId attachmentId, String ownerUserId) {
+        Attachment attachment = attachmentRepository.findById(attachmentId, ownerUserId)
+                .orElseThrow(() -> new IllegalStateException("attachment not found"));
+
+        AttachmentStoragePort.StoragePlan plan = new AttachmentStoragePort.StoragePlan(
+                attachment.getUploadFileName(),
+                attachment.getContentType(),
+                attachment.getSizeBytes(),
+                attachment.getStoragePath(),
+                attachment.getStoredFileName(),
+                attachment.getStagingPath(),
+                attachment.getStagingFileName()
+        );
+
+        if (attachment.getStatus() == Attachment.Status.UPLOADING) {
+            storagePort.deleteStagingQuietly(plan);
+        } else if (attachment.getStatus() == Attachment.Status.STORED) {
+            storagePort.deleteFinalQuietly(plan);
+        } else {
+            storagePort.deleteStagingQuietly(plan);
+            storagePort.deleteFinalQuietly(plan);
+        }
+
+        attachmentRepository.deleteById(attachmentId, ownerUserId);
+    }
+
     private String safeDisplayName(String original) {
         if (original == null) return "unknown";
         String s = original.replace("\\", "/");

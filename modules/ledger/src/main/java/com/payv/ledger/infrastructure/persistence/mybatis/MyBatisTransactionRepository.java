@@ -30,12 +30,7 @@ public class MyBatisTransactionRepository implements TransactionRepository {
 
         // transaction
         TransactionRecord record = TransactionRecord.toRecord(transaction);
-        boolean isExist = transactionMapper.existsById(transaction.getId().toString());
-        if (isExist) {
-            transactionMapper.update(record);
-        } else {
-            transactionMapper.insert(record);
-        }
+        transactionMapper.upsert(record);
 
         // tags: replace 전략(간단/명확). 규모 커지면 diff로 최적화.
         transactionTagMapper.deleteByTransactionId(record.getTransactionId());

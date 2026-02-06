@@ -27,6 +27,15 @@ public class AttachmentController {
         return ResponseEntity.accepted().body(new UploadAttachmentResponse(id.getValue(), "UPLOADING"));
     }
 
+    @DeleteMapping("/{attachmentId}")
+    public ResponseEntity<Void> delete(@RequestHeader("X-User-Id") String ownerUserId,
+                                       @PathVariable String transactionId,
+                                       @PathVariable String attachmentId) {
+
+        commandService.delete(AttachmentId.of(attachmentId), ownerUserId);
+        return ResponseEntity.noContent().build();
+    }
+
     @Data
     @AllArgsConstructor
     public static class UploadAttachmentResponse {

@@ -98,6 +98,18 @@ public class LocalFsAttachmentStorageAdapter implements AttachmentStoragePort {
         }
     }
 
+    @Override
+    public void deleteFinalQuietly(StoragePlan plan) {
+        try {
+            Path p = safeResolve(baseDir, plan.getStoragePath())
+                    .resolve(plan.getStoredFileName()).normalize();
+            if (p.startsWith(baseDir)) {
+                Files.deleteIfExists(p);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
     private Path safeResolve(Path base, String relative) {
         Path resolved = base.resolve(relative).normalize();
         if (!resolved.startsWith(base)) {

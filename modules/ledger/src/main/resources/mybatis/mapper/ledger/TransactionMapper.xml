@@ -32,10 +32,6 @@
     </sql>
 
     <!-- ==== Query ==== -->
-    <select id="existsById" parameterType="string" resultType="boolean">
-        SELECT COUNT(1) FROM transaction WHERE transaction_id = #{transactionId}
-    </select>
-
     <select id="selectList" resultMap="TransactionRecordMap">
         select
             <include refid="txColumns"/>
@@ -84,7 +80,7 @@
     </select>
 
     <!-- ==== Command ==== -->
-    <insert id="insert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
+    <insert id="upsert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
         INSERT INTO transaction (
             transaction_id,
             owner_user_id,
@@ -110,19 +106,18 @@
             #{sourceType},
             #{fixedCostTemplateId}
         )
+        ON CONFLICT (transaction_id)
+        DO UPDATE SET
+            owner_user_id = EXCLUDED.owner_user_id,
+            transaction_type = EXCLUDED.transaction_type,
+            amount = EXCLUDED.amount,
+            transaction_date = EXCLUDED.transaction_date,
+            asset_id = EXCLUDED.asset_id,
+            memo = EXCLUDED.memo,
+            category_id_level1 = EXCLUDED.category_id_level1,
+            category_id_level2 = EXCLUDED.category_id_level2,
+            source_type = EXCLUDED.source_type,
+            fixed_cost_template_id = EXCLUDED.fixed_cost_template_id
     </insert>
-
-    <update id="update" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
-        UPDATE transaction SET
-            transaction_type = #{transactionType},
-            amount = #{amount},
-            transaction_date = #{transactionDate},
-            asset_id = #{assetId},
-            category_id_level1 = #{categoryIdLevel1},
-            category_id_level2 = #{categoryIdLevel2},
-            memo = #{memo}
-        WHERE transaction_id = #{transactionId}
-        AND owner_user_id = #{ownerUserId}
-    </update>
 
 </mapper>

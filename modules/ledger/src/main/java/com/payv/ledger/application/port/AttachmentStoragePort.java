@@ -2,6 +2,7 @@ package com.payv.ledger.application.port;
 
 import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.TransactionId;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +17,10 @@ public interface AttachmentStoragePort {
 
     void deleteStagingQuietly(StoragePlan plan);
 
+    void deleteFinalQuietly(StoragePlan plan);
+
     @Getter
+    @AllArgsConstructor
     class StoragePlan {
         private final String uploadFileName;
         private final String contentType;
@@ -28,17 +32,5 @@ public interface AttachmentStoragePort {
         private final String stagingPath;
         private final String stagingFileName;
 
-        public StoragePlan(String uploadFileName, String contentType, long sizeBytes,
-                           String storagePath, String storedFileName,
-                           String stagingPath, String stagingFileName) {
-
-            this.uploadFileName = uploadFileName;
-            this.contentType = contentType;
-            this.sizeBytes = sizeBytes;
-            this.storagePath = storagePath;
-            this.storedFileName = storedFileName;
-            this.stagingPath = stagingPath;
-            this.stagingFileName = stagingFileName;
-        }
     }
 }
