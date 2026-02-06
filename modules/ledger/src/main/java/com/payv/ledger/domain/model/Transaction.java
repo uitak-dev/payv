@@ -121,27 +121,6 @@ public final class Transaction {
         this.categoryIdLevel2 = !(level2 == null || level2.trim().isEmpty()) ? level2 : null;
     }
 
-    public boolean addTag(String tagId) {
-        if (tagIds.size() >= MAX_TAGS) throw new IllegalStateException("tag limit exceeded");
-        return tagIds.add(tagId);
-    }
-
-    public boolean removeTag(String tagId) {
-        Objects.requireNonNull(tagId);
-        return tagIds.remove(tagId);
-    }
-
-    public boolean addAttachment(Attachment attachment) {
-        if (attachments.size() >= MAX_ATTACHMENTS)
-            throw new IllegalStateException("attachment limit exceeded");
-        return attachments.add(attachment);
-    }
-
-    public boolean removeAttachment(Attachment attachment) {
-        Objects.requireNonNull(attachment);
-        return attachments.remove(attachment);
-    }
-
     public void updateTags(Set<String> newTagIds) {
         if (newTagIds != null && newTagIds.size() > MAX_TAGS) {
             throw new IllegalArgumentException("태그는 최대 " + MAX_TAGS + "개까지만 등록 가능합니다.");

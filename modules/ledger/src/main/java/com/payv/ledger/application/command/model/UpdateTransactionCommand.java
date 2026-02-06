@@ -21,7 +21,6 @@ public final class UpdateTransactionCommand {
     private String memo;
 
     private final LinkedHashSet<String> tagIds = new LinkedHashSet<>();
-    private boolean tagIdsProvided;
 
     @Builder
     public UpdateTransactionCommand(TransactionType transactionType, Money amount,
@@ -38,9 +37,5 @@ public final class UpdateTransactionCommand {
 
     public void addTagId(String tagId) {
         tagIds.add(tagId);
-    }
-
-    public void markTagIdsProvided() {
-        this.tagIdsProvided = true;
     }
 }

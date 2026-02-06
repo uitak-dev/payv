@@ -75,9 +75,7 @@ public class TransactionCommandService {
         if (command.getCategoryIdLevel1() != null) {
             tx.updateCategorize(command.getCategoryIdLevel1(), command.getCategoryIdLevel2());
         }
-        if (command.isTagIdsProvided()) {
-            tx.updateTags(command.getTagIds());
-        }
+        tx.updateTags(command.getTagIds());
 
         transactionRepository.save(tx);
     }

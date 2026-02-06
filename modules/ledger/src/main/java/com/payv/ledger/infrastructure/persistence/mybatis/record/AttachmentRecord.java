@@ -55,7 +55,7 @@ public final class AttachmentRecord {
                 .uploadFileName(attachment.getUploadFileName())
                 .storedFileName(attachment.getStoredFileName())
                 .storagePath(attachment.getStoragePath())
-                .storagePath(attachment.getStagingPath())
+                .stagingPath(attachment.getStagingPath())
                 .stagingFileName(attachment.getStagingFileName())
                 .contentType(attachment.getContentType())
                 .sizeBytes(attachment.getSizeBytes())

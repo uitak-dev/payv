@@ -13,6 +13,15 @@
         where transaction_id = #{transactionId}
     </delete>
 
+    <delete id="deleteByTransactionIdAndTagIds">
+        delete from transaction_tag
+        where transaction_id = #{transactionId}
+        and tag_id in
+        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+    </delete>
+
     <insert id="insertTags">
         insert into transaction_tag
             (transaction_id, tag_id)

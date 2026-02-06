@@ -13,8 +13,11 @@ import com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionTagR
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -32,22 +35,32 @@ public class MyBatisTransactionRepository implements TransactionRepository {
         TransactionRecord record = TransactionRecord.toRecord(transaction);
         transactionMapper.upsert(record);
 
-        // tags: replace 전략(간단/명확). 규모 커지면 diff로 최적화.
-        transactionTagMapper.deleteByTransactionId(record.getTransactionId());
-        if (!transaction.getTagIds().isEmpty()) {
-            List<TransactionTagRecord> tags = transaction.getTagIds().stream()
-                    .map(tagId -> new TransactionTagRecord(record.getTransactionId(), tagId))
-                    .collect(Collectors.toList());
-            transactionTagMapper.insertTags(tags);
+        // tags: diff 전략
+        List<TransactionTagRecord> existingTagRecords =
+                transactionTagMapper.selectByTransactionId(record.getTransactionId());
+        Set<String> existingTagIds = existingTagRecords.stream()
+                .map(TransactionTagRecord::getTagId)
+                .collect(Collectors.toSet());
+        Set<String> newTagIds = new HashSet<>(transaction.getTagIds());
+
+        List<String> tagIdsToDelete = new ArrayList<>();
+        for (String existingTagId : existingTagIds) {
+            if (!newTagIds.contains(existingTagId)) {
+                tagIdsToDelete.add(existingTagId);
+            }
+        }
+        if (!tagIdsToDelete.isEmpty()) {
+            transactionTagMapper.deleteByTransactionIdAndTagIds(record.getTransactionId(), tagIdsToDelete);
         }
 
-        // attachments: replace 전략(간단/명확). 규모 커지면 diff로 최적화.
-        attachmentMapper.deleteByTransactionId(record.getTransactionId());
-        if (!transaction.getAttachments().isEmpty()) {
-            List<AttachmentRecord> atts = transaction.getAttachments().stream()
-                    .map(AttachmentRecord::toRecord)
-                    .collect(Collectors.toList());
-            attachmentMapper.insertAttachments(atts);
+        List<TransactionTagRecord> tagRecordsToInsert = new ArrayList<>();
+        for (String newTagId : newTagIds) {
+            if (!existingTagIds.contains(newTagId)) {
+                tagRecordsToInsert.add(new TransactionTagRecord(record.getTransactionId(), newTagId));
+            }
+        }
+        if (!tagRecordsToInsert.isEmpty()) {
+            transactionTagMapper.insertTags(tagRecordsToInsert);
         }
     }
 

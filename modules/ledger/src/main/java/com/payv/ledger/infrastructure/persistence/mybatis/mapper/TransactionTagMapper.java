@@ -10,6 +10,8 @@ import java.util.List;
 public interface TransactionTagMapper {
 
     void deleteByTransactionId(@Param("transactionId") String transactionId);
+    void deleteByTransactionIdAndTagIds(@Param("transactionId") String transactionId,
+                                        @Param("tagIds") List<String> tagIds);
     void insertTags(@Param("records") List<TransactionTagRecord> records);
 
     List<TransactionTagRecord> selectByTransactionId(@Param("transactionId") String transactionId);

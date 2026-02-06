@@ -59,7 +59,6 @@ public class TransactionApiController {
                 .build();
 
         if (req.getTagIds() != null) {
-            command.markTagIdsProvided();
             for (String tagId : req.getTagIds()) {
                 command.addTagId(tagId);
             }
