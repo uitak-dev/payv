@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.asset.infrastructure.persistence.mybatis.mapper.AssetMapper">
+
+    <resultMap id="AssetRecordMap" type="com.payv.asset.infrastructure.persistence.mybatis.record.AssetRecord">
+        <id     property="assetId" column="asset_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="name" column="name"/>
+        <result property="assetType" column="asset_type"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="AssetNameMap" type="com.payv.asset.infrastructure.persistence.mybatis.record.AssetRecord">
+        <id     property="assetId" column="asset_id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <insert id="upsert" parameterType="com.payv.asset.infrastructure.persistence.mybatis.record.AssetRecord">
+        INSERT INTO asset (
+            asset_id,
+            owner_user_id,
+            name,
+            asset_type,
+            is_active,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{assetId},
+            #{ownerUserId},
+            #{name},
+            #{assetType},
+            #{isActive},
+            COALESCE(#{createdAt}, NOW()),
+            NOW()
+        )
+        ON CONFLICT (asset_id)
+        DO UPDATE SET
+            owner_user_id = EXCLUDED.owner_user_id,
+            name          = EXCLUDED.name,
+            asset_type    = EXCLUDED.asset_type,
+            is_active     = EXCLUDED.is_active,
+            updated_at    = NOW()
+    </insert>
+
+    <select id="selectByIdAndOwner" resultMap="AssetRecordMap">
+        SELECT
+            asset_id,
+            owner_user_id,
+            name,
+            asset_type,
+            is_active,
+            created_at,
+            updated_at
+        FROM asset
+        WHERE asset_id = #{assetId}
+        AND owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+    </select>
+
+    <select id="selectAllByOwner" resultMap="AssetRecordMap">
+        SELECT
+            asset_id,
+            owner_user_id,
+            name,
+            asset_type,
+            is_active,
+            created_at,
+            updated_at
+        FROM asset
+        WHERE owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="selectNamesByIds" resultMap="AssetNameMap">
+        SELECT
+            asset_id,
+            name
+        FROM asset
+        WHERE owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+        AND asset_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

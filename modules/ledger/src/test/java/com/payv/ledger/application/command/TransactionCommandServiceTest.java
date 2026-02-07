@@ -164,7 +164,7 @@ public class TransactionCommandServiceTest {
         }
 
         @Override
-        public void validateCategoryIds(Collection<String> categoryIds, String ownerUserId) {
+        public void validateCategorization(Collection<String> categoryIds, String ownerUserId) {
         }
     }
 
