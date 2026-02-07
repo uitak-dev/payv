@@ -47,7 +47,7 @@ public class InProcessClassificationAclAdapter implements ClassificationValidati
     }
 
     @Override
-    public void validateCategoryIds(Collection<String> categoryIds, String ownerUserId) {
+    public void validateCategorization(Collection<String> categoryIds, String ownerUserId) {
         if (categoryIds == null || categoryIds.isEmpty()) return;
 
         Set<String> normalized = new LinkedHashSet<>();

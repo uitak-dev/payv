@@ -33,7 +33,7 @@ public class TransactionCommandService {
         if (command.getTagIds() != null && !command.getTagIds().isEmpty()) {
             classificationValidationPort.validateTagIds(command.getTagIds(), ownerUserId);
         }
-        classificationValidationPort.validateCategoryIds(
+        classificationValidationPort.validateCategorization(
                 buildCategoryIds(command.getCategoryIdLevel1(), command.getCategoryIdLevel2()),
                 ownerUserId
         );

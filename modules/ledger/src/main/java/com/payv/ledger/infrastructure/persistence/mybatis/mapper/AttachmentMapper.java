@@ -12,7 +12,7 @@ public interface AttachmentMapper {
     int countActiveByTransactionId(@Param("transactionId") String transactionId,
                                    @Param("ownerUserId") String ownerUserId);
     void insertUploading(AttachmentRecord record);
-    void insertAttachments(@Param("records") List<AttachmentRecord> records);
+
     List<AttachmentRecord> selectStoredByTransactionId(@Param("transactionId") String transactionId,
                                                        @Param("ownerUserId") String ownerUserId);
     void deleteByTransactionId(@Param("transactionId") String transactionId,

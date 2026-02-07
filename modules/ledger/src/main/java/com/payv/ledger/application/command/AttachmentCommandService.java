@@ -20,18 +20,12 @@ public class AttachmentCommandService {
 
     private static final int MAX_ATTACHMENTS = 2;
 
-    private final TransactionRepository transactionRepository;
     private final AttachmentRepository attachmentRepository;
     private final AttachmentStoragePort storagePort;
     private final TransactionTemplate txTemplate;
 
     @Transactional
     public AttachmentId upload(TransactionId transactionId, String ownerUserId, MultipartFile file) {
-
-        // 0) 거래 존재/소유권 확인(첨부는 거래에 종속)
-//        if (!transactionRepository.existsOwned(transactionId, ownerUserId)) {
-//            throw new IllegalArgumentException("transaction not found");
-//        }
 
         // 1) 개수 제한(UPLOADING+STORED)
         int activeCount = attachmentRepository.countActiveByTransactionId(transactionId, ownerUserId);
