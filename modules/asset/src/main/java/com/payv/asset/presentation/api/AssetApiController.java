@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/asset/assets")
@@ -29,8 +30,9 @@ public class AssetApiController {
     private final AssetCommandService commandService;
 
     @PostMapping
-    public ResponseEntity<CreateAssetResponse> create(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<CreateAssetResponse> create(Principal principal,
                                                       @RequestBody CreateAssetRequest req) {
+        String ownerUserId = principal.getName();
 
         AssetId id = commandService.create(
                 new CreateAssetCommand(req.getName(), AssetType.valueOf(req.getAssetType())),
@@ -41,9 +43,10 @@ public class AssetApiController {
     }
 
     @PutMapping("/{assetId}")
-    public ResponseEntity<Void> update(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> update(Principal principal,
                                        @PathVariable String assetId,
                                        @RequestBody UpdateAssetRequest req) {
+        String ownerUserId = principal.getName();
 
         commandService.update(
                 new UpdateAssetCommand(AssetId.of(assetId), req.getNewName(), AssetType.valueOf(req.getAssetType())),
@@ -54,8 +57,9 @@ public class AssetApiController {
     }
 
     @DeleteMapping("/{assetId}")
-    public ResponseEntity<Void> deactivate(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> deactivate(Principal principal,
                                            @PathVariable String assetId) {
+        String ownerUserId = principal.getName();
 
         commandService.deactivate(new DeactivateAssetCommand(AssetId.of(assetId)), ownerUserId);
         return ResponseEntity.noContent().build();

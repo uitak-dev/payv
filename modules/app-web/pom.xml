@@ -16,10 +16,10 @@
     <dependencies>
         <!-- 내부 모듈 -->
         <dependency><groupId>com.payv</groupId><artifactId>ledger</artifactId></dependency>
-<!--        <dependency><groupId>com.payv</groupId><artifactId>common</artifactId></dependency>-->
-<!--        <dependency><groupId>com.payv</groupId><artifactId>iam</artifactId></dependency>-->
-<!--        <dependency><groupId>com.payv</groupId><artifactId>asset</artifactId></dependency>-->
-<!--        <dependency><groupId>com.payv</groupId><artifactId>classification</artifactId></dependency>-->
+        <dependency><groupId>com.payv</groupId><artifactId>common</artifactId></dependency>
+        <dependency><groupId>com.payv</groupId><artifactId>iam</artifactId></dependency>
+        <dependency><groupId>com.payv</groupId><artifactId>asset</artifactId></dependency>
+        <dependency><groupId>com.payv</groupId><artifactId>classification</artifactId></dependency>
 <!--        <dependency><groupId>com.payv</groupId><artifactId>transfer</artifactId></dependency>-->
 <!--        <dependency><groupId>com.payv</groupId><artifactId>budget</artifactId></dependency>-->
 <!--        <dependency><groupId>com.payv</groupId><artifactId>automation</artifactId></dependency>-->
@@ -31,7 +31,7 @@
             <artifactId>spring-webmvc</artifactId>
         </dependency>
 
-        <!-- Spring Security
+        <!-- Spring Security -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
@@ -40,7 +40,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
-        -->
 
         <!-- DataSource/Tx 조립을 app-web에서 한다면 -->
         <dependency>
@@ -67,13 +66,11 @@
         </dependency>
 
         <!-- DB Driver -->
-        <!--
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/ledger/transactions")
 @RequiredArgsConstructor
@@ -22,8 +24,9 @@ public class TransactionApiController {
     private final TransactionCommandService transactionCommandService;
 
     @PostMapping
-    public ResponseEntity<CreateTransactionResponse> create(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<CreateTransactionResponse> create(Principal principal,
                                                             @RequestBody CreateTransactionRequest req) {
+        String ownerUserId = principal.getName();
 
         CreateTransactionCommand command = CreateTransactionCommand.builder()
                         .transactionType(TransactionType.valueOf(req.getTransactionType()))
@@ -46,9 +49,10 @@ public class TransactionApiController {
     }
 
     @PutMapping("/{transactionId}")
-    public ResponseEntity<Void> update(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> update(Principal principal,
                                        @PathVariable String transactionId,
                                        @RequestBody UpdateTransactionRequest req) {
+        String ownerUserId = principal.getName();
 
         UpdateTransactionCommand command = UpdateTransactionCommand.builder()
                 .transactionType(TransactionType.valueOf(req.getTransactionType()))
@@ -69,8 +73,9 @@ public class TransactionApiController {
     }
 
     @DeleteMapping("/{transactionId}")
-    public ResponseEntity<Void> delete(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> delete(Principal principal,
                                        @PathVariable String transactionId) {
+        String ownerUserId = principal.getName();
         transactionCommandService.deleteTransaction(TransactionId.of(transactionId), ownerUserId);
         return ResponseEntity.noContent().build();
     }

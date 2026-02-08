@@ -47,7 +47,6 @@ public class AttachmentCommandServiceTest {
         });
 
         service = new AttachmentCommandService(
-                new NoOpTransactionRepository(),
                 attachmentRepository,
                 storagePort,
                 txTemplate

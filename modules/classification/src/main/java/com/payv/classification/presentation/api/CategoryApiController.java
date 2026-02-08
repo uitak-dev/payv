@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/classification/categories")
 @RequiredArgsConstructor
@@ -26,8 +28,9 @@ public class CategoryApiController {
     private final CategoryCommandService commandService;
 
     @PostMapping("/roots")
-    public ResponseEntity<CreateCategoryResponse> createRoot(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<CreateCategoryResponse> createRoot(Principal principal,
                                                              @RequestBody CreateParentCategoryRequest req) {
+        String ownerUserId = principal.getName();
 
         CategoryId id = commandService.createParent(
                 new CreateParentCategoryCommand(req.getName()),
@@ -38,9 +41,10 @@ public class CategoryApiController {
     }
 
     @PostMapping("/roots/{rootId}/children")
-    public ResponseEntity<CreateCategoryResponse> createChild(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<CreateCategoryResponse> createChild(Principal principal,
                                                               @PathVariable String rootId,
                                                               @RequestBody CreateChildCategoryRequest req) {
+        String ownerUserId = principal.getName();
 
         CategoryId id = commandService.createChild(
                 new CreateChildCategoryCommand(CategoryId.of(rootId), req.getName()),
@@ -51,9 +55,10 @@ public class CategoryApiController {
     }
 
     @PutMapping("/roots/{rootId}")
-    public ResponseEntity<Void> renameRoot(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> renameRoot(Principal principal,
                                            @PathVariable String rootId,
                                            @RequestBody RenameRootCategoryRequest req) {
+        String ownerUserId = principal.getName();
 
         commandService.renameRoot(
                 new RenameRootCategoryCommand(CategoryId.of(rootId), req.getNewName()),
@@ -64,10 +69,11 @@ public class CategoryApiController {
     }
 
     @PutMapping("/roots/{rootId}/children/{childId}")
-    public ResponseEntity<Void> renameChild(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> renameChild(Principal principal,
                                             @PathVariable String rootId,
                                             @PathVariable String childId,
                                             @RequestBody RenameChildCategoryRequest req) {
+        String ownerUserId = principal.getName();
 
         commandService.renameChild(
                 new RenameChildCategoryCommand(CategoryId.of(rootId), CategoryId.of(childId), req.getNewName()),
@@ -78,8 +84,9 @@ public class CategoryApiController {
     }
 
     @DeleteMapping("/roots/{rootId}")
-    public ResponseEntity<Void> deactivateRoot(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> deactivateRoot(Principal principal,
                                                @PathVariable String rootId) {
+        String ownerUserId = principal.getName();
 
         commandService.deactivateRoot(
                 new DeactivateRootCategoryCommand(CategoryId.of(rootId)),
@@ -90,9 +97,10 @@ public class CategoryApiController {
     }
 
     @DeleteMapping("/roots/{rootId}/children/{childId}")
-    public ResponseEntity<Void> deactivateChild(@RequestHeader("X-User-Id") String ownerUserId,
+    public ResponseEntity<Void> deactivateChild(Principal principal,
                                                 @PathVariable String rootId,
                                                 @PathVariable String childId) {
+        String ownerUserId = principal.getName();
 
         commandService.deactivateChild(
                 new DeactivateChildCategoryCommand(CategoryId.of(rootId), CategoryId.of(childId)),

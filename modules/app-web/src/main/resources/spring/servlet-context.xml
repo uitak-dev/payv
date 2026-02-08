@@ -11,13 +11,21 @@
 
     <!-- Controller는 각 모듈 presentation.web에 두되, servlet 컨텍스트에서만 스캔 -->
     <context:component-scan base-package="
+        com.payv.iam.presentation.api,
         com.payv.iam.presentation.web,
+        com.payv.asset.presentation.api,
         com.payv.asset.presentation.web,
+        com.payv.classification.presentation.api,
         com.payv.classification.presentation.web,
+        com.payv.ledger.presentation.api,
         com.payv.ledger.presentation.web,
+        com.payv.transfer.presentation.api,
         com.payv.transfer.presentation.web,
+        com.payv.budget.presentation.api,
         com.payv.budget.presentation.web,
+        com.payv.automation.presentation.api,
         com.payv.automation.presentation.web,
+        com.payv.reporting.presentation.api,
         com.payv.reporting.presentation.web"
     />
 
