@@ -37,7 +37,6 @@
         <property name="minimumIdle"     value="${hikari.minimumIdle:2}"/>
         <property name="idleTimeout"     value="${hikari.idleTimeout:600000}"/>
         <property name="connectionTimeout" value="${hikari.connectionTimeout:30000}"/>
-        <property name="connectionTestQuery" value="SELECT 1 FROM DUAL"/>
     </bean>
 
     <!-- 4) 트랜잭션 매니저 & @Transactional 활성화 -->

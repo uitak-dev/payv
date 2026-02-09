@@ -15,12 +15,10 @@
 
         <security:intercept-url pattern="/assets/**" access="permitAll"/>
         <security:intercept-url pattern="/login" access="permitAll"/>
+        <security:intercept-url pattern="/signup" access="permitAll"/>
         <security:intercept-url pattern="/perform_login" access="permitAll"/>
-        <security:intercept-url pattern="/api/iam/auth/signup" access="permitAll"/>
-        <security:intercept-url pattern="/api/iam/auth/login" access="permitAll"/>
         <security:intercept-url pattern="/error/**" access="permitAll"/>
 
-        <security:intercept-url pattern="/api/**" access="hasRole('USER')"/>
         <security:intercept-url pattern="/**" access="hasRole('USER')"/>
 
         <security:form-login login-page="/login"
