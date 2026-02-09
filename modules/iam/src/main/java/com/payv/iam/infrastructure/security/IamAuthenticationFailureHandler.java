@@ -17,6 +17,12 @@ public class IamAuthenticationFailureHandler implements AuthenticationFailureHan
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
         String contextPath = request.getContextPath();
+        if ("XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"success\":false,\"message\":\"invalid credentials\"}");
+            return;
+        }
         response.sendRedirect(contextPath + "/login?error=true");
     }
 }

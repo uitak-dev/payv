@@ -17,6 +17,16 @@ public class IamAuthenticationSuccessHandler implements AuthenticationSuccessHan
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         String contextPath = request.getContextPath();
-        response.sendRedirect(contextPath + "/login?success=true");
+        if (isAjaxRequest(request)) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"success\":true,\"redirectUrl\":\"" + contextPath + "/ledger/transactions\"}");
+            return;
+        }
+        response.sendRedirect(contextPath + "/ledger/transactions");
+    }
+
+    private boolean isAjaxRequest(HttpServletRequest request) {
+        return "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"));
     }
 }
