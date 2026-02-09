@@ -16,12 +16,14 @@ public class IamViewController {
     public String login(@RequestParam(required = false) String error,
                         @RequestParam(required = false) String logout,
                         @RequestParam(required = false) String success,
+                        @RequestParam(required = false) String signupSuccess,
                         Principal principal,
                         Model model) {
 
         model.addAttribute("error", error);
         model.addAttribute("logout", logout);
         model.addAttribute("success", success);
+        model.addAttribute("signupSuccess", signupSuccess);
         model.addAttribute("authenticatedUserId", principal == null ? null : principal.getName());
         return "iam/login";
     }
