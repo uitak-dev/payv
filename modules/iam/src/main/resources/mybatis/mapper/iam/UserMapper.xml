@@ -27,7 +27,7 @@
             #{email},
             #{passwordHash},
             #{displayName},
-            #{isActive},
+            #{active},
             COALESCE(#{createdAt}, NOW()),
             NOW()
         )

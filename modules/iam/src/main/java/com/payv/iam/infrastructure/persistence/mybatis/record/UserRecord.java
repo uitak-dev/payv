@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,12 +17,12 @@ public class UserRecord {
     private String passwordHash;
     private String displayName;
     private boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     @Builder
     private UserRecord(String userId, String email, String passwordHash, String displayName,
-                       boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                       boolean isActive, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.userId = userId;
         this.email = email;
         this.passwordHash = passwordHash;
