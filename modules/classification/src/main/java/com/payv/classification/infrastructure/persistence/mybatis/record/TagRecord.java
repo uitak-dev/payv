@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -16,12 +16,12 @@ public class TagRecord {
     private String ownerUserId;
     private String name;
     private boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     @Builder
     private TagRecord(String tagId, String ownerUserId, String name, boolean isActive,
-                     LocalDateTime createdAt, LocalDateTime updatedAt) {
+                     OffsetDateTime createdAt, OffsetDateTime updatedAt) {
 
         this.tagId = tagId;
         this.ownerUserId = ownerUserId;

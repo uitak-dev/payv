@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,13 +17,13 @@ public class CategoryRecord {
     private Integer depth;          // 1 or 2
     private Boolean isSystem;
     private Boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     @Builder
     private CategoryRecord(String categoryId, String ownerUserId, String name, String parentId,
                           Integer depth, Boolean isSystem, Boolean isActive,
-                          LocalDateTime createdAt, LocalDateTime updatedAt) {
+                          OffsetDateTime createdAt, OffsetDateTime updatedAt) {
 
         this.categoryId = categoryId;
         this.ownerUserId = ownerUserId;
