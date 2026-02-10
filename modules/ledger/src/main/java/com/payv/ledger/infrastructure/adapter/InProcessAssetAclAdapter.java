@@ -4,6 +4,7 @@ import com.payv.asset.application.query.AssetQueryService;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.AssetValidationPort;
+import com.payv.ledger.application.port.dto.AssetOptionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -49,5 +52,12 @@ public class InProcessAssetAclAdapter implements AssetValidationPort, AssetQuery
             result.put(entry.getKey().getValue(), entry.getValue());
         }
         return result;
+    }
+
+    @Override
+    public List<AssetOptionDto> getAllActiveAssets(String ownerUserId) {
+        return assetQueryService.getAll(ownerUserId).stream()
+                .map(asset -> new AssetOptionDto(asset.getAssetId(), asset.getName()))
+                .collect(Collectors.toList());
     }
 }

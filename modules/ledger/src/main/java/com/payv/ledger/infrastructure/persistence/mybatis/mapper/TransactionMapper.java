@@ -11,7 +11,6 @@ import java.util.List;
 public interface TransactionMapper {
 
     /** ---- Query ---- */
-
     List<TransactionRecord> selectList(@Param("ownerUserId") String ownerUserId,
                                        @Param("from") LocalDate from,
                                        @Param("to") LocalDate to,

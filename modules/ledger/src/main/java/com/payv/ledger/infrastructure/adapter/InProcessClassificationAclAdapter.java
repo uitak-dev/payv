@@ -8,15 +8,18 @@ import com.payv.classification.domain.model.CategoryId;
 import com.payv.classification.domain.model.TagId;
 import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.application.port.ClassificationValidationPort;
+import com.payv.ledger.application.port.dto.CategoryChildOptionDto;
+import com.payv.ledger.application.port.dto.CategoryTreeOptionDto;
+import com.payv.ledger.application.port.dto.TagOptionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,5 +101,32 @@ public class InProcessClassificationAclAdapter implements ClassificationValidati
             result.put(entry.getKey().getValue(), entry.getValue());
         }
         return result;
+    }
+
+    @Override
+    public List<TagOptionDto> getAllTags(String ownerUserId) {
+        return tagQueryService.getAll(ownerUserId).stream()
+                .map(tag -> new TagOptionDto(tag.getTagId(), tag.getName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CategoryTreeOptionDto> getAllCategories(String ownerUserId) {
+        return categoryQueryService.getAll(ownerUserId).stream()
+                .map(this::toCategoryTreeOption)
+                .collect(Collectors.toList());
+    }
+
+    private CategoryTreeOptionDto toCategoryTreeOption(CategoryTreeView root) {
+        List<CategoryChildOptionDto> children = root.getChildren() == null
+                ? Collections.emptyList()
+                : root.getChildren().stream()
+                .map(this::toCategoryChildOption)
+                .collect(Collectors.toList());
+        return new CategoryTreeOptionDto(root.getCategoryId(), root.getName(), children);
+    }
+
+    private CategoryChildOptionDto toCategoryChildOption(CategoryChildView child) {
+        return new CategoryChildOptionDto(child.getCategoryId(), child.getName());
     }
 }
