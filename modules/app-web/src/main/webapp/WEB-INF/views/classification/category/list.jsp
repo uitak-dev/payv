@@ -88,6 +88,8 @@
     </main>
 </div>
 
+<%@ include file="/WEB-INF/views/common/bottom-nav.jspf" %>
+
 <script src="${ctx}/assets/app.js"></script>
 </body>
 </html>

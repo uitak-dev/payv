@@ -1,0 +1,24 @@
+<%@ page pageEncoding="UTF-8" %>
+<c:if test="${empty ctx}">
+    <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+</c:if>
+<nav class="app-bottom-nav border-t border-slate-200 bg-white/95 backdrop-blur">
+    <div class="grid grid-cols-4 text-center text-xs">
+        <a href="${ctx}/home" data-nav="home" class="py-3">
+            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <div class="mt-1">홈</div>
+        </a>
+        <a href="${ctx}/ledger/transactions" data-nav="report" class="py-3">
+            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <div class="mt-1">원장</div>
+        </a>
+        <a href="${ctx}/budget/budgets" data-nav="plan" class="py-3">
+            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <div class="mt-1">예산</div>
+        </a>
+        <a href="${ctx}/asset/assets" data-nav="settings" class="py-3">
+            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <div class="mt-1">설정</div>
+        </a>
+    </div>
+</nav>
