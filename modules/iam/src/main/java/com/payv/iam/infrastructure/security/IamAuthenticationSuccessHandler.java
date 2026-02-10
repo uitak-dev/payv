@@ -20,10 +20,10 @@ public class IamAuthenticationSuccessHandler implements AuthenticationSuccessHan
         if (isAjaxRequest(request)) {
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"success\":true,\"redirectUrl\":\"" + contextPath + "/ledger/transactions\"}");
+            response.getWriter().write("{\"success\":true,\"redirectUrl\":\"" + contextPath + "/home\"}");
             return;
         }
-        response.sendRedirect(contextPath + "/ledger/transactions");
+        response.sendRedirect(contextPath + "/home");
     }
 
     private boolean isAjaxRequest(HttpServletRequest request) {
