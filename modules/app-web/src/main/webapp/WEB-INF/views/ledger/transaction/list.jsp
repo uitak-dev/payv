@@ -21,16 +21,16 @@
     </header>
 
     <main class="px-4 pt-4 pv-safe-bottom">
-        <c:if test="${not empty created}">
+        <c:if test="${not empty notice.created}">
             <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">거래가 생성되었습니다.</p>
         </c:if>
-        <c:if test="${not empty updated}">
+        <c:if test="${not empty notice.updated}">
             <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">거래가 수정되었습니다.</p>
         </c:if>
-        <c:if test="${not empty deleted}">
+        <c:if test="${not empty notice.deleted}">
             <p class="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">거래가 삭제되었습니다.</p>
         </c:if>
-        <c:if test="${not empty error}">
+        <c:if test="${not empty notice.error}">
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>
         </c:if>
 
