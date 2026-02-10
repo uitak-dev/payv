@@ -1,0 +1,102 @@
+package com.payv.budget.presentation.web;
+
+import com.payv.budget.application.command.BudgetCommandService;
+import com.payv.budget.application.command.model.DeactivateBudgetCommand;
+import com.payv.budget.application.port.ClassificationQueryPort;
+import com.payv.budget.application.query.BudgetQueryService;
+import com.payv.budget.domain.model.BudgetId;
+import com.payv.budget.presentation.dto.request.BudgetListConditionRequest;
+import com.payv.budget.presentation.dto.request.BudgetListNoticeRequest;
+import com.payv.budget.presentation.dto.request.CreateBudgetRequest;
+import com.payv.budget.presentation.dto.request.UpdateBudgetRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.time.YearMonth;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/budget/budgets")
+@RequiredArgsConstructor
+public class BudgetViewController {
+
+    private final BudgetCommandService commandService;
+    private final BudgetQueryService queryService;
+    private final ClassificationQueryPort classificationQueryPort;
+
+    @GetMapping
+    public String list(Principal principal,
+                       @ModelAttribute("condition") BudgetListConditionRequest condition,
+                       @ModelAttribute("notice") BudgetListNoticeRequest notice,
+                       Model model) {
+        String ownerUserId = principal.getName();
+        YearMonth targetMonth = condition.resolvedMonth();
+
+        model.addAttribute("selectedMonth", targetMonth.toString());
+        model.addAttribute("budgets", queryService.getMonthlyBudgets(ownerUserId, targetMonth));
+        model.addAttribute("categories", classificationQueryPort.getAllCategories(ownerUserId));
+        model.addAttribute("notice", notice);
+        return "budget/list";
+    }
+
+    @PostMapping(produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> create(Principal principal,
+                                                       @ModelAttribute CreateBudgetRequest request) {
+        String ownerUserId = principal.getName();
+        try {
+            commandService.create(request.toCommand(), ownerUserId);
+            String month = request.getMonth() == null ? YearMonth.now().toString() : request.getMonth();
+            return okRedirect("/budget/budgets?created=true&month=" + month);
+        } catch (RuntimeException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    @PutMapping(path = "/{budgetId}", consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> update(Principal principal,
+                                                       @PathVariable String budgetId,
+                                                       @RequestBody UpdateBudgetRequest request) {
+        String ownerUserId = principal.getName();
+        try {
+            commandService.update(request.toCommand(budgetId), ownerUserId);
+            String month = request.getMonth() == null ? YearMonth.now().toString() : request.getMonth();
+            return okRedirect("/budget/budgets?updated=true&month=" + month);
+        } catch (RuntimeException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    @DeleteMapping(path = "/{budgetId}", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deactivate(Principal principal,
+                                                           @PathVariable String budgetId) {
+        String ownerUserId = principal.getName();
+        try {
+            commandService.deactivate(new DeactivateBudgetCommand(BudgetId.of(budgetId)), ownerUserId);
+            return okRedirect("/budget/budgets?deactivated=true");
+        } catch (RuntimeException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("success", true);
+        body.put("redirectUrl", redirectPath);
+        return ResponseEntity.ok(body);
+    }
+
+    private ResponseEntity<Map<String, Object>> badRequest(String message) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("success", false);
+        body.put("message", message == null ? "request failed" : message);
+        return ResponseEntity.badRequest().body(body);
+    }
+}
