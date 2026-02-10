@@ -26,6 +26,9 @@
         <c:if test="${not empty createdChild}">
             <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">2단계 카테고리가 생성되었습니다.</p>
         </c:if>
+        <c:if test="${not empty renamed}">
+            <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">카테고리 이름이 변경되었습니다.</p>
+        </c:if>
         <c:if test="${not empty deactivated}">
             <p class="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">카테고리가 비활성화되었습니다.</p>
         </c:if>
@@ -52,11 +55,19 @@
                             </form>
                         </div>
 
-                        <div class="mt-3 grid grid-cols-2 gap-2">
+                        <form class="mt-3 flex gap-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}" data-ajax="true" data-method="PUT">
+                            <input name="newName" value="${root.name}" required class="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"/>
+                            <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-sm">1단계 이름변경</button>
+                        </form>
+
+                        <div class="mt-3 space-y-2">
                             <c:forEach var="child" items="${root.children}">
-                                <div class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                                    <span class="truncate">${child.name}</span>
-                                    <form method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children/${child.categoryId}" data-ajax="true" data-method="DELETE">
+                                <div class="rounded-lg border border-slate-200 p-2">
+                                    <form class="flex gap-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children/${child.categoryId}" data-ajax="true" data-method="PUT">
+                                        <input name="newName" value="${child.name}" required class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"/>
+                                        <button type="submit" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">2단계 이름변경</button>
+                                    </form>
+                                    <form class="mt-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children/${child.categoryId}" data-ajax="true" data-method="DELETE">
                                         <button type="submit" class="text-xs text-slate-500">비활성</button>
                                     </form>
                                 </div>

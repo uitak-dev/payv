@@ -30,9 +30,8 @@ public class IamSignUpViewController {
 
     @PostMapping(produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> signUp(@RequestParam String email,
-                                                       @RequestParam String password,
-                                                       @RequestParam(required = false) String displayName) {
+    public ResponseEntity<Map<String, Object>> signUp(@RequestParam String email, @RequestParam String password,
+                                                      @RequestParam(required = false) String displayName) {
         try {
             commandService.signUp(new SignUpCommand(email, password, displayName));
             Map<String, Object> body = new LinkedHashMap<>();

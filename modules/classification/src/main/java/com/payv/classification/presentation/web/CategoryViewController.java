@@ -7,6 +7,8 @@ import com.payv.classification.application.command.model.DeactivateChildCategory
 import com.payv.classification.application.command.model.DeactivateRootCategoryCommand;
 import com.payv.classification.application.query.CategoryQueryService;
 import com.payv.classification.domain.model.CategoryId;
+import com.payv.classification.presentation.dto.request.RenameChildCategoryRequest;
+import com.payv.classification.presentation.dto.request.RenameRootCategoryRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,7 @@ public class CategoryViewController {
     public String list(Principal principal,
                        @RequestParam(required = false) String createdRoot,
                        @RequestParam(required = false) String createdChild,
+                       @RequestParam(required = false) String renamed,
                        @RequestParam(required = false) String deactivated,
                        @RequestParam(required = false) String error,
                        Model model) {
@@ -37,6 +40,7 @@ public class CategoryViewController {
         model.addAttribute("categories", queryService.getAll(ownerUserId));
         model.addAttribute("createdRoot", createdRoot);
         model.addAttribute("createdChild", createdChild);
+        model.addAttribute("renamed", renamed);
         model.addAttribute("deactivated", deactivated);
         model.addAttribute("error", error);
         return "classification/category/list";
@@ -67,6 +71,35 @@ public class CategoryViewController {
                     ownerUserId
             );
             return okRedirect("/classification/categories?createdChild=true");
+        } catch (RuntimeException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    @PutMapping(path = "/roots/{rootId}", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> renameRoot(Principal principal,
+                                                           @PathVariable String rootId,
+                                                           RenameRootCategoryRequest request) {
+        String ownerUserId = principal.getName();
+        try {
+            commandService.renameRoot(request.toCommand(rootId), ownerUserId);
+            return okRedirect("/classification/categories?renamed=true");
+        } catch (RuntimeException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    @PutMapping(path = "/roots/{rootId}/children/{childId}", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> renameChild(Principal principal,
+                                                            @PathVariable String rootId,
+                                                            @PathVariable String childId,
+                                                            RenameChildCategoryRequest request) {
+        String ownerUserId = principal.getName();
+        try {
+            commandService.renameChild(request.toCommand(rootId, childId), ownerUserId);
+            return okRedirect("/classification/categories?renamed=true");
         } catch (RuntimeException e) {
             return badRequest(e.getMessage());
         }
