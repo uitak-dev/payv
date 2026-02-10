@@ -1,17 +1,17 @@
 package com.payv.ledger.presentation.web;
 
-import com.payv.asset.application.query.AssetQueryService;
-import com.payv.classification.application.query.CategoryQueryService;
-import com.payv.classification.application.query.TagQueryService;
 import com.payv.ledger.application.command.AttachmentCommandService;
 import com.payv.ledger.application.command.TransactionCommandService;
-import com.payv.ledger.application.command.model.CreateTransactionCommand;
-import com.payv.ledger.application.command.model.UpdateTransactionCommand;
+import com.payv.ledger.application.port.AssetQueryPort;
+import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.application.query.TransactionQueryService;
 import com.payv.ledger.domain.model.AttachmentId;
-import com.payv.ledger.domain.model.Money;
 import com.payv.ledger.domain.model.TransactionId;
-import com.payv.ledger.domain.model.TransactionType;
+import com.payv.ledger.presentation.dto.request.CreateTransactionRequest;
+import com.payv.ledger.presentation.dto.request.TransactionDetailNoticeQueryRequest;
+import com.payv.ledger.presentation.dto.request.TransactionListQueryRequest;
+import com.payv.ledger.presentation.dto.request.TransactionListNoticeQueryRequest;
+import com.payv.ledger.presentation.dto.request.UpdateTransactionRequest;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionDetailView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/ledger/transactions")
@@ -33,36 +35,29 @@ public class TransactionViewController {
     private final TransactionCommandService commandService;
     private final AttachmentCommandService attachmentCommandService;
 
-    private final AssetQueryService assetQueryService;
-    private final CategoryQueryService categoryQueryService;
-    private final TagQueryService tagQueryService;
+    private final AssetQueryPort assetQueryPort;
+    private final ClassificationQueryPort classificationQueryPort;
 
     @GetMapping
     public String list(Principal principal,
-                       @RequestParam(required = false) String from,
-                       @RequestParam(required = false) String to,
-                       @RequestParam(required = false) String assetId,
-                       @RequestParam(defaultValue = "1") int page,
-                       @RequestParam(defaultValue = "20") int size,
-                       @RequestParam(required = false) String created,
-                       @RequestParam(required = false) String updated,
-                       @RequestParam(required = false) String deleted,
-                       @RequestParam(required = false) String error,
+                       @ModelAttribute("condition") TransactionListQueryRequest condition,
+                       @ModelAttribute("notice") TransactionListNoticeQueryRequest notice,
                        Model model) {
         String ownerUserId = principal.getName();
 
-        LocalDate fromDate = (from != null && !from.isEmpty()) ? LocalDate.parse(from) : null;
-        LocalDate toDate = (to != null && !to.isEmpty()) ? LocalDate.parse(to) : null;
-
-        model.addAttribute("result", queryService.list(ownerUserId, fromDate, toDate, assetId, page, size));
-        model.addAttribute("assets", assetQueryService.getAll(ownerUserId));
-        model.addAttribute("from", from);
-        model.addAttribute("to", to);
-        model.addAttribute("assetId", assetId);
-        model.addAttribute("created", created);
-        model.addAttribute("updated", updated);
-        model.addAttribute("deleted", deleted);
-        model.addAttribute("error", error);
+        model.addAttribute("result", queryService.list(
+                ownerUserId,
+                condition.getFrom(),
+                condition.getTo(),
+                condition.normalizedAssetId(),
+                condition.getPage(),
+                condition.getSize()
+        ));
+        model.addAttribute("assets", assetQueryPort.getAllActiveAssets(ownerUserId));
+        model.addAttribute("from", condition.getFrom());
+        model.addAttribute("to", condition.getTo());
+        model.addAttribute("assetId", condition.normalizedAssetId());
+        model.addAttribute("notice", notice);
         return "ledger/transaction/list";
     }
 
@@ -84,32 +79,10 @@ public class TransactionViewController {
     @PostMapping(produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> create(Principal principal,
-                                                       @RequestParam String transactionType,
-                                                       @RequestParam long amount,
-                                                       @RequestParam String transactionDate,
-                                                       @RequestParam String assetId,
-                                                       @RequestParam String categoryIdLevel1,
-                                                       @RequestParam(required = false) String categoryIdLevel2,
-                                                       @RequestParam(required = false) String memo,
-                                                       @RequestParam(value = "tagIds", required = false) List<String> tagIds) {
+                                                       @ModelAttribute CreateTransactionRequest request) {
         String ownerUserId = principal.getName();
         try {
-            CreateTransactionCommand command = CreateTransactionCommand.builder()
-                    .transactionType(TransactionType.valueOf(transactionType))
-                    .amount(Money.generate(amount))
-                    .transactionDate(LocalDate.parse(transactionDate))
-                    .assetId(assetId)
-                    .categoryIdLevel1(categoryIdLevel1)
-                    .categoryIdLevel2(blankToNull(categoryIdLevel2))
-                    .memo(blankToNull(memo))
-                    .build();
-            if (tagIds != null) {
-                for (String tagId : tagIds) {
-                    if (tagId != null && !tagId.trim().isEmpty()) command.addTagId(tagId);
-                }
-            }
-
-            TransactionId id = commandService.createManual(command, ownerUserId);
+            TransactionId id = commandService.createManual(request.toCommand(), ownerUserId);
             return okRedirect("/ledger/transactions/" + id.getValue() + "?created=true");
         } catch (RuntimeException e) {
             return badRequest(e.getMessage());
@@ -119,20 +92,12 @@ public class TransactionViewController {
     @GetMapping("/{transactionId}")
     public String detail(Principal principal,
                          @PathVariable String transactionId,
-                         @RequestParam(required = false) String created,
-                         @RequestParam(required = false) String updated,
-                         @RequestParam(required = false) String attachmentUploaded,
-                         @RequestParam(required = false) String attachmentDeleted,
-                         @RequestParam(required = false) String error,
+                         @ModelAttribute("notice") TransactionDetailNoticeQueryRequest notice,
                          Model model) {
         String ownerUserId = principal.getName();
 
         model.addAttribute("tx", queryService.detail(TransactionId.of(transactionId), ownerUserId));
-        model.addAttribute("created", created);
-        model.addAttribute("updated", updated);
-        model.addAttribute("attachmentUploaded", attachmentUploaded);
-        model.addAttribute("attachmentDeleted", attachmentDeleted);
-        model.addAttribute("error", error);
+        model.addAttribute("notice", notice);
         return "ledger/transaction/detail";
     }
 
@@ -158,32 +123,10 @@ public class TransactionViewController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> update(Principal principal,
                                                        @PathVariable String transactionId,
-                                                       @RequestBody Map<String, Object> req) {
+                                                       @RequestBody UpdateTransactionRequest request) {
         String ownerUserId = principal.getName();
         try {
-            String transactionType = stringValue(req.get("transactionType"));
-            long amount = Long.parseLong(stringValue(req.get("amount")));
-            LocalDate transactionDate = LocalDate.parse(stringValue(req.get("transactionDate")));
-            String assetId = stringValue(req.get("assetId"));
-            String categoryIdLevel1 = stringValue(req.get("categoryIdLevel1"));
-            String categoryIdLevel2 = blankToNull(stringValue(req.get("categoryIdLevel2")));
-            String memo = blankToNull(stringValue(req.get("memo")));
-
-            UpdateTransactionCommand command = UpdateTransactionCommand.builder()
-                    .transactionType(TransactionType.valueOf(transactionType))
-                    .amount(Money.generate(amount))
-                    .transactionDate(transactionDate)
-                    .assetId(assetId)
-                    .categoryIdLevel1(categoryIdLevel1)
-                    .categoryIdLevel2(categoryIdLevel2)
-                    .memo(memo)
-                    .build();
-
-            for (String tagId : stringListValue(req.get("tagIds"))) {
-                    if (tagId != null && !tagId.trim().isEmpty()) command.addTagId(tagId);
-            }
-
-            commandService.updateTransaction(TransactionId.of(transactionId), command, ownerUserId);
+            commandService.updateTransaction(TransactionId.of(transactionId), request.toCommand(), ownerUserId);
             return okRedirect("/ledger/transactions/" + transactionId + "?updated=true");
         } catch (RuntimeException e) {
             return badRequest(e.getMessage());
@@ -232,9 +175,9 @@ public class TransactionViewController {
     }
 
     private void populateFormOptions(Model model, String ownerUserId) {
-        model.addAttribute("assets", assetQueryService.getAll(ownerUserId));
-        model.addAttribute("categories", categoryQueryService.getAll(ownerUserId));
-        model.addAttribute("tags", tagQueryService.getAll(ownerUserId));
+        model.addAttribute("assets", assetQueryPort.getAllActiveAssets(ownerUserId));
+        model.addAttribute("categories", classificationQueryPort.getAllCategories(ownerUserId));
+        model.addAttribute("tags", classificationQueryPort.getAllTags(ownerUserId));
     }
 
     private Map<String, Boolean> toTagSelectionMap(TransactionDetailView tx) {
@@ -244,29 +187,6 @@ public class TransactionViewController {
             ret.put(tag.getTagId(), true);
         }
         return ret;
-    }
-
-    private static String blankToNull(String value) {
-        if (value == null) return null;
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private static String stringValue(Object value) {
-        if (value == null) return null;
-        return String.valueOf(value);
-    }
-
-    private static List<String> stringListValue(Object value) {
-        if (value == null) return Collections.emptyList();
-        if (value instanceof Collection) {
-            List<String> ret = new ArrayList<>();
-            for (Object each : (Collection<?>) value) {
-                ret.add(String.valueOf(each));
-            }
-            return ret;
-        }
-        return Collections.singletonList(String.valueOf(value));
     }
 
     private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {

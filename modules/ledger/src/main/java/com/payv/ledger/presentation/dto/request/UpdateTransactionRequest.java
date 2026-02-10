@@ -1,12 +1,15 @@
 package com.payv.ledger.presentation.dto.request;
 
-import com.sun.istack.internal.NotNull;
+import com.payv.ledger.application.command.model.UpdateTransactionCommand;
+import com.payv.ledger.domain.model.Money;
+import com.payv.ledger.domain.model.TransactionType;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 public final class UpdateTransactionRequest {
@@ -18,6 +21,7 @@ public final class UpdateTransactionRequest {
     private long amount;
 
     @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate transactionDate;
 
     @NotBlank
@@ -28,5 +32,47 @@ public final class UpdateTransactionRequest {
 
     private String categoryIdLevel2;
     private String memo;
-    private List<String> tagIds;
+    private Object tagIds;
+
+    public UpdateTransactionCommand toCommand() {
+        UpdateTransactionCommand command = UpdateTransactionCommand.builder()
+                .transactionType(TransactionType.valueOf(transactionType))
+                .amount(Money.generate(amount))
+                .transactionDate(transactionDate)
+                .assetId(assetId)
+                .categoryIdLevel1(categoryIdLevel1)
+                .categoryIdLevel2(blankToNull(categoryIdLevel2))
+                .memo(blankToNull(memo))
+                .build();
+
+        appendTagIds(command, tagIds);
+
+        return command;
+    }
+
+    private static String blankToNull(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static void appendTagIds(UpdateTransactionCommand command, Object rawTagIds) {
+        if (rawTagIds == null) return;
+
+        if (rawTagIds instanceof Iterable) {
+            for (Object each : (Iterable<?>) rawTagIds) {
+                appendSingleTagId(command, each);
+            }
+            return;
+        }
+
+        appendSingleTagId(command, rawTagIds);
+    }
+
+    private static void appendSingleTagId(UpdateTransactionCommand command, Object value) {
+        if (value == null) return;
+        String tagId = String.valueOf(value).trim();
+        if (tagId.isEmpty()) return;
+        command.addTagId(tagId);
+    }
 }
