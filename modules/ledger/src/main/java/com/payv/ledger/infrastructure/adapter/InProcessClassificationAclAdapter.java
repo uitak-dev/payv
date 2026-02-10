@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Component("ledgerClassificationAclAdapter")
 @RequiredArgsConstructor
 public class InProcessClassificationAclAdapter implements ClassificationValidationPort, ClassificationQueryPort {
 

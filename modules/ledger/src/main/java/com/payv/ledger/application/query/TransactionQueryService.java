@@ -144,6 +144,12 @@ public class TransactionQueryService {
         return value == null ? 0L : value;
     }
 
+    @Transactional(readOnly = true)
+    public long sumAmountByType(String ownerUserId, LocalDate from, LocalDate to, String transactionType) {
+        Long value = txMapper.sumAmountByType(ownerUserId, from, to, transactionType);
+        return value == null ? 0L : value;
+    }
+
     @Data
     @AllArgsConstructor
     public static class PagedResult<T> {

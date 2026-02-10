@@ -98,6 +98,19 @@
         </if>
     </select>
 
+    <select id="sumAmountByType" resultType="long">
+        select coalesce(sum(amount), 0)
+        from transaction
+        where owner_user_id = #{ownerUserId}
+          and transaction_type = #{transactionType}
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+    </select>
+
     <!-- ==== Command ==== -->
     <insert id="upsert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord">
         INSERT INTO transaction (

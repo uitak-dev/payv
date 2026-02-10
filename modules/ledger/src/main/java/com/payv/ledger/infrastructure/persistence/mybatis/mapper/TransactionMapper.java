@@ -32,6 +32,10 @@ public interface TransactionMapper {
                           @Param("categoryIdLevel1") String categoryIdLevel1,
                           @Param("categoryIdLevel2") String categoryIdLevel2);
 
+    Long sumAmountByType(@Param("ownerUserId") String ownerUserId,
+                         @Param("from") LocalDate from, @Param("to") LocalDate to,
+                         @Param("transactionType") String transactionType);
+
     /** ---- Command ---- */
     int upsert(TransactionRecord record);
 
