@@ -12,11 +12,9 @@ public interface TransactionMapper {
 
     /** ---- Query ---- */
     List<TransactionRecord> selectList(@Param("ownerUserId") String ownerUserId,
-                                       @Param("from") LocalDate from,
-                                       @Param("to") LocalDate to,
+                                       @Param("from") LocalDate from, @Param("to") LocalDate to,
                                        @Param("assetId") String assetId,
-                                       @Param("offset") int offset,
-                                       @Param("limit") int limit);
+                                       @Param("offset") int offset, @Param("limit") int limit);
 
     int countList(@Param("ownerUserId") String ownerUserId,
                   @Param("from") LocalDate from,
@@ -28,6 +26,11 @@ public interface TransactionMapper {
 
     List<String> selectTagIds(@Param("transactionId") String transactionId,
                               @Param("ownerUserId") String ownerUserId);
+
+    Long sumExpenseAmount(@Param("ownerUserId") String ownerUserId,
+                          @Param("from") LocalDate from, @Param("to") LocalDate to,
+                          @Param("categoryIdLevel1") String categoryIdLevel1,
+                          @Param("categoryIdLevel2") String categoryIdLevel2);
 
     /** ---- Command ---- */
     int upsert(TransactionRecord record);

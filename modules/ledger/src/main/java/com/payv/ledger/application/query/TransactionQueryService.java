@@ -137,6 +137,13 @@ public class TransactionQueryService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public long sumExpenseAmount(String ownerUserId, LocalDate from, LocalDate to,
+                                 String categoryIdLevel1, String categoryIdLevel2) {
+        Long value = txMapper.sumExpenseAmount(ownerUserId, from, to, categoryIdLevel1, categoryIdLevel2);
+        return value == null ? 0L : value;
+    }
+
     @Data
     @AllArgsConstructor
     public static class PagedResult<T> {
