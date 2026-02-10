@@ -44,6 +44,51 @@ public class BudgetViewController {
         return "budget/list";
     }
 
+    @GetMapping("/new")
+    public String createForm(Principal principal,
+                             @RequestParam(required = false) String month,
+                             @RequestParam(required = false) String error,
+                             Model model) {
+        String ownerUserId = principal.getName();
+        YearMonth targetMonth = parseMonthOrNow(month);
+
+        model.addAttribute("selectedMonth", targetMonth.toString());
+        model.addAttribute("categories", classificationQueryPort.getAllCategories(ownerUserId));
+        model.addAttribute("error", error);
+        return "budget/create";
+    }
+
+    @GetMapping("/{budgetId}")
+    public String detail(Principal principal,
+                         @PathVariable String budgetId,
+                         @RequestParam(required = false) String deactivated,
+                         @RequestParam(required = false) String error,
+                         Model model) {
+        String ownerUserId = principal.getName();
+        BudgetQueryService.BudgetView budget = queryService.get(BudgetId.of(budgetId), ownerUserId)
+                .orElseThrow(() -> new IllegalStateException("budget not found"));
+
+        model.addAttribute("budget", budget);
+        model.addAttribute("deactivated", deactivated);
+        model.addAttribute("error", error);
+        return "budget/detail";
+    }
+
+    @GetMapping("/{budgetId}/edit")
+    public String editForm(Principal principal,
+                           @PathVariable String budgetId,
+                           @RequestParam(required = false) String error,
+                           Model model) {
+        String ownerUserId = principal.getName();
+        BudgetQueryService.BudgetView budget = queryService.get(BudgetId.of(budgetId), ownerUserId)
+                .orElseThrow(() -> new IllegalStateException("budget not found"));
+
+        model.addAttribute("budget", budget);
+        model.addAttribute("categories", classificationQueryPort.getAllCategories(ownerUserId));
+        model.addAttribute("error", error);
+        return "budget/edit";
+    }
+
     @PostMapping(produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> create(Principal principal,
@@ -98,5 +143,16 @@ public class BudgetViewController {
         body.put("success", false);
         body.put("message", message == null ? "request failed" : message);
         return ResponseEntity.badRequest().body(body);
+    }
+
+    private YearMonth parseMonthOrNow(String month) {
+        if (month == null || month.trim().isEmpty()) {
+            return YearMonth.now();
+        }
+        try {
+            return YearMonth.parse(month.trim());
+        } catch (RuntimeException e) {
+            return YearMonth.now();
+        }
     }
 }

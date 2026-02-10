@@ -15,7 +15,7 @@
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
             <h1 class="text-base font-semibold">태그 관리</h1>
-            <a href="${ctx}/classification/categories" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">카테고리</a>
+            <a href="${ctx}/classification/tags/new" class="rounded-xl bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white">태그 추가</a>
         </div>
     </header>
 
@@ -33,35 +33,22 @@
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>
         </c:if>
 
-        <div class="space-y-4">
-            <section class="pv-card p-4">
-                <div class="text-sm font-semibold">태그 추가</div>
-                <form class="mt-3 flex gap-2" method="post" action="${ctx}/classification/tags" data-ajax="true">
-                    <input name="name" required class="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="예: 회사"/>
-                    <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">추가</button>
-                </form>
-            </section>
-
-            <section class="pv-card p-4">
-                <div class="text-sm font-semibold">태그 목록</div>
-                <div class="mt-4 space-y-3">
-                    <c:forEach var="tag" items="${tags}">
-                        <div class="rounded-xl border border-slate-200 p-3">
-                            <form class="flex gap-2" method="post" action="${ctx}/classification/tags/${tag.tagId}" data-ajax="true" data-method="PUT">
-                                <input name="newName" value="${tag.name}" required class="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"/>
-                                <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-sm">이름변경</button>
-                            </form>
-                            <form class="mt-2" method="post" action="${ctx}/classification/tags/${tag.tagId}" data-ajax="true" data-method="DELETE">
-                                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">비활성</button>
-                            </form>
+        <section class="pv-card p-4">
+            <div class="text-sm font-semibold">태그 목록</div>
+            <div class="mt-4 space-y-3">
+                <c:forEach var="tag" items="${tags}">
+                    <div class="rounded-xl border border-slate-200 p-3">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm font-medium">${tag.name}</div>
+                            <a href="${ctx}/classification/tags/${tag.tagId}/edit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">수정</a>
                         </div>
-                    </c:forEach>
-                    <c:if test="${empty tags}">
-                        <p class="py-1 text-sm text-slate-500">등록된 태그가 없습니다.</p>
-                    </c:if>
-                </div>
-            </section>
-        </div>
+                    </div>
+                </c:forEach>
+                <c:if test="${empty tags}">
+                    <p class="py-1 text-sm text-slate-500">등록된 태그가 없습니다.</p>
+                </c:if>
+            </div>
+        </section>
     </main>
 </div>
 

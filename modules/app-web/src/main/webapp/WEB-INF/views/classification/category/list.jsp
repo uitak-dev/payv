@@ -15,7 +15,7 @@
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
             <h1 class="text-base font-semibold">카테고리 관리</h1>
-            <a href="${ctx}/classification/tags" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">태그</a>
+            <a href="${ctx}/classification/categories/new" class="rounded-xl bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white">1단계 추가</a>
         </div>
     </header>
 
@@ -36,55 +36,24 @@
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>
         </c:if>
 
-        <div class="space-y-4">
-            <section class="pv-card p-4">
-                <div class="text-sm font-semibold">1단계 카테고리 추가</div>
-                <form class="mt-3 flex gap-2" method="post" action="${ctx}/classification/categories/roots" data-ajax="true">
-                    <input name="name" required class="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="예: 식비"/>
-                    <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">추가</button>
-                </form>
-            </section>
-
-            <section class="space-y-3">
-                <c:forEach var="root" items="${categories}">
-                    <article class="pv-card p-4">
+        <section class="space-y-3">
+            <c:forEach var="root" items="${categories}">
+                <article class="pv-card p-4">
+                    <a href="${ctx}/classification/categories/roots/${root.categoryId}" class="block">
                         <div class="flex items-center justify-between gap-2">
-                            <div class="text-sm font-semibold">${root.name}</div>
-                            <form method="post" action="${ctx}/classification/categories/roots/${root.categoryId}" data-ajax="true" data-method="DELETE">
-                                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">비활성</button>
-                            </form>
+                            <div>
+                                <div class="text-sm font-semibold">${root.name}</div>
+                                <div class="mt-1 text-xs text-slate-500">하위 ${root.children.size()}개</div>
+                            </div>
+                            <span class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">상세</span>
                         </div>
-
-                        <form class="mt-3 flex gap-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}" data-ajax="true" data-method="PUT">
-                            <input name="newName" value="${root.name}" required class="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"/>
-                            <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-sm">1단계 이름변경</button>
-                        </form>
-
-                        <div class="mt-3 space-y-2">
-                            <c:forEach var="child" items="${root.children}">
-                                <div class="rounded-lg border border-slate-200 p-2">
-                                    <form class="flex gap-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children/${child.categoryId}" data-ajax="true" data-method="PUT">
-                                        <input name="newName" value="${child.name}" required class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"/>
-                                        <button type="submit" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">2단계 이름변경</button>
-                                    </form>
-                                    <form class="mt-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children/${child.categoryId}" data-ajax="true" data-method="DELETE">
-                                        <button type="submit" class="text-xs text-slate-500">비활성</button>
-                                    </form>
-                                </div>
-                            </c:forEach>
-                        </div>
-
-                        <form class="mt-3 flex gap-2" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children" data-ajax="true">
-                            <input name="name" required class="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="2단계 추가"/>
-                            <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-sm">추가</button>
-                        </form>
-                    </article>
-                </c:forEach>
-                <c:if test="${empty categories}">
-                    <section class="pv-card p-4 text-sm text-slate-500">등록된 카테고리가 없습니다.</section>
-                </c:if>
-            </section>
-        </div>
+                    </a>
+                </article>
+            </c:forEach>
+            <c:if test="${empty categories}">
+                <section class="pv-card p-4 text-sm text-slate-500">등록된 카테고리가 없습니다.</section>
+            </c:if>
+        </section>
     </main>
 </div>
 

@@ -1,11 +1,11 @@
 package com.payv.asset.presentation.web;
 
 import com.payv.asset.application.command.AssetCommandService;
-import com.payv.asset.application.command.model.CreateAssetCommand;
 import com.payv.asset.application.command.model.DeactivateAssetCommand;
 import com.payv.asset.application.query.AssetQueryService;
 import com.payv.asset.domain.model.AssetId;
-import com.payv.asset.domain.model.AssetType;
+import com.payv.asset.presentation.dto.request.CreateAssetRequest;
+import com.payv.asset.presentation.dto.request.UpdateAssetRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,6 +27,7 @@ public class AssetViewController {
     @GetMapping
     public String list(Principal principal,
                        @RequestParam(required = false) String created,
+                       @RequestParam(required = false) String updated,
                        @RequestParam(required = false) String deactivated,
                        @RequestParam(required = false) String error,
                        Model model) {
@@ -34,23 +35,52 @@ public class AssetViewController {
 
         model.addAttribute("assets", queryService.getAll(ownerUserId));
         model.addAttribute("created", created);
+        model.addAttribute("updated", updated);
         model.addAttribute("deactivated", deactivated);
         model.addAttribute("error", error);
         return "asset/list";
     }
 
+    @GetMapping("/new")
+    public String createForm(@RequestParam(required = false) String error, Model model) {
+        model.addAttribute("error", error);
+        return "asset/create";
+    }
+
+    @GetMapping("/{assetId}/edit")
+    public String editForm(Principal principal,
+                           @PathVariable String assetId,
+                           @RequestParam(required = false) String error,
+                           Model model) {
+        String ownerUserId = principal.getName();
+        model.addAttribute("asset", queryService.get(AssetId.of(assetId), ownerUserId)
+                .orElseThrow(() -> new IllegalStateException("asset not found")));
+        model.addAttribute("error", error);
+        return "asset/edit";
+    }
+
     @PostMapping(produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> create(Principal principal,
-                                                      @RequestParam String name,
-                                                      @RequestParam String assetType) {
+                                                       @ModelAttribute CreateAssetRequest request) {
         String ownerUserId = principal.getName();
         try {
-            commandService.create(
-                    new CreateAssetCommand(name, AssetType.valueOf(assetType)),
-                    ownerUserId
-            );
+            commandService.create(request.toCommand(), ownerUserId);
             return okRedirect("/asset/assets?created=true");
+        } catch (RuntimeException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    @PutMapping(path = "/{assetId}", consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> update(Principal principal,
+                                                       @PathVariable String assetId,
+                                                       @RequestBody UpdateAssetRequest request) {
+        String ownerUserId = principal.getName();
+        try {
+            commandService.update(request.toCommand(assetId), ownerUserId);
+            return okRedirect("/asset/assets?updated=true");
         } catch (RuntimeException e) {
             return badRequest(e.getMessage());
         }

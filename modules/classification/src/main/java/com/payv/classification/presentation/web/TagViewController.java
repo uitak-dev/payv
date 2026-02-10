@@ -41,6 +41,24 @@ public class TagViewController {
         return "classification/tag/list";
     }
 
+    @GetMapping("/new")
+    public String createForm(@RequestParam(required = false) String error, Model model) {
+        model.addAttribute("error", error);
+        return "classification/tag/create";
+    }
+
+    @GetMapping("/{tagId}/edit")
+    public String editForm(Principal principal,
+                           @PathVariable String tagId,
+                           @RequestParam(required = false) String error,
+                           Model model) {
+        String ownerUserId = principal.getName();
+        model.addAttribute("tag", queryService.get(TagId.of(tagId), ownerUserId)
+                .orElseThrow(() -> new IllegalStateException("tag not found")));
+        model.addAttribute("error", error);
+        return "classification/tag/edit";
+    }
+
     @PostMapping(produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> create(Principal principal,

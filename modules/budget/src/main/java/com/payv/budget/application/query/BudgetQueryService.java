@@ -73,13 +73,38 @@ public class BudgetQueryService {
         return ret;
     }
 
-    public Optional<BudgetView> get(BudgetId budgetId, String ownerUserId, YearMonth yearMonth) {
+    public Optional<BudgetView> get(BudgetId budgetId, String ownerUserId) {
         return budgetRepository.findById(budgetId, ownerUserId)
-                .map(b -> {
-                    List<BudgetView> one = getMonthlyBudgets(ownerUserId, yearMonth).stream()
-                            .filter(v -> v.getBudgetId().equals(b.getId().getValue()))
-                            .collect(Collectors.toList());
-                    return one.isEmpty() ? null : one.get(0);
+                .map(budget -> {
+                    YearMonth targetMonth = budget.getTargetMonth();
+                    LocalDate monthStart = targetMonth.atDay(1);
+                    LocalDate monthEnd = targetMonth.atEndOfMonth();
+
+                    String categoryId = budget.getCategoryId();
+                    Map<String, String> categoryNames = categoryId == null
+                            ? Collections.emptyMap()
+                            : classificationQueryPort.getCategoryNames(Collections.singleton(categoryId), ownerUserId);
+
+                    long spent = ledgerSpendingQueryPort.sumExpenseAmount(
+                            ownerUserId,
+                            monthStart,
+                            monthEnd,
+                            categoryId
+                    );
+                    long remaining = budget.getAmountLimit() - spent;
+                    int usageRate = (int) ((spent * 100.0d) / budget.getAmountLimit());
+
+                    return new BudgetView(
+                            budget.getId().getValue(),
+                            targetMonth.toString(),
+                            categoryId,
+                            budget.isOverallBudget() ? "전체 예산" : categoryNames.get(categoryId),
+                            budget.getAmountLimit(),
+                            budget.getMemo(),
+                            spent,
+                            remaining,
+                            usageRate
+                    );
                 });
     }
 

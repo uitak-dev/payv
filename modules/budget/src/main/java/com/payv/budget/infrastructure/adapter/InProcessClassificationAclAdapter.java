@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("budgetClassificationAclAdapter")
 @RequiredArgsConstructor
 public class InProcessClassificationAclAdapter implements ClassificationValidationPort, ClassificationQueryPort {
 
