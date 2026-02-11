@@ -3,8 +3,10 @@ package com.payv.ledger.presentation.web;
 import com.payv.ledger.application.command.AttachmentCommandService;
 import com.payv.ledger.application.command.TransactionCommandService;
 import com.payv.ledger.application.port.AssetQueryPort;
+import com.payv.ledger.application.port.AttachmentStoragePort;
 import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.application.query.TransactionQueryService;
+import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.presentation.dto.request.CreateTransactionRequest;
@@ -14,6 +16,8 @@ import com.payv.ledger.presentation.dto.request.TransactionListNoticeQueryReques
 import com.payv.ledger.presentation.dto.request.UpdateTransactionRequest;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionDetailView;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,6 +38,7 @@ public class TransactionViewController {
     private final TransactionQueryService queryService;
     private final TransactionCommandService commandService;
     private final AttachmentCommandService attachmentCommandService;
+    private final AttachmentStoragePort attachmentStoragePort;
 
     private final AssetQueryPort assetQueryPort;
     private final ClassificationQueryPort classificationQueryPort;
@@ -174,6 +179,30 @@ public class TransactionViewController {
         }
     }
 
+    @GetMapping("/{transactionId}/attachments/{attachmentId}/image")
+    @ResponseBody
+    public ResponseEntity<byte[]> attachmentImage(Principal principal,
+                                                  @PathVariable String transactionId,
+                                                  @PathVariable String attachmentId) {
+        String ownerUserId = principal.getName();
+        try {
+            Attachment attachment = queryService.findStoredAttachment(
+                            TransactionId.of(transactionId), AttachmentId.of(attachmentId), ownerUserId)
+                    .orElseThrow(() -> new IllegalStateException("attachment not found"));
+
+            byte[] body = attachmentStoragePort.readFinal(
+                    attachment.getStoragePath(),
+                    attachment.getStoredFileName()
+            );
+            MediaType mediaType = parseMediaType(attachment.getContentType());
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .body(body);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     private void populateFormOptions(Model model, String ownerUserId) {
         model.addAttribute("assets", assetQueryPort.getAllActiveAssets(ownerUserId));
         model.addAttribute("categories", classificationQueryPort.getAllCategories(ownerUserId));
@@ -201,5 +230,16 @@ public class TransactionViewController {
         body.put("success", false);
         body.put("message", message == null ? "request failed" : message);
         return ResponseEntity.badRequest().body(body);
+    }
+
+    private MediaType parseMediaType(String contentType) {
+        if (contentType == null || contentType.trim().isEmpty()) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+        try {
+            return MediaType.parseMediaType(contentType);
+        } catch (IllegalArgumentException e) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
     }
 }

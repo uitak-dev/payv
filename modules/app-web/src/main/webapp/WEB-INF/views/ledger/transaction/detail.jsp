@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <!doctype html>
 <html lang="ko">
@@ -29,7 +30,7 @@
             <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">거래가 수정되었습니다.</p>
         </c:if>
         <c:if test="${not empty notice.attachmentUploaded}">
-            <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">첨부 업로드를 요청했습니다.</p>
+            <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">첨부 파일이 업로드되었습니다.</p>
         </c:if>
         <c:if test="${not empty notice.attachmentDeleted}">
             <p class="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">첨부가 삭제되었습니다.</p>
@@ -80,22 +81,47 @@
             <section class="pv-card p-4">
                 <div class="flex items-center justify-between">
                     <div class="text-sm font-semibold">첨부 파일</div>
-                    <a href="${ctx}/ledger/transactions/${tx.transactionId}/edit" class="text-xs text-slate-500">편집 화면에서 업로드</a>
+                    <div class="text-xs text-slate-500">${fn:length(tx.attachments)}/2</div>
                 </div>
-                <div class="mt-3 space-y-2">
+
+                <c:if test="${fn:length(tx.attachments) < 2}">
+                    <form class="mt-3 flex items-center gap-2"
+                          method="post"
+                          enctype="multipart/form-data"
+                          action="${ctx}/ledger/transactions/${tx.transactionId}/attachments"
+                          data-ajax="true">
+                        <input type="file"
+                               name="file"
+                               accept="image/*"
+                               required
+                               class="block w-full flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"/>
+                        <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-sm">업로드</button>
+                    </form>
+                </c:if>
+                <c:if test="${fn:length(tx.attachments) >= 2}">
+                    <p class="mt-3 text-xs text-slate-500">첨부 파일은 최대 2개까지 업로드할 수 있습니다.</p>
+                </c:if>
+
+                <div class="mt-3 grid grid-cols-2 gap-3">
                     <c:forEach var="att" items="${tx.attachments}">
-                        <div class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                            <div>
-                                <div>${att.uploadFileName}</div>
-                                <div class="text-xs text-slate-500">${att.status}</div>
+                        <c:url var="attImageUrl" value="/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}/image"/>
+                        <div class="overflow-hidden rounded-xl border border-slate-200">
+                            <a href="${attImageUrl}" target="_blank" rel="noopener noreferrer" class="block">
+                                <img src="${attImageUrl}" alt="${att.uploadFileName}" class="pv-thumb h-24 w-full object-cover"/>
+                            </a>
+                            <div class="flex items-center justify-between gap-2 px-3 py-2">
+                                <div class="truncate text-xs text-slate-600">${att.uploadFileName}</div>
+                                <form method="post"
+                                      action="${ctx}/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}"
+                                      data-ajax="true"
+                                      data-method="DELETE">
+                                    <button type="submit" class="text-xs text-slate-500">삭제</button>
+                                </form>
                             </div>
-                            <form method="post" action="${ctx}/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}" data-ajax="true" data-method="DELETE">
-                                <button type="submit" class="text-xs text-slate-500">삭제</button>
-                            </form>
                         </div>
                     </c:forEach>
                     <c:if test="${empty tx.attachments}">
-                        <p class="text-sm text-slate-500">첨부 파일이 없습니다.</p>
+                        <p class="col-span-2 text-sm text-slate-500">첨부 파일이 없습니다.</p>
                     </c:if>
                 </div>
             </section>

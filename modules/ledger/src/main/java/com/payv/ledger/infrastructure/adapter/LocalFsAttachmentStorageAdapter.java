@@ -110,6 +110,22 @@ public class LocalFsAttachmentStorageAdapter implements AttachmentStoragePort {
         }
     }
 
+    @Override
+    public byte[] readFinal(String storagePath, String storedFileName) {
+        Path filePath = safeResolve(baseDir, storagePath).resolve(storedFileName).normalize();
+        if (!filePath.startsWith(baseDir)) {
+            throw new IllegalArgumentException("invalid attachment file path");
+        }
+        try {
+            if (!Files.exists(filePath) || !Files.isRegularFile(filePath)) {
+                throw new IllegalStateException("attachment file not found");
+            }
+            return Files.readAllBytes(filePath);
+        } catch (IOException e) {
+            throw new IllegalStateException("failed to read attachment file", e);
+        }
+    }
+
     private Path safeResolve(Path base, String relative) {
         Path resolved = base.resolve(relative).normalize();
         if (!resolved.startsWith(base)) {

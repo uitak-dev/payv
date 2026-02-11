@@ -19,6 +19,8 @@ public interface AttachmentStoragePort {
 
     void deleteFinalQuietly(StoragePlan plan);
 
+    byte[] readFinal(String storagePath, String storedFileName);
+
     @Getter
     @AllArgsConstructor
     class StoragePlan {

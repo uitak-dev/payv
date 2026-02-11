@@ -3,6 +3,7 @@ package com.payv.ledger.application.query;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.domain.model.Attachment;
+import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.domain.repository.AttachmentRepository;
@@ -135,6 +136,13 @@ public class TransactionQueryService {
                 tags,
                 attachments
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Attachment> findStoredAttachment(TransactionId transactionId, AttachmentId attachmentId, String ownerUserId) {
+        return attachmentRepository.findById(attachmentId, ownerUserId)
+                .filter(attachment -> attachment.getTransactionId().equals(transactionId))
+                .filter(attachment -> attachment.getStatus() == Attachment.Status.STORED);
     }
 
     @Transactional(readOnly = true)

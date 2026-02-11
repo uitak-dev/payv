@@ -211,6 +211,11 @@ public class AttachmentCommandServiceTest {
         public void deleteFinalQuietly(StoragePlan plan) {
             this.movedToFinal = true;
         }
+
+        @Override
+        public byte[] readFinal(String storagePath, String storedFileName) {
+            return new byte[0];
+        }
     }
 
     private static class NoOpTransactionRepository implements TransactionRepository {

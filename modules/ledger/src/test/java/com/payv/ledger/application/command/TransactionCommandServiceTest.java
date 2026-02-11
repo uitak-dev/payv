@@ -195,5 +195,10 @@ public class TransactionCommandServiceTest {
         @Override
         public void deleteFinalQuietly(StoragePlan plan) {
         }
+
+        @Override
+        public byte[] readFinal(String storagePath, String storedFileName) {
+            return new byte[0];
+        }
     }
 }

@@ -100,28 +100,6 @@
             <button type="submit" class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">${submitLabel}</button>
         </form>
 
-        <c:if test="${mode == 'edit'}">
-            <section class="mt-4 pv-card p-4">
-                <div class="text-sm font-semibold">첨부 파일</div>
-                <form class="mt-3" method="post" enctype="multipart/form-data" action="${ctx}/ledger/transactions/${tx.transactionId}/attachments" data-ajax="true">
-                    <input type="file" name="file" accept="image/*" required class="block w-full text-sm"/>
-                    <button type="submit" class="mt-2 rounded-xl border border-slate-200 px-3 py-2 text-sm">업로드</button>
-                </form>
-                <div class="mt-3 space-y-2">
-                    <c:forEach var="att" items="${tx.attachments}">
-                        <div class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                            <div>${att.uploadFileName}</div>
-                            <form method="post" action="${ctx}/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}" data-ajax="true" data-method="DELETE">
-                                <button type="submit" class="text-xs text-slate-500">삭제</button>
-                            </form>
-                        </div>
-                    </c:forEach>
-                    <c:if test="${empty tx.attachments}">
-                        <p class="text-sm text-slate-500">첨부 파일이 없습니다.</p>
-                    </c:if>
-                </div>
-            </section>
-        </c:if>
     </main>
 </div>
 
