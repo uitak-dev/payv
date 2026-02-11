@@ -15,7 +15,7 @@
 <!--        <module>modules/transfer</module>-->
         <module>modules/budget</module>
 <!--        <module>modules/automation</module>-->
-<!--        <module>modules/reporting</module>-->
+        <module>modules/reporting</module>
         <module>modules/common</module>
         <module>modules/ledger</module>
         <module>modules/app-web</module>
@@ -73,6 +73,11 @@
             <dependency>
                 <groupId>com.payv</groupId>
                 <artifactId>budget</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.payv</groupId>
+                <artifactId>reporting</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
