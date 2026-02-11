@@ -16,7 +16,7 @@
             <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
             <div class="mt-1">예산</div>
         </a>
-        <a href="${ctx}/asset/assets" data-nav="settings" class="py-3">
+        <a href="${ctx}/settings" data-nav="settings" class="py-3">
             <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
             <div class="mt-1">설정</div>
         </a>
