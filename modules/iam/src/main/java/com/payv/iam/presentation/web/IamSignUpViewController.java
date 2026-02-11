@@ -2,13 +2,14 @@ package com.payv.iam.presentation.web;
 
 import com.payv.iam.application.command.IamCommandService;
 import com.payv.iam.application.command.model.SignUpCommand;
+import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,9 +22,9 @@ public class IamSignUpViewController {
 
     @GetMapping
     public String signUpForm(@RequestParam(required = false) String error,
-                             Principal principal,
+                             @AuthenticationPrincipal IamUserDetails userDetails,
                              Model model) {
-        if (principal != null) return "redirect:/ledger/transactions";
+        if (userDetails != null) return "redirect:/ledger/transactions";
         model.addAttribute("error", error);
         return "iam/signup";
     }

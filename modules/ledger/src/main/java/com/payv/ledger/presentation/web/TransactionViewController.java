@@ -15,16 +15,17 @@ import com.payv.ledger.presentation.dto.request.TransactionListQueryRequest;
 import com.payv.ledger.presentation.dto.request.TransactionListNoticeQueryRequest;
 import com.payv.ledger.presentation.dto.request.UpdateTransactionRequest;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionDetailView;
+import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -44,11 +45,11 @@ public class TransactionViewController {
     private final ClassificationQueryPort classificationQueryPort;
 
     @GetMapping
-    public String list(Principal principal,
+    public String list(@AuthenticationPrincipal IamUserDetails userDetails,
                        @ModelAttribute("condition") TransactionListQueryRequest condition,
                        @ModelAttribute("notice") TransactionListNoticeQueryRequest notice,
                        Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
 
         model.addAttribute("result", queryService.list(
                 ownerUserId,
@@ -67,10 +68,10 @@ public class TransactionViewController {
     }
 
     @GetMapping("/new")
-    public String createForm(Principal principal,
+    public String createForm(@AuthenticationPrincipal IamUserDetails userDetails,
                              @RequestParam(required = false) String error,
                              Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         populateFormOptions(model, ownerUserId);
         model.addAttribute("error", error);
         model.addAttribute("mode", "create");
@@ -83,9 +84,9 @@ public class TransactionViewController {
 
     @PostMapping(produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(Principal principal,
+    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateTransactionRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             TransactionId id = commandService.createManual(request.toCommand(), ownerUserId);
             return okRedirect("/ledger/transactions/" + id.getValue() + "?created=true");
@@ -95,11 +96,11 @@ public class TransactionViewController {
     }
 
     @GetMapping("/{transactionId}")
-    public String detail(Principal principal,
+    public String detail(@AuthenticationPrincipal IamUserDetails userDetails,
                          @PathVariable String transactionId,
                          @ModelAttribute("notice") TransactionDetailNoticeQueryRequest notice,
                          Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
 
         model.addAttribute("tx", queryService.detail(TransactionId.of(transactionId), ownerUserId));
         model.addAttribute("notice", notice);
@@ -107,11 +108,11 @@ public class TransactionViewController {
     }
 
     @GetMapping("/{transactionId}/edit")
-    public String editForm(Principal principal,
+    public String editForm(@AuthenticationPrincipal IamUserDetails userDetails,
                            @PathVariable String transactionId,
                            @RequestParam(required = false) String error,
                            Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         TransactionDetailView tx = queryService.detail(TransactionId.of(transactionId), ownerUserId);
 
         populateFormOptions(model, ownerUserId);
@@ -126,10 +127,10 @@ public class TransactionViewController {
 
     @PutMapping(path = "/{transactionId}", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> update(Principal principal,
+    public ResponseEntity<Map<String, Object>> update(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String transactionId,
                                                        @RequestBody UpdateTransactionRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.updateTransaction(TransactionId.of(transactionId), request.toCommand(), ownerUserId);
             return okRedirect("/ledger/transactions/" + transactionId + "?updated=true");
@@ -140,9 +141,9 @@ public class TransactionViewController {
 
     @DeleteMapping(path = "/{transactionId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> delete(Principal principal,
+    public ResponseEntity<Map<String, Object>> delete(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String transactionId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.deleteTransaction(TransactionId.of(transactionId), ownerUserId);
             return okRedirect("/ledger/transactions?deleted=true");
@@ -153,10 +154,10 @@ public class TransactionViewController {
 
     @PostMapping(path = "/{transactionId}/attachments", consumes = "multipart/form-data", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> uploadAttachment(Principal principal,
+    public ResponseEntity<Map<String, Object>> uploadAttachment(@AuthenticationPrincipal IamUserDetails userDetails,
                                                                 @PathVariable String transactionId,
                                                                 @RequestParam("file") MultipartFile file) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             attachmentCommandService.upload(TransactionId.of(transactionId), ownerUserId, file);
             return okRedirect("/ledger/transactions/" + transactionId + "?attachmentUploaded=true");
@@ -167,10 +168,10 @@ public class TransactionViewController {
 
     @DeleteMapping(path = "/{transactionId}/attachments/{attachmentId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> deleteAttachment(Principal principal,
+    public ResponseEntity<Map<String, Object>> deleteAttachment(@AuthenticationPrincipal IamUserDetails userDetails,
                                                                 @PathVariable String transactionId,
                                                                 @PathVariable String attachmentId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             attachmentCommandService.delete(AttachmentId.of(attachmentId), ownerUserId);
             return okRedirect("/ledger/transactions/" + transactionId + "?attachmentDeleted=true");
@@ -181,10 +182,10 @@ public class TransactionViewController {
 
     @GetMapping("/{transactionId}/attachments/{attachmentId}/image")
     @ResponseBody
-    public ResponseEntity<byte[]> attachmentImage(Principal principal,
+    public ResponseEntity<byte[]> attachmentImage(@AuthenticationPrincipal IamUserDetails userDetails,
                                                   @PathVariable String transactionId,
                                                   @PathVariable String attachmentId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             Attachment attachment = queryService.findStoredAttachment(
                             TransactionId.of(transactionId), AttachmentId.of(attachmentId), ownerUserId)

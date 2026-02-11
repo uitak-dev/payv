@@ -55,10 +55,10 @@
                 </form>
             </section>
 
-            <c:if test="${not empty ownerUserId}">
+            <c:if test="${not empty email}">
                 <section class="pv-card p-4">
-                    <div class="text-xs text-slate-500">로그인 사용자</div>
-                    <div class="mt-1 text-sm font-medium">${ownerUserId}</div>
+                    <div class="text-xs text-slate-500">사용자 프로필</div>
+                    <div class="mt-1 text-sm font-medium">${email}</div>
                 </section>
             </c:if>
         </div>

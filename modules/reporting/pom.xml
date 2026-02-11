@@ -23,6 +23,10 @@
             <groupId>com.payv</groupId>
             <artifactId>ledger</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>iam</artifactId>
+        </dependency>
 
         <!-- Spring Core -->
         <dependency>

@@ -11,13 +11,14 @@ import com.payv.classification.application.query.model.CategoryTreeView;
 import com.payv.classification.domain.model.CategoryId;
 import com.payv.classification.presentation.dto.request.RenameChildCategoryRequest;
 import com.payv.classification.presentation.dto.request.RenameRootCategoryRequest;
+import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -30,14 +31,14 @@ public class CategoryViewController {
     private final CategoryQueryService queryService;
 
     @GetMapping
-    public String list(Principal principal,
+    public String list(@AuthenticationPrincipal IamUserDetails userDetails,
                        @RequestParam(required = false) String createdRoot,
                        @RequestParam(required = false) String createdChild,
                        @RequestParam(required = false) String renamed,
                        @RequestParam(required = false) String deactivated,
                        @RequestParam(required = false) String error,
                        Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
 
         model.addAttribute("categories", queryService.getAll(ownerUserId));
         model.addAttribute("createdRoot", createdRoot);
@@ -55,14 +56,14 @@ public class CategoryViewController {
     }
 
     @GetMapping("/roots/{rootId}")
-    public String detail(Principal principal,
+    public String detail(@AuthenticationPrincipal IamUserDetails userDetails,
                          @PathVariable String rootId,
                          @RequestParam(required = false) String createdChild,
                          @RequestParam(required = false) String renamed,
                          @RequestParam(required = false) String deactivated,
                          @RequestParam(required = false) String error,
                          Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         CategoryTreeView root = getRoot(rootId, ownerUserId);
 
         model.addAttribute("root", root);
@@ -74,34 +75,34 @@ public class CategoryViewController {
     }
 
     @GetMapping("/roots/{rootId}/edit")
-    public String editRootForm(Principal principal,
+    public String editRootForm(@AuthenticationPrincipal IamUserDetails userDetails,
                                @PathVariable String rootId,
                                @RequestParam(required = false) String error,
                                Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         model.addAttribute("root", getRoot(rootId, ownerUserId));
         model.addAttribute("error", error);
         return "classification/category/edit-root";
     }
 
     @GetMapping("/roots/{rootId}/children/new")
-    public String createChildForm(Principal principal,
+    public String createChildForm(@AuthenticationPrincipal IamUserDetails userDetails,
                                   @PathVariable String rootId,
                                   @RequestParam(required = false) String error,
                                   Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         model.addAttribute("root", getRoot(rootId, ownerUserId));
         model.addAttribute("error", error);
         return "classification/category/create-child";
     }
 
     @GetMapping("/roots/{rootId}/children/{childId}/edit")
-    public String editChildForm(Principal principal,
+    public String editChildForm(@AuthenticationPrincipal IamUserDetails userDetails,
                                 @PathVariable String rootId,
                                 @PathVariable String childId,
                                 @RequestParam(required = false) String error,
                                 Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         CategoryTreeView root = getRoot(rootId, ownerUserId);
         CategoryChildView child = root.getChildren().stream()
                 .filter(c -> c.getCategoryId().equals(childId))
@@ -116,9 +117,9 @@ public class CategoryViewController {
 
     @PostMapping(path = "/roots", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> createRoot(Principal principal,
+    public ResponseEntity<Map<String, Object>> createRoot(@AuthenticationPrincipal IamUserDetails userDetails,
                                                            @RequestParam String name) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.createParent(new CreateParentCategoryCommand(name), ownerUserId);
             return okRedirect("/classification/categories?createdRoot=true");
@@ -129,10 +130,10 @@ public class CategoryViewController {
 
     @PostMapping(path = "/roots/{rootId}/children", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> createChild(Principal principal,
+    public ResponseEntity<Map<String, Object>> createChild(@AuthenticationPrincipal IamUserDetails userDetails,
                                                             @PathVariable String rootId,
                                                             @RequestParam String name) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.createChild(
                     new CreateChildCategoryCommand(CategoryId.of(rootId), name),
@@ -146,10 +147,10 @@ public class CategoryViewController {
 
     @PutMapping(path = "/roots/{rootId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> renameRoot(Principal principal,
+    public ResponseEntity<Map<String, Object>> renameRoot(@AuthenticationPrincipal IamUserDetails userDetails,
                                                            @PathVariable String rootId,
                                                            RenameRootCategoryRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.renameRoot(request.toCommand(rootId), ownerUserId);
             return okRedirect("/classification/categories/roots/" + rootId + "?renamed=true");
@@ -160,11 +161,11 @@ public class CategoryViewController {
 
     @PutMapping(path = "/roots/{rootId}/children/{childId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> renameChild(Principal principal,
+    public ResponseEntity<Map<String, Object>> renameChild(@AuthenticationPrincipal IamUserDetails userDetails,
                                                             @PathVariable String rootId,
                                                             @PathVariable String childId,
                                                             RenameChildCategoryRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.renameChild(request.toCommand(rootId, childId), ownerUserId);
             return okRedirect("/classification/categories/roots/" + rootId + "?renamed=true");
@@ -175,9 +176,9 @@ public class CategoryViewController {
 
     @DeleteMapping(path = "/roots/{rootId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivateRoot(Principal principal,
+    public ResponseEntity<Map<String, Object>> deactivateRoot(@AuthenticationPrincipal IamUserDetails userDetails,
                                                                @PathVariable String rootId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.deactivateRoot(
                     new DeactivateRootCategoryCommand(CategoryId.of(rootId)),
@@ -191,10 +192,10 @@ public class CategoryViewController {
 
     @DeleteMapping(path = "/roots/{rootId}/children/{childId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivateChild(Principal principal,
+    public ResponseEntity<Map<String, Object>> deactivateChild(@AuthenticationPrincipal IamUserDetails userDetails,
                                                                 @PathVariable String rootId,
                                                                 @PathVariable String childId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.deactivateChild(
                     new DeactivateChildCategoryCommand(CategoryId.of(rootId), CategoryId.of(childId)),

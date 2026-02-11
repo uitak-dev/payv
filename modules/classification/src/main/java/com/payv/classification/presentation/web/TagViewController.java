@@ -6,13 +6,14 @@ import com.payv.classification.application.command.model.DeactivateTagCommand;
 import com.payv.classification.application.query.TagQueryService;
 import com.payv.classification.domain.model.TagId;
 import com.payv.classification.presentation.dto.request.RenameTagRequest;
+import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,13 +26,13 @@ public class TagViewController {
     private final TagQueryService queryService;
 
     @GetMapping
-    public String list(Principal principal,
+    public String list(@AuthenticationPrincipal IamUserDetails userDetails,
                        @RequestParam(required = false) String created,
                        @RequestParam(required = false) String renamed,
                        @RequestParam(required = false) String deactivated,
                        @RequestParam(required = false) String error,
                        Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
 
         model.addAttribute("tags", queryService.getAll(ownerUserId));
         model.addAttribute("created", created);
@@ -48,11 +49,11 @@ public class TagViewController {
     }
 
     @GetMapping("/{tagId}/edit")
-    public String editForm(Principal principal,
+    public String editForm(@AuthenticationPrincipal IamUserDetails userDetails,
                            @PathVariable String tagId,
                            @RequestParam(required = false) String error,
                            Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         model.addAttribute("tag", queryService.get(TagId.of(tagId), ownerUserId)
                 .orElseThrow(() -> new IllegalStateException("tag not found")));
         model.addAttribute("error", error);
@@ -61,9 +62,9 @@ public class TagViewController {
 
     @PostMapping(produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(Principal principal,
+    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                       @RequestParam String name) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.create(new CreateTagCommand(name), ownerUserId);
             return okRedirect("/classification/tags?created=true");
@@ -74,10 +75,10 @@ public class TagViewController {
 
     @PutMapping(path = "/{tagId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> rename(Principal principal,
+    public ResponseEntity<Map<String, Object>> rename(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String tagId,
                                                        RenameTagRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.rename(request.toCommand(tagId), ownerUserId);
             return okRedirect("/classification/tags?renamed=true");
@@ -88,9 +89,9 @@ public class TagViewController {
 
     @DeleteMapping(path = "/{tagId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivate(Principal principal,
+    public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
                                                           @PathVariable String tagId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.deactivate(new DeactivateTagCommand(TagId.of(tagId)), ownerUserId);
             return okRedirect("/classification/tags?deactivated=true");

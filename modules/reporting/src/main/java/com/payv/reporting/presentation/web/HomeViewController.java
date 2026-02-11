@@ -1,14 +1,15 @@
 package com.payv.reporting.presentation.web;
 
 import com.payv.budget.application.query.BudgetQueryService;
+import com.payv.iam.infrastructure.security.IamUserDetails;
 import com.payv.ledger.application.query.TransactionQueryService;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionSummaryView;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.security.Principal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Collections;
@@ -22,8 +23,8 @@ public class HomeViewController {
     private final TransactionQueryService transactionQueryService;
 
     @GetMapping({"/", "/home"})
-    public String home(Principal principal, Model model) {
-        String ownerUserId = principal.getName();
+    public String home(@AuthenticationPrincipal IamUserDetails userDetails, Model model) {
+        String ownerUserId = userDetails.getUserId();
 
         YearMonth currentMonth = YearMonth.now();
         LocalDate monthStart = currentMonth.atDay(1);

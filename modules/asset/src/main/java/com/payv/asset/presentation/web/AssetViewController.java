@@ -6,13 +6,14 @@ import com.payv.asset.application.query.AssetQueryService;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.asset.presentation.dto.request.CreateAssetRequest;
 import com.payv.asset.presentation.dto.request.UpdateAssetRequest;
+import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,13 +26,13 @@ public class AssetViewController {
     private final AssetQueryService queryService;
 
     @GetMapping
-    public String list(Principal principal,
+    public String list(@AuthenticationPrincipal IamUserDetails userDetails,
                        @RequestParam(required = false) String created,
                        @RequestParam(required = false) String updated,
                        @RequestParam(required = false) String deactivated,
                        @RequestParam(required = false) String error,
                        Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
 
         model.addAttribute("assets", queryService.getAll(ownerUserId));
         model.addAttribute("created", created);
@@ -48,11 +49,11 @@ public class AssetViewController {
     }
 
     @GetMapping("/{assetId}/edit")
-    public String editForm(Principal principal,
+    public String editForm(@AuthenticationPrincipal IamUserDetails userDetails,
                            @PathVariable String assetId,
                            @RequestParam(required = false) String error,
                            Model model) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         model.addAttribute("asset", queryService.get(AssetId.of(assetId), ownerUserId)
                 .orElseThrow(() -> new IllegalStateException("asset not found")));
         model.addAttribute("error", error);
@@ -61,9 +62,9 @@ public class AssetViewController {
 
     @PostMapping(produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(Principal principal,
+    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateAssetRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.create(request.toCommand(), ownerUserId);
             return okRedirect("/asset/assets?created=true");
@@ -74,10 +75,10 @@ public class AssetViewController {
 
     @PutMapping(path = "/{assetId}", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> update(Principal principal,
+    public ResponseEntity<Map<String, Object>> update(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String assetId,
                                                        @RequestBody UpdateAssetRequest request) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.update(request.toCommand(assetId), ownerUserId);
             return okRedirect("/asset/assets?updated=true");
@@ -88,9 +89,9 @@ public class AssetViewController {
 
     @DeleteMapping(path = "/{assetId}", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivate(Principal principal,
+    public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
                                                            @PathVariable String assetId) {
-        String ownerUserId = principal.getName();
+        String ownerUserId = userDetails.getUserId();
         try {
             commandService.deactivate(new DeactivateAssetCommand(AssetId.of(assetId)), ownerUserId);
             return okRedirect("/asset/assets?deactivated=true");
