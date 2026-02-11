@@ -6,6 +6,7 @@
     <resultMap id="TransactionTagRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionTagRecord">
         <id property="transactionId" column="transaction_id" />
         <id property="tagId"         column="tag_id" />
+        <result property="ownerUserId" column="owner_user_id" />
     </resultMap>
 
     <delete id="deleteByTransactionId">
@@ -24,10 +25,10 @@
 
     <insert id="insertTags">
         insert into transaction_tag
-            (transaction_id, tag_id)
+            (transaction_id, tag_id, owner_user_id)
         values
         <foreach collection="records" item="r" separator=",">
-            (#{r.transactionId}, #{r.tagId})
+            (#{r.transactionId}, #{r.tagId}, #{r.ownerUserId})
         </foreach>
     </insert>
 

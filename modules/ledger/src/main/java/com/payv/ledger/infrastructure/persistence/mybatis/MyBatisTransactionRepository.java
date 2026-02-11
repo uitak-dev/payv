@@ -56,7 +56,7 @@ public class MyBatisTransactionRepository implements TransactionRepository {
         List<TransactionTagRecord> tagRecordsToInsert = new ArrayList<>();
         for (String newTagId : newTagIds) {
             if (!existingTagIds.contains(newTagId)) {
-                tagRecordsToInsert.add(new TransactionTagRecord(record.getTransactionId(), newTagId));
+                tagRecordsToInsert.add(new TransactionTagRecord(record.getTransactionId(), newTagId, record.getOwnerUserId()));
             }
         }
         if (!tagRecordsToInsert.isEmpty()) {

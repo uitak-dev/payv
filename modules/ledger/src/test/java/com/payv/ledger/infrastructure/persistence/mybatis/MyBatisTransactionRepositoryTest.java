@@ -75,6 +75,7 @@ public class MyBatisTransactionRepositoryTest {
         verify(transactionTagMapper).insertTags(insertCaptor.capture());
         assertEquals(1, insertCaptor.getValue().size());
         assertEquals("tag-new", insertCaptor.getValue().get(0).getTagId());
+        assertEquals("user-1", insertCaptor.getValue().get(0).getOwnerUserId());
     }
 
     @Test
