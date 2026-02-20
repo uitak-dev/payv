@@ -44,7 +44,7 @@
         AND is_active = TRUE
     </update>
 
-    <select id="selectById" resultMap="TagRecordMap">
+    <select id="selectByIdAndOwner" resultMap="TagRecordMap">
         SELECT
             tag_id,
             owner_user_id,

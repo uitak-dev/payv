@@ -54,8 +54,11 @@ public class TagViewController {
                            @RequestParam(required = false) String error,
                            Model model) {
         String ownerUserId = userDetails.getUserId();
-        model.addAttribute("tag", queryService.get(TagId.of(tagId), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("tag not found")));
+        TagQueryService.TagView tag = queryService.get(TagId.of(tagId), ownerUserId).orElse(null);
+        if (tag == null) {
+            return "redirect:/classification/tags?error=true";
+        }
+        model.addAttribute("tag", tag);
         model.addAttribute("error", error);
         return "classification/tag/edit";
     }
@@ -73,11 +76,11 @@ public class TagViewController {
         }
     }
 
-    @PutMapping(path = "/{tagId}", produces = "application/json")
+    @PutMapping(path = "/{tagId}", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> rename(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String tagId,
-                                                       RenameTagRequest request) {
+                                                       @RequestBody RenameTagRequest request) {
         String ownerUserId = userDetails.getUserId();
         try {
             commandService.rename(request.toCommand(tagId), ownerUserId);
