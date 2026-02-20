@@ -27,6 +27,14 @@
             <groupId>com.payv</groupId>
             <artifactId>iam</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>asset</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>classification</artifactId>
+        </dependency>
 
         <!-- Spring Core -->
         <dependency>

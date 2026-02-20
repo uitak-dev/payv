@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.reporting.infrastructure.persistence.mybatis.mapper.ReportingLedgerReadMapper">
+
+    <resultMap id="AmountByIdRecordMap" type="com.payv.reporting.infrastructure.persistence.mybatis.record.AmountByIdRecord">
+        <result property="refId" column="ref_id"/>
+        <result property="amount" column="amount"/>
+    </resultMap>
+
+    <resultMap id="RecentTransactionRecordMap" type="com.payv.reporting.infrastructure.persistence.mybatis.record.RecentTransactionRecord">
+        <id property="transactionId" column="transaction_id"/>
+        <result property="transactionType" column="transaction_type"/>
+        <result property="amount" column="amount"/>
+        <result property="transactionDate" column="transaction_date"/>
+        <result property="assetId" column="asset_id"/>
+        <result property="categoryIdLevel1" column="category_id_level1"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+
+    <select id="sumAmountByType" resultType="long">
+        select coalesce(sum(amount), 0)
+        from transaction
+        where owner_user_id = #{ownerUserId}
+          and transaction_type = #{transactionType}
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+    </select>
+
+    <select id="sumExpenseByAsset" resultMap="AmountByIdRecordMap">
+        select asset_id as ref_id,
+               coalesce(sum(amount), 0) as amount
+        from transaction
+        where owner_user_id = #{ownerUserId}
+          and transaction_type = 'EXPENSE'
+          and asset_id is not null
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+        group by asset_id
+        order by amount desc, asset_id asc
+    </select>
+
+    <select id="sumExpenseByCategoryLevel1" resultMap="AmountByIdRecordMap">
+        select category_id_level1 as ref_id,
+               coalesce(sum(amount), 0) as amount
+        from transaction
+        where owner_user_id = #{ownerUserId}
+          and transaction_type = 'EXPENSE'
+          and category_id_level1 is not null
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+        group by category_id_level1
+        order by amount desc, category_id_level1 asc
+    </select>
+
+    <select id="sumExpenseByTag" resultMap="AmountByIdRecordMap">
+        select tt.tag_id as ref_id,
+               coalesce(sum(t.amount), 0) as amount
+        from transaction t
+        join transaction_tag tt
+          on tt.transaction_id = t.transaction_id
+         and tt.owner_user_id = t.owner_user_id
+        where t.owner_user_id = #{ownerUserId}
+          and t.transaction_type = 'EXPENSE'
+          and tt.tag_id is not null
+        <if test="from != null">
+            and t.transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and t.transaction_date <![CDATA[<=]]> #{to}
+        </if>
+        group by tt.tag_id
+        order by amount desc, tt.tag_id asc
+    </select>
+
+    <select id="selectRecentTransactions" resultMap="RecentTransactionRecordMap">
+        select transaction_id,
+               transaction_type,
+               amount,
+               transaction_date,
+               asset_id,
+               category_id_level1,
+               memo
+        from transaction
+        where owner_user_id = #{ownerUserId}
+        <if test="from != null">
+            and transaction_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transaction_date <![CDATA[<=]]> #{to}
+        </if>
+        order by transaction_date desc, transaction_id desc
+        limit #{limit}
+    </select>
+</mapper>

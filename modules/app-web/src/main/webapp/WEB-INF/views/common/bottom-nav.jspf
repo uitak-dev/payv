@@ -8,9 +8,9 @@
             <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
             <div class="mt-1">홈</div>
         </a>
-        <a href="${ctx}/ledger/transactions" data-nav="report" class="py-3">
+        <a href="${ctx}/reports" data-nav="report" class="py-3">
             <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
-            <div class="mt-1">원장</div>
+            <div class="mt-1">리포트</div>
         </a>
         <a href="${ctx}/budget/budgets" data-nav="plan" class="py-3">
             <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>

@@ -1,59 +1,37 @@
 package com.payv.reporting.presentation.web;
 
-import com.payv.budget.application.query.BudgetQueryService;
 import com.payv.iam.infrastructure.security.IamUserDetails;
-import com.payv.ledger.application.query.TransactionQueryService;
-import com.payv.ledger.presentation.dto.viewmodel.TransactionSummaryView;
+import com.payv.reporting.application.query.ReportingQueryService;
+import com.payv.reporting.application.query.model.HomeDashboardView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.Collections;
-import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
 public class HomeViewController {
 
-    private final BudgetQueryService budgetQueryService;
-    private final TransactionQueryService transactionQueryService;
+    private final ReportingQueryService reportingQueryService;
 
     @GetMapping({"/", "/home"})
     public String home(@AuthenticationPrincipal IamUserDetails userDetails, Model model) {
         String ownerUserId = userDetails.getUserId();
 
-        YearMonth currentMonth = YearMonth.now();
-        LocalDate monthStart = currentMonth.atDay(1);
-        LocalDate monthEnd = currentMonth.atEndOfMonth();
+        HomeDashboardView dashboard = reportingQueryService.getHomeDashboard(ownerUserId, null);
 
-        List<BudgetQueryService.BudgetView> monthlyBudgets = budgetQueryService.getMonthlyBudgets(ownerUserId, currentMonth);
-        BudgetQueryService.BudgetView overallBudget = monthlyBudgets.stream()
-                .filter(b -> b.getCategoryId() == null)
-                .findFirst()
-                .orElse(null);
+        model.addAttribute("month", dashboard.getMonth());
+        model.addAttribute("monthStart", dashboard.getMonthStart());
+        model.addAttribute("monthEnd", dashboard.getMonthEnd());
+        model.addAttribute("incomeAmount", dashboard.getIncomeAmount());
+        model.addAttribute("expenseAmount", dashboard.getExpenseAmount());
+        model.addAttribute("netAmount", dashboard.getNetAmount());
+        model.addAttribute("recentTransactions", dashboard.getRecentTransactions());
 
-        long incomeAmount = transactionQueryService.sumAmountByType(ownerUserId, monthStart, monthEnd, "INCOME");
-        long expenseAmount = transactionQueryService.sumAmountByType(ownerUserId, monthStart, monthEnd, "EXPENSE");
-
-        TransactionQueryService.PagedResult<TransactionSummaryView> recent =
-                transactionQueryService.list(ownerUserId, monthStart, monthEnd, null, 1, 20);
-
-        model.addAttribute("month", currentMonth);
-        model.addAttribute("monthStart", monthStart);
-        model.addAttribute("monthEnd", monthEnd);
-        model.addAttribute("incomeAmount", incomeAmount);
-        model.addAttribute("expenseAmount", expenseAmount);
-        model.addAttribute("netAmount", incomeAmount - expenseAmount);
-        model.addAttribute("recentTransactions", recent == null ? Collections.emptyList() : recent.getItems());
-
-        model.addAttribute("overallBudget", overallBudget);
-        model.addAttribute("hasOverallBudget", overallBudget != null);
-        model.addAttribute("remainingBudget", overallBudget == null ? 0L : overallBudget.getRemainingAmount());
-        model.addAttribute("budgetUsageRate", overallBudget == null ? 0 : overallBudget.getUsageRate());
+        model.addAttribute("hasOverallBudget", dashboard.isHasOverallBudget());
+        model.addAttribute("remainingBudget", dashboard.getRemainingBudget());
+        model.addAttribute("budgetUsageRate", dashboard.getBudgetUsageRate());
 
         return "home/index";
     }
