@@ -30,7 +30,7 @@
             <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">카테고리 이름이 변경되었습니다.</p>
         </c:if>
         <c:if test="${not empty deactivated}">
-            <p class="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">카테고리가 비활성화되었습니다.</p>
+            <p class="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">카테고리가 삭제되었습니다.</p>
         </c:if>
         <c:if test="${not empty error}">
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>

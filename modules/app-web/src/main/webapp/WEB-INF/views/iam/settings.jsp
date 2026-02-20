@@ -14,19 +14,14 @@
 <div class="app-shell shadow-sm">
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
-            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="메뉴" disabled>
-                <img src="${ctx}/assets/icons/menu.svg" alt="" class="h-5 w-5 opacity-80" aria-hidden="true"/>
-            </button>
-            <div class="flex items-center gap-2">
-                <h1 class="text-base font-semibold">설정</h1>
-                <div class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                    <span>${currentMonth}</span>
-                    <img src="${ctx}/assets/icons/chevron-down.svg" alt="" class="h-3 w-3 opacity-70" aria-hidden="true"/>
-                </div>
+            <a href="${ctx}/home" class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-sm">홈</a>
+            <h1 class="text-base font-semibold">설정</h1>
+            <div class="inline-flex items-center rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600">
+                <c:choose>
+                    <c:when test="${not empty ownerUserId}">${ownerUserId}</c:when>
+                    <c:otherwise>-</c:otherwise>
+                </c:choose>
             </div>
-            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="알림" disabled>
-                <img src="${ctx}/assets/icons/bell.svg" alt="" class="h-5 w-5 opacity-80" aria-hidden="true"/>
-            </button>
         </div>
     </header>
 

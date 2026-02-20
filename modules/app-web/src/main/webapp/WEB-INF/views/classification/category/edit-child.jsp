@@ -38,7 +38,7 @@
         </form>
 
         <form class="mt-4" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}/children/${child.categoryId}" data-ajax="true" data-method="DELETE">
-            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700">2단계 카테고리 비활성</button>
+            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700">2단계 카테고리 삭제</button>
         </form>
     </main>
 </div>
