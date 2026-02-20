@@ -5,19 +5,19 @@
 <nav class="app-bottom-nav border-t border-slate-200 bg-white/95 backdrop-blur">
     <div class="grid grid-cols-4 text-center text-xs">
         <a href="${ctx}/home" data-nav="home" class="py-3">
-            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <img src="${ctx}/assets/icons/home.svg" alt="" class="nav-icon mx-auto h-6 w-6" aria-hidden="true"/>
             <div class="mt-1">홈</div>
         </a>
         <a href="${ctx}/reports" data-nav="report" class="py-3">
-            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <img src="${ctx}/assets/icons/report.svg" alt="" class="nav-icon mx-auto h-6 w-6" aria-hidden="true"/>
             <div class="mt-1">리포트</div>
         </a>
         <a href="${ctx}/budget/budgets" data-nav="plan" class="py-3">
-            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <img src="${ctx}/assets/icons/budget.svg" alt="" class="nav-icon mx-auto h-6 w-6" aria-hidden="true"/>
             <div class="mt-1">예산</div>
         </a>
         <a href="${ctx}/settings" data-nav="settings" class="py-3">
-            <div class="mx-auto h-6 w-6 rounded bg-slate-100"></div>
+            <img src="${ctx}/assets/icons/settings.svg" alt="" class="nav-icon mx-auto h-6 w-6" aria-hidden="true"/>
             <div class="mt-1">설정</div>
         </a>
     </div>

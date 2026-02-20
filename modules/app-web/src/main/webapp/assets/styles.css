@@ -166,3 +166,13 @@ header.sticky {
     radial-gradient(140px 80px at 30% 20%, rgba(15, 23, 42, 0.10), transparent 60%),
     rgba(15, 23, 42, 0.03);
 }
+
+/* Bottom navigation icons */
+.app-bottom-nav .nav-icon {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.app-bottom-nav a[aria-current="page"] .nav-icon {
+  opacity: 1;
+}

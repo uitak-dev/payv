@@ -15,17 +15,17 @@
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
             <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="메뉴" disabled>
-                <span class="h-4 w-5 rounded bg-slate-200"></span>
+                <img src="${ctx}/assets/icons/menu.svg" alt="" class="h-5 w-5 opacity-80" aria-hidden="true"/>
             </button>
             <div class="flex items-center gap-2">
                 <h1 class="text-base font-semibold">설정</h1>
                 <div class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
                     <span>${currentMonth}</span>
-                    <span class="h-3 w-3 rounded bg-slate-200"></span>
+                    <img src="${ctx}/assets/icons/chevron-down.svg" alt="" class="h-3 w-3 opacity-70" aria-hidden="true"/>
                 </div>
             </div>
             <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200" aria-label="알림" disabled>
-                <span class="h-5 w-5 rounded-full bg-slate-200"></span>
+                <img src="${ctx}/assets/icons/bell.svg" alt="" class="h-5 w-5 opacity-80" aria-hidden="true"/>
             </button>
         </div>
     </header>
@@ -36,13 +36,13 @@
                 <div class="text-sm font-semibold">설정</div>
                 <div class="mt-3 space-y-2">
                     <a href="${ctx}/classification/categories" class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-                        <span class="text-sm font-medium">카테고리 관리</span><span class="h-4 w-4 rounded bg-slate-200"></span>
+                        <span class="text-sm font-medium">카테고리 관리</span><img src="${ctx}/assets/icons/chevron-right.svg" alt="" class="h-4 w-4 opacity-70" aria-hidden="true"/>
                     </a>
                     <a href="${ctx}/classification/tags" class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-                        <span class="text-sm font-medium">태그 관리</span><span class="h-4 w-4 rounded bg-slate-200"></span>
+                        <span class="text-sm font-medium">태그 관리</span><img src="${ctx}/assets/icons/chevron-right.svg" alt="" class="h-4 w-4 opacity-70" aria-hidden="true"/>
                     </a>
                     <a href="${ctx}/asset/assets" class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-                        <span class="text-sm font-medium">자산 관리</span><span class="h-4 w-4 rounded bg-slate-200"></span>
+                        <span class="text-sm font-medium">자산 관리</span><img src="${ctx}/assets/icons/chevron-right.svg" alt="" class="h-4 w-4 opacity-70" aria-hidden="true"/>
                     </a>
                 </div>
             </section>

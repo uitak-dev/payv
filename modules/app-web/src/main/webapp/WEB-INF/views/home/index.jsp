@@ -62,7 +62,9 @@
                     <c:forEach var="item" items="${recentTransactions}">
                         <a href="${ctx}/ledger/transactions/${item.transactionId}" class="flex items-center justify-between px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
+                                    <img src="${ctx}/assets/icons/receipt.svg" alt="" class="h-5 w-5 opacity-80" aria-hidden="true"/>
+                                </div>
                                 <div>
                                     <div class="text-sm font-medium">${item.categoryNameLevel1}</div>
                                     <div class="mt-0.5 text-xs text-slate-500">${item.transactionDate} · ${item.assetName}</div>
