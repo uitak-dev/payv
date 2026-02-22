@@ -1,6 +1,7 @@
 package com.payv.ledger.presentation.dto.request;
 
 import com.payv.ledger.application.command.model.UpdateTransactionCommand;
+import com.payv.ledger.application.command.model.UpdateTransferCommand;
 import com.payv.ledger.domain.model.Money;
 import com.payv.ledger.domain.model.TransactionType;
 import lombok.Data;
@@ -33,6 +34,8 @@ public final class UpdateTransactionRequest {
     private String categoryIdLevel2;
     private String memo;
     private Object tagIds;
+    private String fromAssetId;
+    private String toAssetId;
 
     public UpdateTransactionCommand toCommand() {
         UpdateTransactionCommand command = UpdateTransactionCommand.builder()
@@ -48,6 +51,20 @@ public final class UpdateTransactionRequest {
         appendTagIds(command, tagIds);
 
         return command;
+    }
+
+    public boolean isTransferType() {
+        return "TRANSFER".equalsIgnoreCase(transactionType);
+    }
+
+    public UpdateTransferCommand toTransferCommand() {
+        return UpdateTransferCommand.builder()
+                .fromAssetId(blankToNull(fromAssetId))
+                .toAssetId(blankToNull(toAssetId))
+                .amount(Money.generate(amount))
+                .transferDate(transactionDate)
+                .memo(blankToNull(memo))
+                .build();
     }
 
     private static String blankToNull(String value) {

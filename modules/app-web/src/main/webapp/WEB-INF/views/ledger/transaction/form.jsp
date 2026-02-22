@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<c:set var="selectedType" value="${mode == 'edit' ? tx.transactionType : (not empty requestedType ? requestedType : 'EXPENSE')}"/>
 <!doctype html>
 <html lang="ko">
 <head>
@@ -30,9 +31,12 @@
                 <div class="grid gap-4">
                     <label class="block">
                         <div class="text-sm font-medium">유형</div>
-                        <select name="transactionType" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                            <option value="EXPENSE" ${tx.transactionType == 'EXPENSE' ? 'selected' : ''}>지출</option>
-                            <option value="INCOME" ${tx.transactionType == 'INCOME' ? 'selected' : ''}>수입</option>
+                        <select data-tx-type name="transactionType" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                            <option value="EXPENSE" ${selectedType == 'EXPENSE' ? 'selected' : ''}>지출</option>
+                            <option value="INCOME" ${selectedType == 'INCOME' ? 'selected' : ''}>수입</option>
+                            <c:if test="${mode != 'edit'}">
+                                <option value="TRANSFER" ${selectedType == 'TRANSFER' ? 'selected' : ''}>이체</option>
+                            </c:if>
                         </select>
                     </label>
 
@@ -46,48 +50,73 @@
                         <input name="transactionDate" type="date" required value="${mode == 'edit' ? tx.transactionDate : today}" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"/>
                     </label>
 
-                    <label class="block">
-                        <div class="text-sm font-medium">자산</div>
-                        <select name="assetId" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                            <option value="">선택</option>
-                            <c:forEach var="asset" items="${assets}">
-                                <option value="${asset.assetId}" ${mode == 'edit' and asset.assetId == tx.assetId ? 'selected' : ''}>${asset.name}</option>
-                            </c:forEach>
-                        </select>
-                    </label>
-
-                    <label class="block">
-                        <div class="text-sm font-medium">1단계 카테고리</div>
-                        <select id="categoryLevel1" name="categoryIdLevel1" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                            <option value="">선택</option>
-                            <c:forEach var="root" items="${categories}">
-                                <option value="${root.categoryId}" ${mode == 'edit' and root.categoryId == tx.categoryIdLevel1 ? 'selected' : ''}>${root.name}</option>
-                            </c:forEach>
-                        </select>
-                    </label>
-
-                    <label class="block">
-                        <div class="text-sm font-medium">2단계 카테고리(선택)</div>
-                        <select id="categoryLevel2" name="categoryIdLevel2" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                            <option value="">선택</option>
-                            <c:forEach var="root" items="${categories}">
-                                <c:forEach var="child" items="${root.children}">
-                                    <option value="${child.categoryId}" data-parent="${root.categoryId}" ${mode == 'edit' and child.categoryId == tx.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
+                    <div data-section="tx" class="${selectedType == 'TRANSFER' ? 'hidden grid gap-4' : 'grid gap-4'}">
+                        <label class="block">
+                            <div class="text-sm font-medium">자산</div>
+                            <select name="assetId" data-required-for="tx" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                <option value="">선택</option>
+                                <c:forEach var="asset" items="${assets}">
+                                    <option value="${asset.assetId}" ${mode == 'edit' and asset.assetId == tx.assetId ? 'selected' : ''}>${asset.name}</option>
                                 </c:forEach>
-                            </c:forEach>
-                        </select>
-                    </label>
+                            </select>
+                        </label>
 
-                    <div>
-                        <div class="text-sm font-medium">태그 (최대 3개)</div>
-                        <div class="mt-2 grid grid-cols-2 gap-2">
-                            <c:forEach var="tag" items="${tags}">
-                                <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                                    <input type="checkbox" name="tagIds" value="${tag.tagId}" ${selectedTagMap[tag.tagId] ? 'checked' : ''}/>
-                                    <span>${tag.name}</span>
-                                </label>
-                            </c:forEach>
+                        <label class="block">
+                            <div class="text-sm font-medium">1단계 카테고리</div>
+                            <select id="categoryLevel1" name="categoryIdLevel1" data-required-for="tx" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                <option value="">선택</option>
+                                <c:forEach var="root" items="${categories}">
+                                    <option value="${root.categoryId}" ${mode == 'edit' and root.categoryId == tx.categoryIdLevel1 ? 'selected' : ''}>${root.name}</option>
+                                </c:forEach>
+                            </select>
+                        </label>
+
+                        <label class="block">
+                            <div class="text-sm font-medium">2단계 카테고리(선택)</div>
+                            <select id="categoryLevel2" name="categoryIdLevel2" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                <option value="">선택</option>
+                                <c:forEach var="root" items="${categories}">
+                                    <c:forEach var="child" items="${root.children}">
+                                        <option value="${child.categoryId}" data-parent="${root.categoryId}" ${mode == 'edit' and child.categoryId == tx.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
+                                    </c:forEach>
+                                </c:forEach>
+                            </select>
+                        </label>
+
+                        <div>
+                            <div class="text-sm font-medium">태그 (최대 3개)</div>
+                            <div class="mt-2 grid grid-cols-2 gap-2">
+                                <c:forEach var="tag" items="${tags}">
+                                    <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                                        <input type="checkbox" name="tagIds" value="${tag.tagId}" ${selectedTagMap[tag.tagId] ? 'checked' : ''}/>
+                                        <span>${tag.name}</span>
+                                    </label>
+                                </c:forEach>
+                            </div>
                         </div>
+                    </div>
+
+                    <div data-section="transfer" class="${selectedType == 'TRANSFER' ? 'grid gap-4' : 'hidden grid gap-4'}">
+                        <label class="block">
+                            <div class="text-sm font-medium">출금 자산</div>
+                            <select name="fromAssetId" data-required-for="transfer" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                <option value="">선택</option>
+                                <c:forEach var="asset" items="${assets}">
+                                    <option value="${asset.assetId}">${asset.name}</option>
+                                </c:forEach>
+                            </select>
+                        </label>
+
+                        <label class="block">
+                            <div class="text-sm font-medium">입금 자산</div>
+                            <select name="toAssetId" data-required-for="transfer" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                <option value="">선택</option>
+                                <c:forEach var="asset" items="${assets}">
+                                    <option value="${asset.assetId}">${asset.name}</option>
+                                </c:forEach>
+                            </select>
+                            <p class="mt-1 text-xs text-slate-500">출금/입금 자산은 동일할 수 없습니다.</p>
+                        </label>
                     </div>
 
                     <label class="block">

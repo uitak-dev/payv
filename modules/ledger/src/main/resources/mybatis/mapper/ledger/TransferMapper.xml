@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransferMapper">
+
+    <resultMap id="TransferRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.TransferRecord">
+        <id property="transferId" column="transfer_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="fromAssetId" column="from_asset_id"/>
+        <result property="toAssetId" column="to_asset_id"/>
+        <result property="amount" column="amount"/>
+        <result property="transferDate" column="transfer_date"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+
+    <sql id="transferColumns">
+        transfer_id,
+        owner_user_id,
+        from_asset_id,
+        to_asset_id,
+        amount,
+        transfer_date,
+        memo
+    </sql>
+
+    <select id="selectList" resultMap="TransferRecordMap">
+        select <include refid="transferColumns"/>
+        from transfer
+        where owner_user_id = #{ownerUserId}
+        <if test="from != null">
+            and transfer_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transfer_date <![CDATA[<=]]> #{to}
+        </if>
+        order by transfer_date desc, transfer_id desc
+        offset #{offset} limit #{limit}
+    </select>
+
+    <select id="countList" resultType="int">
+        select count(*)
+        from transfer
+        where owner_user_id = #{ownerUserId}
+        <if test="from != null">
+            and transfer_date <![CDATA[>=]]> #{from}
+        </if>
+        <if test="to != null">
+            and transfer_date <![CDATA[<=]]> #{to}
+        </if>
+    </select>
+
+    <select id="selectDetail" resultMap="TransferRecordMap">
+        select <include refid="transferColumns"/>
+        from transfer
+        where transfer_id = #{transferId}
+          and owner_user_id = #{ownerUserId}
+    </select>
+
+    <insert id="upsert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.TransferRecord">
+        insert into transfer (
+            transfer_id,
+            owner_user_id,
+            from_asset_id,
+            to_asset_id,
+            amount,
+            transfer_date,
+            memo,
+            created_at,
+            updated_at
+        ) values (
+            #{transferId},
+            #{ownerUserId},
+            #{fromAssetId},
+            #{toAssetId},
+            #{amount},
+            #{transferDate},
+            #{memo},
+            now(),
+            now()
+        )
+        on conflict (transfer_id)
+        do update set
+            owner_user_id = excluded.owner_user_id,
+            from_asset_id = excluded.from_asset_id,
+            to_asset_id = excluded.to_asset_id,
+            amount = excluded.amount,
+            transfer_date = excluded.transfer_date,
+            memo = excluded.memo,
+            updated_at = now()
+    </insert>
+
+    <delete id="deleteByIdAndOwner">
+        delete from transfer
+        where transfer_id = #{transferId}
+          and owner_user_id = #{ownerUserId}
+    </delete>
+
+</mapper>

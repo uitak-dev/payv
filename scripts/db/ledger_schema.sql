@@ -24,6 +24,31 @@ create index if not exists idx_transaction_owner_date
 create index if not exists idx_transaction_asset
     on transaction (asset_id);
 
+create table if not exists transfer (
+    transfer_id      varchar(64) primary key,
+    owner_user_id    varchar(64) not null,
+    from_asset_id    varchar(64) not null,
+    to_asset_id      varchar(64) not null,
+    amount           bigint not null,
+    transfer_date    date not null,
+    memo             text,
+    created_at       timestamptz not null default now(),
+    updated_at       timestamptz not null default now(),
+    constraint chk_transfer_asset_pair
+        check (from_asset_id <> to_asset_id),
+    constraint chk_transfer_amount
+        check (amount > 0)
+);
+
+create index if not exists idx_transfer_owner_date
+    on transfer (owner_user_id, transfer_date desc);
+
+create index if not exists idx_transfer_from_asset
+    on transfer (from_asset_id);
+
+create index if not exists idx_transfer_to_asset
+    on transfer (to_asset_id);
+
 create table if not exists transaction_tag (
     transaction_id  varchar(64) not null,
     tag_id          varchar(64) not null,

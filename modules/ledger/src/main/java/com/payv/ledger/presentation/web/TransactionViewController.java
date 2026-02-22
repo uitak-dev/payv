@@ -1,6 +1,7 @@
 package com.payv.ledger.presentation.web;
 
 import com.payv.ledger.application.command.AttachmentCommandService;
+import com.payv.ledger.application.command.TransferCommandService;
 import com.payv.ledger.application.command.TransactionCommandService;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.AttachmentStoragePort;
@@ -8,6 +9,7 @@ import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.application.query.TransactionQueryService;
 import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.AttachmentId;
+import com.payv.ledger.domain.model.TransferId;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.presentation.dto.request.CreateTransactionRequest;
 import com.payv.ledger.presentation.dto.request.TransactionDetailNoticeQueryRequest;
@@ -38,6 +40,7 @@ public class TransactionViewController {
 
     private final TransactionQueryService queryService;
     private final TransactionCommandService commandService;
+    private final TransferCommandService transferCommandService;
     private final AttachmentCommandService attachmentCommandService;
     private final AttachmentStoragePort attachmentStoragePort;
 
@@ -69,12 +72,14 @@ public class TransactionViewController {
 
     @GetMapping("/new")
     public String createForm(@AuthenticationPrincipal IamUserDetails userDetails,
+                             @RequestParam(required = false) String type,
                              @RequestParam(required = false) String error,
                              Model model) {
         String ownerUserId = userDetails.getUserId();
         populateFormOptions(model, ownerUserId);
         model.addAttribute("error", error);
         model.addAttribute("mode", "create");
+        model.addAttribute("requestedType", normalizeRequestedType(type));
         model.addAttribute("action", "/ledger/transactions");
         model.addAttribute("submitLabel", "저장");
         model.addAttribute("today", LocalDate.now());
@@ -88,6 +93,10 @@ public class TransactionViewController {
                                                        @ModelAttribute CreateTransactionRequest request) {
         String ownerUserId = userDetails.getUserId();
         try {
+            if (request.isTransferType()) {
+                TransferId id = transferCommandService.create(request.toTransferCommand(), ownerUserId);
+                return okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
+            }
             TransactionId id = commandService.createManual(request.toCommand(), ownerUserId);
             return okRedirect("/ledger/transactions/" + id.getValue() + "?created=true");
         } catch (RuntimeException e) {
@@ -132,6 +141,10 @@ public class TransactionViewController {
                                                        @RequestBody UpdateTransactionRequest request) {
         String ownerUserId = userDetails.getUserId();
         try {
+            if (request.isTransferType()) {
+                transferCommandService.update(TransferId.of(transactionId), request.toTransferCommand(), ownerUserId);
+                return okRedirect("/ledger/transfers/" + transactionId + "?updated=true");
+            }
             commandService.updateTransaction(TransactionId.of(transactionId), request.toCommand(), ownerUserId);
             return okRedirect("/ledger/transactions/" + transactionId + "?updated=true");
         } catch (RuntimeException e) {
@@ -242,5 +255,14 @@ public class TransactionViewController {
         } catch (IllegalArgumentException e) {
             return MediaType.APPLICATION_OCTET_STREAM;
         }
+    }
+
+    private String normalizeRequestedType(String type) {
+        if (type == null) return null;
+        String normalized = type.trim().toUpperCase();
+        if ("TRANSFER".equals(normalized)) return normalized;
+        if ("INCOME".equals(normalized)) return normalized;
+        if ("EXPENSE".equals(normalized)) return normalized;
+        return null;
     }
 }

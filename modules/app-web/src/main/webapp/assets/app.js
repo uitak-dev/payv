@@ -42,9 +42,13 @@
         const txFields = document.querySelector("[data-section='tx']");             // 일반 지출/수입 필드 영역
         const transferFields = document.querySelector("[data-section='transfer']"); // 이체 전용 필드 영역
         const saveBtn = document.querySelector("[data-save-btn]");                  // 저장 버튼
-        const catLevel1 = document.querySelector("[name='categoryLevel1']");        // 카테고리 선택
-        const transferFrom = document.querySelector("[name='fromAsset']");          // 출금 자산
-        const transferTo = document.querySelector("[name='toAsset']");              // 입금 자산
+        const catLevel1 = document.querySelector("[name='categoryIdLevel1'], [name='categoryLevel1']"); // 카테고리 선택
+        const transferFrom = document.querySelector("[name='fromAssetId'], [name='fromAsset']");        // 출금 자산
+        const transferTo = document.querySelector("[name='toAssetId'], [name='toAsset']");              // 입금 자산
+        const txRequiredFields = Array.from(document.querySelectorAll("[data-required-for='tx']"));
+        const transferRequiredFields = Array.from(document.querySelectorAll("[data-required-for='transfer']"));
+        const txInputs = txFields ? Array.from(txFields.querySelectorAll("input, select, textarea")) : [];
+        const transferInputs = transferFields ? Array.from(transferFields.querySelectorAll("input, select, textarea")) : [];
 
         // 선택된 유형에 따라 UI와 버튼 활성화 여부를 변경하는 함수
         function applyType() {
@@ -53,6 +57,10 @@
             
             if (txFields) txFields.classList.toggle("hidden", isTransfer);
             if (transferFields) transferFields.classList.toggle("hidden", !isTransfer);
+            txRequiredFields.forEach((field) => { field.required = !isTransfer; });
+            transferRequiredFields.forEach((field) => { field.required = isTransfer; });
+            txInputs.forEach((field) => { field.disabled = isTransfer; });
+            transferInputs.forEach((field) => { field.disabled = !isTransfer; });
 
             // 클라이언트 측 최소한의 유효성 검사 (저장 버튼 활성화)
             if (saveBtn) {
