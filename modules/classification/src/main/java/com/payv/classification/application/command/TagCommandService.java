@@ -3,9 +3,12 @@ package com.payv.classification.application.command;
 import com.payv.classification.application.command.model.CreateTagCommand;
 import com.payv.classification.application.command.model.DeactivateTagCommand;
 import com.payv.classification.application.command.model.RenameTagCommand;
+import com.payv.classification.application.exception.DuplicateTagNameException;
+import com.payv.classification.application.exception.TagNotFoundException;
 import com.payv.classification.domain.model.Tag;
 import com.payv.classification.domain.model.TagId;
 import com.payv.classification.domain.repository.TagRepository;
+import com.payv.common.error.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +41,7 @@ public class TagCommandService {
         requireOwner(ownerUserId);
 
         Tag tag = tagRepository.findById(command.getTagId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("tag not found"));
+                .orElseThrow(TagNotFoundException::new);
 
         ensureUniqueTagName(ownerUserId, command.getNewName(), tag.getId());
 
@@ -51,7 +54,7 @@ public class TagCommandService {
         requireOwner(ownerUserId);
 
         Tag tag = tagRepository.findById(command.getTagId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("tag not found"));
+                .orElseThrow(TagNotFoundException::new);
 
         tag.deactivate();
         tagRepository.save(tag, ownerUserId);
@@ -62,14 +65,14 @@ public class TagCommandService {
         tagRepository.findAllByOwner(ownerUserId).forEach(existing -> {
             if (excludeId != null && existing.getId().equals(excludeId)) return;
             if (existing.getName().equals(normalized)) {
-                throw new IllegalStateException("duplicate tag name");
+                throw new DuplicateTagNameException();
             }
         });
     }
 
     private static void requireOwner(String ownerUserId) {
         if (ownerUserId == null || ownerUserId.trim().isEmpty()) {
-            throw new IllegalArgumentException("ownerUserId must not be blank");
+            throw new InvalidRequestException("ownerUserId must not be blank");
         }
     }
 }

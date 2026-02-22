@@ -3,6 +3,7 @@ package com.payv.ledger.presentation.web;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.ledger.application.command.TransferCommandService;
+import com.payv.ledger.application.exception.TransferNotFoundException;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.query.TransferQueryService;
 import com.payv.ledger.domain.model.TransferId;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping("/ledger/transfers")
@@ -70,7 +70,7 @@ public class TransferViewController {
     @PostMapping(produces = "application/json")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @ModelAttribute CreateTransferRequest request) {
+                                                      @ModelAttribute CreateTransferRequest request) {
         String ownerUserId = userDetails.getUserId();
         TransferId id = commandService.create(request.toCommand(), ownerUserId);
         return AjaxResponses.okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
@@ -86,7 +86,7 @@ public class TransferViewController {
             model.addAttribute("transfer", queryService.detail(transferId, ownerUserId));
             model.addAttribute("notice", notice);
             return "ledger/transfer/detail";
-        } catch (NoSuchElementException e) {
+        } catch (TransferNotFoundException e) {
             return "redirect:/ledger/transfers?error=true";
         }
     }
@@ -106,7 +106,7 @@ public class TransferViewController {
             model.addAttribute("action", "/ledger/transfers/" + transferId);
             model.addAttribute("submitLabel", "수정");
             return "ledger/transfer/form";
-        } catch (NoSuchElementException e) {
+        } catch (TransferNotFoundException e) {
             return "redirect:/ledger/transfers?error=true";
         }
     }

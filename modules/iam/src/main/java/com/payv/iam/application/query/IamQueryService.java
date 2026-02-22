@@ -1,5 +1,6 @@
 package com.payv.iam.application.query;
 
+import com.payv.iam.application.exception.OwnershipDeniedException;
 import com.payv.iam.domain.model.UserId;
 import com.payv.iam.domain.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -30,7 +31,7 @@ public class IamQueryService {
 
     public void validateOwnership(String requesterUserId, String resourceOwnerUserId) {
         if (!Objects.equals(requesterUserId, resourceOwnerUserId)) {
-            throw new IllegalStateException("access denied: owner mismatch");
+            throw new OwnershipDeniedException();
         }
     }
 

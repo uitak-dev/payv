@@ -1,5 +1,6 @@
 package com.payv.budget.infrastructure.adapter;
 
+import com.payv.budget.application.exception.InvalidBudgetCategoryException;
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.ClassificationValidationPort;
 import com.payv.budget.application.port.dto.CategoryChildOptionDto;
@@ -8,6 +9,7 @@ import com.payv.classification.application.query.CategoryQueryService;
 import com.payv.classification.application.query.model.CategoryChildView;
 import com.payv.classification.application.query.model.CategoryTreeView;
 import com.payv.classification.domain.model.CategoryId;
+import com.payv.common.error.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +32,10 @@ public class InProcessClassificationAclAdapter implements ClassificationValidati
 
         for (String categoryId : categoryIds) {
             if (categoryId == null || categoryId.trim().isEmpty()) {
-                throw new IllegalArgumentException("categoryId must not be blank");
+                throw new InvalidRequestException("categoryId must not be blank");
             }
             if (!rootIds.contains(categoryId)) {
-                throw new IllegalStateException("budget category must be active 1-depth category");
+                throw new InvalidBudgetCategoryException();
             }
         }
         // category type(EXPENSE/INCOME)는 classification 모델에 현재 분리 저장되지 않아,

@@ -4,6 +4,11 @@ import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.ledger.application.command.AttachmentCommandService;
 import com.payv.ledger.application.command.TransferCommandService;
 import com.payv.ledger.application.command.TransactionCommandService;
+import com.payv.ledger.application.exception.AttachmentBinaryNotFoundException;
+import com.payv.ledger.application.exception.AttachmentNotFoundException;
+import com.payv.ledger.application.exception.AttachmentStorageFailureException;
+import com.payv.ledger.application.exception.AttachmentStorageValidationException;
+import com.payv.ledger.application.exception.TransactionNotFoundException;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.AttachmentStoragePort;
 import com.payv.ledger.application.port.ClassificationQueryPort;
@@ -107,10 +112,13 @@ public class TransactionViewController {
                          @ModelAttribute("notice") TransactionDetailNoticeQueryRequest notice,
                          Model model) {
         String ownerUserId = userDetails.getUserId();
-
-        model.addAttribute("tx", queryService.detail(TransactionId.of(transactionId), ownerUserId));
-        model.addAttribute("notice", notice);
-        return "ledger/transaction/detail";
+        try {
+            model.addAttribute("tx", queryService.detail(TransactionId.of(transactionId), ownerUserId));
+            model.addAttribute("notice", notice);
+            return "ledger/transaction/detail";
+        } catch (TransactionNotFoundException e) {
+            return "redirect:/ledger/transactions?error=true";
+        }
     }
 
     @GetMapping("/{transactionId}/edit")
@@ -119,7 +127,12 @@ public class TransactionViewController {
                            @RequestParam(required = false) String error,
                            Model model) {
         String ownerUserId = userDetails.getUserId();
-        TransactionDetailView tx = queryService.detail(TransactionId.of(transactionId), ownerUserId);
+        TransactionDetailView tx;
+        try {
+            tx = queryService.detail(TransactionId.of(transactionId), ownerUserId);
+        } catch (TransactionNotFoundException e) {
+            return "redirect:/ledger/transactions?error=true";
+        }
 
         populateFormOptions(model, ownerUserId);
         model.addAttribute("error", error);
@@ -183,7 +196,7 @@ public class TransactionViewController {
         try {
             Attachment attachment = queryService.findStoredAttachment(
                             TransactionId.of(transactionId), AttachmentId.of(attachmentId), ownerUserId)
-                    .orElseThrow(() -> new IllegalStateException("attachment not found"));
+                    .orElseThrow(AttachmentNotFoundException::new);
 
             byte[] body = attachmentStoragePort.readFinal(
                     attachment.getStoragePath(),
@@ -193,8 +206,10 @@ public class TransactionViewController {
             return ResponseEntity.ok()
                     .contentType(mediaType)
                     .body(body);
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (AttachmentNotFoundException | AttachmentBinaryNotFoundException | AttachmentStorageValidationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (AttachmentStorageFailureException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

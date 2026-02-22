@@ -3,9 +3,12 @@ package com.payv.asset.application.command;
 import com.payv.asset.application.command.model.CreateAssetCommand;
 import com.payv.asset.application.command.model.DeactivateAssetCommand;
 import com.payv.asset.application.command.model.UpdateAssetCommand;
+import com.payv.asset.application.exception.AssetNotFoundException;
+import com.payv.asset.application.exception.DuplicateAssetNameException;
 import com.payv.asset.domain.model.Asset;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.asset.domain.repository.AssetRepository;
+import com.payv.common.error.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +38,7 @@ public class AssetCommandService {
         requireOwner(ownerUserId);
 
         Asset asset = assetRepository.findById(command.getAssetId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("asset not found"));
+                .orElseThrow(AssetNotFoundException::new);
 
         ensureUniqueAssetName(ownerUserId, command.getNewName(), asset.getId());
 
@@ -49,7 +52,7 @@ public class AssetCommandService {
         requireOwner(ownerUserId);
 
         Asset asset = assetRepository.findById(command.getAssetId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("asset not found"));
+                .orElseThrow(AssetNotFoundException::new);
 
         asset.deactivate();
         assetRepository.save(asset, ownerUserId);
@@ -60,14 +63,14 @@ public class AssetCommandService {
         assetRepository.findAllByOwner(ownerUserId).forEach(existing -> {
             if (excludeId != null && existing.getId().equals(excludeId)) return;
             if (existing.getName().equals(normalized)) {
-                throw new IllegalStateException("duplicate asset name");
+                throw new DuplicateAssetNameException();
             }
         });
     }
 
     private static void requireOwner(String ownerUserId) {
         if (ownerUserId == null || ownerUserId.trim().isEmpty()) {
-            throw new IllegalArgumentException("ownerUserId must not be blank");
+            throw new InvalidRequestException("ownerUserId must not be blank");
         }
     }
 }

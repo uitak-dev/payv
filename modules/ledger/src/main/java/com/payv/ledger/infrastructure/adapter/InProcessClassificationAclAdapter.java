@@ -6,6 +6,8 @@ import com.payv.classification.application.query.model.CategoryChildView;
 import com.payv.classification.application.query.model.CategoryTreeView;
 import com.payv.classification.domain.model.CategoryId;
 import com.payv.classification.domain.model.TagId;
+import com.payv.common.error.InvalidRequestException;
+import com.payv.ledger.application.exception.InvalidLedgerReferenceException;
 import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.application.port.ClassificationValidationPort;
 import com.payv.ledger.application.port.dto.CategoryChildOptionDto;
@@ -38,14 +40,14 @@ public class InProcessClassificationAclAdapter implements ClassificationValidati
         Set<String> normalized = new LinkedHashSet<>();
         for (String tagId : tagIds) {
             if (tagId == null || tagId.trim().isEmpty()) {
-                throw new IllegalArgumentException("tagId must not be blank");
+                throw new InvalidRequestException("tagId must not be blank");
             }
             normalized.add(tagId);
         }
 
         Map<String, String> nameMap = getTagNames(normalized, ownerUserId);
         if (nameMap.size() != normalized.size()) {
-            throw new IllegalStateException("invalid or inactive tag included");
+            throw new InvalidLedgerReferenceException("invalid or inactive tag included");
         }
     }
 
@@ -56,14 +58,14 @@ public class InProcessClassificationAclAdapter implements ClassificationValidati
         Set<String> normalized = new LinkedHashSet<>();
         for (String categoryId : categoryIds) {
             if (categoryId == null || categoryId.trim().isEmpty()) {
-                throw new IllegalArgumentException("categoryId must not be blank");
+                throw new InvalidRequestException("categoryId must not be blank");
             }
             normalized.add(categoryId);
         }
 
         Map<String, String> nameMap = getCategoryNames(normalized, ownerUserId);
         if (nameMap.size() != normalized.size()) {
-            throw new IllegalStateException("invalid or inactive category included");
+            throw new InvalidLedgerReferenceException("invalid or inactive category included");
         }
     }
 

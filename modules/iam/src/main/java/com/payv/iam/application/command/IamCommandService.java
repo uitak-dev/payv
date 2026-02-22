@@ -1,6 +1,8 @@
 package com.payv.iam.application.command;
 
 import com.payv.iam.application.command.model.SignUpCommand;
+import com.payv.iam.application.exception.EmailAlreadyExistsException;
+import com.payv.common.error.InvalidRequestException;
 import com.payv.iam.domain.model.User;
 import com.payv.iam.domain.model.UserId;
 import com.payv.iam.domain.repository.UserRepository;
@@ -26,7 +28,7 @@ public class IamCommandService {
 
         String normalizedEmail = User.normalizeEmail(command.getEmail());
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new IllegalStateException("email already exists");
+            throw new EmailAlreadyExistsException();
         }
 
         User user = User.create(
@@ -42,7 +44,7 @@ public class IamCommandService {
     private static String requireRawPassword(String rawPassword) {
         String ret = (rawPassword == null) ? null : rawPassword.trim();
         if (ret == null || ret.isEmpty()) {
-            throw new IllegalArgumentException("password must not be blank");
+            throw new InvalidRequestException("password must not be blank");
         }
         return ret;
     }

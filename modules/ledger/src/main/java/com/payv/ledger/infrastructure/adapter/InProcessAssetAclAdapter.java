@@ -2,6 +2,8 @@ package com.payv.ledger.infrastructure.adapter;
 
 import com.payv.asset.application.query.AssetQueryService;
 import com.payv.asset.domain.model.AssetId;
+import com.payv.common.error.InvalidRequestException;
+import com.payv.ledger.application.exception.InvalidLedgerReferenceException;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.AssetValidationPort;
 import com.payv.ledger.application.port.dto.AssetOptionDto;
@@ -26,12 +28,12 @@ public class InProcessAssetAclAdapter implements AssetValidationPort, AssetQuery
     @Override
     public void validateAssertId(String assetId, String ownerUserId) {
         if (assetId == null || assetId.trim().isEmpty()) {
-            throw new IllegalArgumentException("assetId must not be blank");
+            throw new InvalidRequestException("assetId must not be blank");
         }
 
         boolean exists = assetQueryService.get(AssetId.of(assetId), ownerUserId).isPresent();
         if (!exists) {
-            throw new IllegalStateException("invalid or inactive asset included");
+            throw new InvalidLedgerReferenceException("invalid or inactive asset included");
         }
     }
 

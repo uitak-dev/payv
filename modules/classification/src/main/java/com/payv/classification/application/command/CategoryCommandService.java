@@ -1,9 +1,12 @@
 package com.payv.classification.application.command;
 
 import com.payv.classification.application.command.model.*;
+import com.payv.classification.application.exception.CategoryNotFoundException;
+import com.payv.classification.application.exception.DuplicateRootCategoryNameException;
 import com.payv.classification.domain.model.Category;
 import com.payv.classification.domain.model.CategoryId;
 import com.payv.classification.domain.repository.CategoryRepository;
+import com.payv.common.error.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +40,7 @@ public class CategoryCommandService {
         requireOwner(ownerUserId);
 
         Category root = categoryRepository.findRootById(command.getParentId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("parent category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException("parent category not found"));
 
         // root 내부 정책(최대 6개, 중복명 등)은 엔티티 메서드 책임
         Category child = root.createChild(ownerUserId, command.getName());
@@ -51,7 +54,7 @@ public class CategoryCommandService {
         requireOwner(ownerUserId);
 
         Category root = categoryRepository.findRootById(command.getRootId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("root category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException("root category not found"));
 
         ensureUniqueRootName(ownerUserId, command.getNewName(), root.getId());
 
@@ -64,7 +67,7 @@ public class CategoryCommandService {
         requireOwner(ownerUserId);
 
         Category root = categoryRepository.findRootById(command.getRootId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("root category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException("root category not found"));
 
         root.renameChild(command.getChildId(), command.getNewName());
         categoryRepository.save(root, ownerUserId);
@@ -75,7 +78,7 @@ public class CategoryCommandService {
         requireOwner(ownerUserId);
 
         Category root = categoryRepository.findRootById(command.getRootId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("root category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException("root category not found"));
 
         root.deactivateRoot(); // 도메인 정책(시스템 금지 등)에서 막아야 함
         categoryRepository.save(root, ownerUserId);
@@ -86,7 +89,7 @@ public class CategoryCommandService {
         requireOwner(ownerUserId);
 
         Category root = categoryRepository.findRootById(command.getRootId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("root category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException("root category not found"));
 
         root.deactivateChild(command.getChildId());
         categoryRepository.save(root, ownerUserId);
@@ -97,14 +100,14 @@ public class CategoryCommandService {
         categoryRepository.findAllParentByOwner(ownerUserId).forEach(existing -> {
             if (existing.getId().equals(excludeId)) return;
             if (existing.getName().equals(normalized)) {
-                throw new IllegalStateException("duplicate root category name");
+                throw new DuplicateRootCategoryNameException();
             }
         });
     }
 
     private static void requireOwner(String ownerUserId) {
         if (ownerUserId == null || ownerUserId.trim().isEmpty()) {
-            throw new IllegalArgumentException("ownerUserId must not be blank");
+            throw new InvalidRequestException("ownerUserId must not be blank");
         }
     }
 }

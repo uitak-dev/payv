@@ -4,6 +4,7 @@ import com.payv.common.application.query.PageRequest;
 import com.payv.common.application.query.PagedResult;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.ClassificationQueryPort;
+import com.payv.ledger.application.exception.TransactionNotFoundException;
 import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.Transaction;
@@ -81,7 +82,7 @@ public class TransactionQueryService {
     public TransactionDetailView detail(TransactionId transactionId, String ownerUserId) {
 
         TransactionRecord tr = txMapper.selectDetail(transactionId.getValue(), ownerUserId);
-        if (tr == null) throw new NoSuchElementException("transaction not found");
+        if (tr == null) throw new TransactionNotFoundException();
 
         // 1) 태그 목록 구성
         List<String> tagIds = txMapper.selectTagIds(transactionId.getValue(), ownerUserId);

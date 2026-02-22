@@ -3,6 +3,7 @@ package com.payv.ledger.application.query;
 import com.payv.common.application.query.PageRequest;
 import com.payv.common.application.query.PagedResult;
 import com.payv.ledger.application.port.AssetQueryPort;
+import com.payv.ledger.application.exception.TransferNotFoundException;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransferMapper;
 import com.payv.ledger.infrastructure.persistence.mybatis.record.TransferRecord;
 import com.payv.ledger.presentation.dto.viewmodel.TransferDetailView;
@@ -17,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 @Service
@@ -69,7 +69,7 @@ public class TransferQueryService {
 
     public TransferDetailView detail(String transferId, String ownerUserId) {
         TransferRecord row = transferMapper.selectDetail(transferId, ownerUserId);
-        if (row == null) throw new NoSuchElementException("transfer not found");
+        if (row == null) throw new TransferNotFoundException();
 
         Set<String> assetIds = new HashSet<>();
         if (row.getFromAssetId() != null) assetIds.add(row.getFromAssetId());

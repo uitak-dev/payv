@@ -1,5 +1,7 @@
 package com.payv.ledger.application.command;
 
+import com.payv.ledger.application.exception.AttachmentLimitExceededException;
+import com.payv.ledger.application.exception.AttachmentNotFoundException;
 import com.payv.ledger.application.port.AttachmentStoragePort;
 import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.AttachmentId;
@@ -30,7 +32,7 @@ public class AttachmentCommandService {
         // 1) 개수 제한(UPLOADING+STORED)
         int activeCount = attachmentRepository.countActiveByTransactionId(transactionId, ownerUserId);
         if (activeCount >= MAX_ATTACHMENTS) {
-            throw new IllegalStateException("attachment limit exceeded");
+            throw new AttachmentLimitExceededException();
         }
 
         // 2) 식별자/파일명/경로 계획 수립
@@ -94,7 +96,7 @@ public class AttachmentCommandService {
     @Transactional
     public void delete(AttachmentId attachmentId, String ownerUserId) {
         Attachment attachment = attachmentRepository.findById(attachmentId, ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("attachment not found"));
+                .orElseThrow(AttachmentNotFoundException::new);
 
         AttachmentStoragePort.StoragePlan plan = new AttachmentStoragePort.StoragePlan(
                 attachment.getUploadFileName(),

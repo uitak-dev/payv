@@ -2,6 +2,8 @@ package com.payv.ledger.application.command;
 
 import com.payv.ledger.application.command.model.CreateTransferCommand;
 import com.payv.ledger.application.command.model.UpdateTransferCommand;
+import com.payv.ledger.application.exception.InvalidTransferAssetPairException;
+import com.payv.ledger.application.exception.TransferNotFoundException;
 import com.payv.ledger.application.port.AssetValidationPort;
 import com.payv.ledger.domain.model.Transfer;
 import com.payv.ledger.domain.model.TransferId;
@@ -39,7 +41,7 @@ public class TransferCommandService {
         validateAssetPair(command.getFromAssetId(), command.getToAssetId(), ownerUserId);
 
         Transfer transfer = transferRepository.findById(transferId, ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("transfer not found"));
+                .orElseThrow(TransferNotFoundException::new);
 
         transfer.update(
                 command.getFromAssetId(),
@@ -55,19 +57,19 @@ public class TransferCommandService {
     @Transactional
     public void delete(TransferId transferId, String ownerUserId) {
         Transfer transfer = transferRepository.findById(transferId, ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("transfer not found"));
+                .orElseThrow(TransferNotFoundException::new);
         transferRepository.deleteById(transfer.getId(), ownerUserId);
     }
 
     private void validateAssetPair(String fromAssetId, String toAssetId, String ownerUserId) {
         if (fromAssetId == null || fromAssetId.trim().isEmpty()) {
-            throw new IllegalArgumentException("fromAssetId must not be blank");
+            throw new InvalidTransferAssetPairException("fromAssetId must not be blank");
         }
         if (toAssetId == null || toAssetId.trim().isEmpty()) {
-            throw new IllegalArgumentException("toAssetId must not be blank");
+            throw new InvalidTransferAssetPairException("toAssetId must not be blank");
         }
         if (fromAssetId.equals(toAssetId)) {
-            throw new IllegalArgumentException("fromAssetId and toAssetId must be different");
+            throw new InvalidTransferAssetPairException("fromAssetId and toAssetId must be different");
         }
 
         assetValidationPort.validateAssertId(fromAssetId, ownerUserId);

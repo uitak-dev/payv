@@ -2,6 +2,7 @@ package com.payv.ledger.application.command;
 
 import com.payv.ledger.application.command.model.CreateTransactionCommand;
 import com.payv.ledger.application.command.model.UpdateTransactionCommand;
+import com.payv.ledger.application.exception.TransactionNotFoundException;
 import com.payv.ledger.application.port.AssetValidationPort;
 import com.payv.ledger.application.port.AttachmentStoragePort;
 import com.payv.ledger.application.port.ClassificationValidationPort;
@@ -71,7 +72,7 @@ public class TransactionCommandService {
         assetValidationPort.validateAssertId(command.getAssetId(), ownerUserId);
 
         Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("transaction not found"));
+                .orElseThrow(TransactionNotFoundException::new);
 
         tx.updateBasics(
                 command.getTransactionType(),
@@ -89,7 +90,7 @@ public class TransactionCommandService {
     @Transactional
     public void deleteTransaction(TransactionId transactionId, String ownerUserId) {
         Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("transaction not found"));
+                .orElseThrow(TransactionNotFoundException::new);
 
         // 첨부 파일(메타) 삭제 전에 첨부 파일(바이너리) 정리.
         for (Attachment attachment : tx.getAttachments()) {

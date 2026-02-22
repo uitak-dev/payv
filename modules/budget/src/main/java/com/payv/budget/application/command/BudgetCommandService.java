@@ -3,8 +3,11 @@ package com.payv.budget.application.command;
 import com.payv.budget.application.command.model.CreateBudgetCommand;
 import com.payv.budget.application.command.model.DeactivateBudgetCommand;
 import com.payv.budget.application.command.model.UpdateBudgetCommand;
+import com.payv.budget.application.exception.BudgetNotFoundException;
+import com.payv.budget.application.exception.DuplicateBudgetException;
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.ClassificationValidationPort;
+import com.payv.common.error.InvalidRequestException;
 import com.payv.budget.domain.model.Budget;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.domain.repository.BudgetRepository;
@@ -55,7 +58,7 @@ public class BudgetCommandService {
         cleanupOrphanedCategoryBudgets(ownerUserId);
 
         Budget budget = budgetRepository.findById(command.getBudgetId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("budget not found"));
+                .orElseThrow(BudgetNotFoundException::new);
 
         validateCategoryIfPresent(command.getCategoryId(), ownerUserId);
         ensureUniqueBudget(ownerUserId, command.getTargetMonth(), command.getCategoryId(), budget.getId());
@@ -76,7 +79,7 @@ public class BudgetCommandService {
         cleanupOrphanedCategoryBudgets(ownerUserId);
 
         Budget budget = budgetRepository.findById(command.getBudgetId(), ownerUserId)
-                .orElseThrow(() -> new IllegalStateException("budget not found"));
+                .orElseThrow(BudgetNotFoundException::new);
 
         budget.deactivate();
         budgetRepository.save(budget, ownerUserId);
@@ -106,7 +109,7 @@ public class BudgetCommandService {
             }
 
             if (Objects.equals(budget.getCategoryId(), normalizeNullable(categoryId))) {
-                throw new IllegalStateException("duplicate budget exists for month/category");
+                throw new DuplicateBudgetException();
             }
         }
     }
@@ -119,7 +122,7 @@ public class BudgetCommandService {
 
     private static void requireOwner(String ownerUserId) {
         if (ownerUserId == null || ownerUserId.trim().isEmpty()) {
-            throw new IllegalArgumentException("ownerUserId must not be blank");
+            throw new InvalidRequestException("ownerUserId must not be blank");
         }
     }
 }

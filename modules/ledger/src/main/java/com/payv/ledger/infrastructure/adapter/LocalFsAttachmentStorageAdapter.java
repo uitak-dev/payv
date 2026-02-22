@@ -1,6 +1,9 @@
 package com.payv.ledger.infrastructure.adapter;
 
 import com.payv.ledger.application.port.AttachmentStoragePort;
+import com.payv.ledger.application.exception.AttachmentBinaryNotFoundException;
+import com.payv.ledger.application.exception.AttachmentStorageFailureException;
+import com.payv.ledger.application.exception.AttachmentStorageValidationException;
 import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.TransactionId;
 import org.springframework.stereotype.Component;
@@ -59,7 +62,7 @@ public class LocalFsAttachmentStorageAdapter implements AttachmentStoragePort {
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("failed to save staging file", e);
+            throw new AttachmentStorageFailureException("failed to save staging file", e);
         }
     }
 
@@ -82,7 +85,7 @@ public class LocalFsAttachmentStorageAdapter implements AttachmentStoragePort {
                 Files.move(stagingFile, finalFile, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("failed to move staging -> final", e);
+            throw new AttachmentStorageFailureException("failed to move staging -> final", e);
         }
     }
 
@@ -114,35 +117,35 @@ public class LocalFsAttachmentStorageAdapter implements AttachmentStoragePort {
     public byte[] readFinal(String storagePath, String storedFileName) {
         Path filePath = safeResolve(baseDir, storagePath).resolve(storedFileName).normalize();
         if (!filePath.startsWith(baseDir)) {
-            throw new IllegalArgumentException("invalid attachment file path");
+            throw new AttachmentStorageValidationException("invalid attachment file path");
         }
         try {
             if (!Files.exists(filePath) || !Files.isRegularFile(filePath)) {
-                throw new IllegalStateException("attachment file not found");
+                throw new AttachmentBinaryNotFoundException();
             }
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            throw new IllegalStateException("failed to read attachment file", e);
+            throw new AttachmentStorageFailureException("failed to read attachment file", e);
         }
     }
 
     private Path safeResolve(Path base, String relative) {
         Path resolved = base.resolve(relative).normalize();
         if (!resolved.startsWith(base)) {
-            throw new IllegalArgumentException("invalid path (possible traversal)");
+            throw new AttachmentStorageValidationException("invalid path (possible traversal)");
         }
         return resolved;
     }
 
     private void validateImage(MultipartFile file) {
-        if (file == null || file.isEmpty()) throw new IllegalArgumentException("file required");
+        if (file == null || file.isEmpty()) throw new AttachmentStorageValidationException("file required");
         if (file.getSize() <= 0 || file.getSize() > 5L * 1024 * 1024) {
-            throw new IllegalArgumentException("file too large");
+            throw new AttachmentStorageValidationException("file too large");
         }
         String ct = file.getContentType();
-        if (ct == null) throw new IllegalArgumentException("contentType required");
+        if (ct == null) throw new AttachmentStorageValidationException("contentType required");
         if (!("image/jpeg".equals(ct) || "image/png".equals(ct) || "image/webp".equals(ct))) {
-            throw new IllegalArgumentException("only jpeg/png/webp allowed");
+            throw new AttachmentStorageValidationException("only jpeg/png/webp allowed");
         }
     }
 
