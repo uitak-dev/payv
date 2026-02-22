@@ -11,6 +11,7 @@ import com.payv.classification.application.query.model.CategoryTreeView;
 import com.payv.classification.domain.model.CategoryId;
 import com.payv.classification.presentation.dto.request.RenameChildCategoryRequest;
 import com.payv.classification.presentation.dto.request.RenameRootCategoryRequest;
+import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Controller
@@ -120,12 +119,8 @@ public class CategoryViewController {
     public ResponseEntity<Map<String, Object>> createRoot(@AuthenticationPrincipal IamUserDetails userDetails,
                                                            @RequestParam String name) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.createParent(new CreateParentCategoryCommand(name), ownerUserId);
-            return okRedirect("/classification/categories?createdRoot=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.createParent(new CreateParentCategoryCommand(name), ownerUserId);
+        return AjaxResponses.okRedirect("/classification/categories?createdRoot=true");
     }
 
     @PostMapping(path = "/roots/{rootId}/children", produces = "application/json")
@@ -134,15 +129,11 @@ public class CategoryViewController {
                                                             @PathVariable String rootId,
                                                             @RequestParam String name) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.createChild(
-                    new CreateChildCategoryCommand(CategoryId.of(rootId), name),
-                    ownerUserId
-            );
-            return okRedirect("/classification/categories/roots/" + rootId + "?createdChild=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.createChild(
+                new CreateChildCategoryCommand(CategoryId.of(rootId), name),
+                ownerUserId
+        );
+        return AjaxResponses.okRedirect("/classification/categories/roots/" + rootId + "?createdChild=true");
     }
 
     @PutMapping(path = "/roots/{rootId}", produces = "application/json")
@@ -151,12 +142,8 @@ public class CategoryViewController {
                                                            @PathVariable String rootId,
                                                            RenameRootCategoryRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.renameRoot(request.toCommand(rootId), ownerUserId);
-            return okRedirect("/classification/categories/roots/" + rootId + "?renamed=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.renameRoot(request.toCommand(rootId), ownerUserId);
+        return AjaxResponses.okRedirect("/classification/categories/roots/" + rootId + "?renamed=true");
     }
 
     @PutMapping(path = "/roots/{rootId}/children/{childId}", produces = "application/json")
@@ -166,12 +153,8 @@ public class CategoryViewController {
                                                             @PathVariable String childId,
                                                             RenameChildCategoryRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.renameChild(request.toCommand(rootId, childId), ownerUserId);
-            return okRedirect("/classification/categories/roots/" + rootId + "?renamed=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.renameChild(request.toCommand(rootId, childId), ownerUserId);
+        return AjaxResponses.okRedirect("/classification/categories/roots/" + rootId + "?renamed=true");
     }
 
     @DeleteMapping(path = "/roots/{rootId}", produces = "application/json")
@@ -179,15 +162,11 @@ public class CategoryViewController {
     public ResponseEntity<Map<String, Object>> deactivateRoot(@AuthenticationPrincipal IamUserDetails userDetails,
                                                                @PathVariable String rootId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.deactivateRoot(
-                    new DeactivateRootCategoryCommand(CategoryId.of(rootId)),
-                    ownerUserId
-            );
-            return okRedirect("/classification/categories?deactivated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.deactivateRoot(
+                new DeactivateRootCategoryCommand(CategoryId.of(rootId)),
+                ownerUserId
+        );
+        return AjaxResponses.okRedirect("/classification/categories?deactivated=true");
     }
 
     @DeleteMapping(path = "/roots/{rootId}/children/{childId}", produces = "application/json")
@@ -196,29 +175,11 @@ public class CategoryViewController {
                                                                 @PathVariable String rootId,
                                                                 @PathVariable String childId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.deactivateChild(
-                    new DeactivateChildCategoryCommand(CategoryId.of(rootId), CategoryId.of(childId)),
-                    ownerUserId
-            );
-            return okRedirect("/classification/categories/roots/" + rootId + "?deactivated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
-    }
-
-    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("redirectUrl", redirectPath);
-        return ResponseEntity.ok(body);
-    }
-
-    private ResponseEntity<Map<String, Object>> badRequest(String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message == null ? "request failed" : message);
-        return ResponseEntity.badRequest().body(body);
+        commandService.deactivateChild(
+                new DeactivateChildCategoryCommand(CategoryId.of(rootId), CategoryId.of(childId)),
+                ownerUserId
+        );
+        return AjaxResponses.okRedirect("/classification/categories/roots/" + rootId + "?deactivated=true");
     }
 
     private CategoryTreeView getRoot(String rootId, String ownerUserId) {

@@ -1,5 +1,6 @@
 package com.payv.ledger.presentation.web;
 
+import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.ledger.application.command.AttachmentCommandService;
 import com.payv.ledger.application.command.TransferCommandService;
 import com.payv.ledger.application.command.TransactionCommandService;
@@ -92,16 +93,12 @@ public class TransactionViewController {
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateTransactionRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            if (request.isTransferType()) {
-                TransferId id = transferCommandService.create(request.toTransferCommand(), ownerUserId);
-                return okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
-            }
-            TransactionId id = commandService.createManual(request.toCommand(), ownerUserId);
-            return okRedirect("/ledger/transactions/" + id.getValue() + "?created=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
+        if (request.isTransferType()) {
+            TransferId id = transferCommandService.create(request.toTransferCommand(), ownerUserId);
+            return AjaxResponses.okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
         }
+        TransactionId id = commandService.createManual(request.toCommand(), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transactions/" + id.getValue() + "?created=true");
     }
 
     @GetMapping("/{transactionId}")
@@ -140,16 +137,12 @@ public class TransactionViewController {
                                                        @PathVariable String transactionId,
                                                        @RequestBody UpdateTransactionRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            if (request.isTransferType()) {
-                transferCommandService.update(TransferId.of(transactionId), request.toTransferCommand(), ownerUserId);
-                return okRedirect("/ledger/transfers/" + transactionId + "?updated=true");
-            }
-            commandService.updateTransaction(TransactionId.of(transactionId), request.toCommand(), ownerUserId);
-            return okRedirect("/ledger/transactions/" + transactionId + "?updated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
+        if (request.isTransferType()) {
+            transferCommandService.update(TransferId.of(transactionId), request.toTransferCommand(), ownerUserId);
+            return AjaxResponses.okRedirect("/ledger/transfers/" + transactionId + "?updated=true");
         }
+        commandService.updateTransaction(TransactionId.of(transactionId), request.toCommand(), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transactions/" + transactionId + "?updated=true");
     }
 
     @DeleteMapping(path = "/{transactionId}", produces = "application/json")
@@ -157,12 +150,8 @@ public class TransactionViewController {
     public ResponseEntity<Map<String, Object>> delete(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String transactionId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.deleteTransaction(TransactionId.of(transactionId), ownerUserId);
-            return okRedirect("/ledger/transactions?deleted=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.deleteTransaction(TransactionId.of(transactionId), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transactions?deleted=true");
     }
 
     @PostMapping(path = "/{transactionId}/attachments", consumes = "multipart/form-data", produces = "application/json")
@@ -171,12 +160,8 @@ public class TransactionViewController {
                                                                 @PathVariable String transactionId,
                                                                 @RequestParam("file") MultipartFile file) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            attachmentCommandService.upload(TransactionId.of(transactionId), ownerUserId, file);
-            return okRedirect("/ledger/transactions/" + transactionId + "?attachmentUploaded=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        attachmentCommandService.upload(TransactionId.of(transactionId), ownerUserId, file);
+        return AjaxResponses.okRedirect("/ledger/transactions/" + transactionId + "?attachmentUploaded=true");
     }
 
     @DeleteMapping(path = "/{transactionId}/attachments/{attachmentId}", produces = "application/json")
@@ -185,12 +170,8 @@ public class TransactionViewController {
                                                                 @PathVariable String transactionId,
                                                                 @PathVariable String attachmentId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            attachmentCommandService.delete(AttachmentId.of(attachmentId), ownerUserId);
-            return okRedirect("/ledger/transactions/" + transactionId + "?attachmentDeleted=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        attachmentCommandService.delete(AttachmentId.of(attachmentId), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transactions/" + transactionId + "?attachmentDeleted=true");
     }
 
     @GetMapping("/{transactionId}/attachments/{attachmentId}/image")
@@ -230,20 +211,6 @@ public class TransactionViewController {
             ret.put(tag.getTagId(), true);
         }
         return ret;
-    }
-
-    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("redirectUrl", redirectPath);
-        return ResponseEntity.ok(body);
-    }
-
-    private ResponseEntity<Map<String, Object>> badRequest(String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message == null ? "request failed" : message);
-        return ResponseEntity.badRequest().body(body);
     }
 
     private MediaType parseMediaType(String contentType) {

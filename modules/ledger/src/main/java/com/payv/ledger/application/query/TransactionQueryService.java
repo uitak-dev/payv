@@ -1,5 +1,7 @@
 package com.payv.ledger.application.query;
 
+import com.payv.common.application.query.PageRequest;
+import com.payv.common.application.query.PagedResult;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.domain.model.Attachment;
@@ -12,8 +14,6 @@ import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapp
 import com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionDetailView;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionSummaryView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,12 +37,11 @@ public class TransactionQueryService {
                                                     LocalDate from, LocalDate to,
                                                     String assetId,
                                                     int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 10), 100);
-        int offset = (safePage - 1) * safeSize;
-
-        List<TransactionRecord> rows = txMapper.selectList(ownerUserId, from, to, assetId, offset, safeSize);
+        List<TransactionRecord> rows = txMapper.selectList(
+                ownerUserId, from, to, assetId, pageRequest.getOffset(), pageRequest.getSize()
+        );
         int total = txMapper.countList(ownerUserId, from, to, assetId);
 
         Set<String> assetIds = new HashSet<String>();
@@ -75,7 +74,7 @@ public class TransactionQueryService {
             ));
         }
 
-        return new PagedResult<>(items, total, safePage, safeSize);
+        return new PagedResult<>(items, total, pageRequest.getPage(), pageRequest.getSize());
     }
 
     @Transactional(readOnly = true)
@@ -156,14 +155,5 @@ public class TransactionQueryService {
     public long sumAmountByType(String ownerUserId, LocalDate from, LocalDate to, String transactionType) {
         Long value = txMapper.sumAmountByType(ownerUserId, from, to, transactionType);
         return value == null ? 0L : value;
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class PagedResult<T> {
-        private final List<T> items;
-        private final int total;
-        private final int page;
-        private final int size;
     }
 }

@@ -1,6 +1,7 @@
 package com.payv.ledger.presentation.web;
 
 import com.payv.iam.infrastructure.security.IamUserDetails;
+import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.ledger.application.command.TransferCommandService;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.query.TransferQueryService;
@@ -19,7 +20,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -72,12 +72,8 @@ public class TransferViewController {
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateTransferRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            TransferId id = commandService.create(request.toCommand(), ownerUserId);
-            return okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        TransferId id = commandService.create(request.toCommand(), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
     }
 
     @GetMapping("/{transferId}")
@@ -121,12 +117,8 @@ public class TransferViewController {
                                                        @PathVariable String transferId,
                                                        @RequestBody UpdateTransferRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.update(TransferId.of(transferId), request.toCommand(), ownerUserId);
-            return okRedirect("/ledger/transfers/" + transferId + "?updated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.update(TransferId.of(transferId), request.toCommand(), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transfers/" + transferId + "?updated=true");
     }
 
     @DeleteMapping(path = "/{transferId}", produces = "application/json")
@@ -134,25 +126,7 @@ public class TransferViewController {
     public ResponseEntity<Map<String, Object>> delete(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @PathVariable String transferId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.delete(TransferId.of(transferId), ownerUserId);
-            return okRedirect("/ledger/transfers?deleted=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
-    }
-
-    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("redirectUrl", redirectPath);
-        return ResponseEntity.ok(body);
-    }
-
-    private ResponseEntity<Map<String, Object>> badRequest(String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message == null ? "request failed" : message);
-        return ResponseEntity.badRequest().body(body);
+        commandService.delete(TransferId.of(transferId), ownerUserId);
+        return AjaxResponses.okRedirect("/ledger/transfers?deleted=true");
     }
 }

@@ -1,12 +1,12 @@
 package com.payv.ledger.application.query;
 
+import com.payv.common.application.query.PageRequest;
+import com.payv.common.application.query.PagedResult;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransferMapper;
 import com.payv.ledger.infrastructure.persistence.mybatis.record.TransferRecord;
 import com.payv.ledger.presentation.dto.viewmodel.TransferDetailView;
 import com.payv.ledger.presentation.dto.viewmodel.TransferSummaryView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +33,11 @@ public class TransferQueryService {
                                                  LocalDate to,
                                                  int page,
                                                  int size) {
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 10), 100);
-        int offset = (safePage - 1) * safeSize;
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        List<TransferRecord> rows = transferMapper.selectList(ownerUserId, from, to, offset, safeSize);
+        List<TransferRecord> rows = transferMapper.selectList(
+                ownerUserId, from, to, pageRequest.getOffset(), pageRequest.getSize()
+        );
         int total = transferMapper.countList(ownerUserId, from, to);
 
         Set<String> assetIds = new HashSet<>();
@@ -64,7 +64,7 @@ public class TransferQueryService {
             ));
         }
 
-        return new PagedResult<>(items, total, safePage, safeSize);
+        return new PagedResult<>(items, total, pageRequest.getPage(), pageRequest.getSize());
     }
 
     public TransferDetailView detail(String transferId, String ownerUserId) {
@@ -89,14 +89,5 @@ public class TransferQueryService {
                 assetNames.get(row.getToAssetId()),
                 row.getMemo()
         );
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class PagedResult<T> {
-        private final List<T> items;
-        private final int total;
-        private final int page;
-        private final int size;
     }
 }

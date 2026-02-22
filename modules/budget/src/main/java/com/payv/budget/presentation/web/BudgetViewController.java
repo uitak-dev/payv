@@ -9,6 +9,7 @@ import com.payv.budget.presentation.dto.request.BudgetListConditionRequest;
 import com.payv.budget.presentation.dto.request.BudgetListNoticeRequest;
 import com.payv.budget.presentation.dto.request.CreateBudgetRequest;
 import com.payv.budget.presentation.dto.request.UpdateBudgetRequest;
+import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Controller
@@ -95,13 +95,9 @@ public class BudgetViewController {
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateBudgetRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.create(request.toCommand(), ownerUserId);
-            String month = request.getMonth() == null ? YearMonth.now().toString() : request.getMonth();
-            return okRedirect("/budget/budgets?created=true&month=" + month);
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.create(request.toCommand(), ownerUserId);
+        String month = request.getMonth() == null ? YearMonth.now().toString() : request.getMonth();
+        return AjaxResponses.okRedirect("/budget/budgets?created=true&month=" + month);
     }
 
     @PutMapping(path = "/{budgetId}", consumes = "application/json", produces = "application/json")
@@ -110,13 +106,9 @@ public class BudgetViewController {
                                                        @PathVariable String budgetId,
                                                        @RequestBody UpdateBudgetRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.update(request.toCommand(budgetId), ownerUserId);
-            String month = request.getMonth() == null ? YearMonth.now().toString() : request.getMonth();
-            return okRedirect("/budget/budgets?updated=true&month=" + month);
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.update(request.toCommand(budgetId), ownerUserId);
+        String month = request.getMonth() == null ? YearMonth.now().toString() : request.getMonth();
+        return AjaxResponses.okRedirect("/budget/budgets?updated=true&month=" + month);
     }
 
     @DeleteMapping(path = "/{budgetId}", produces = "application/json")
@@ -124,26 +116,8 @@ public class BudgetViewController {
     public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
                                                            @PathVariable String budgetId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.deactivate(new DeactivateBudgetCommand(BudgetId.of(budgetId)), ownerUserId);
-            return okRedirect("/budget/budgets?deactivated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
-    }
-
-    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("redirectUrl", redirectPath);
-        return ResponseEntity.ok(body);
-    }
-
-    private ResponseEntity<Map<String, Object>> badRequest(String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message == null ? "request failed" : message);
-        return ResponseEntity.badRequest().body(body);
+        commandService.deactivate(new DeactivateBudgetCommand(BudgetId.of(budgetId)), ownerUserId);
+        return AjaxResponses.okRedirect("/budget/budgets?deactivated=true");
     }
 
     private YearMonth parseMonthOrNow(String month) {

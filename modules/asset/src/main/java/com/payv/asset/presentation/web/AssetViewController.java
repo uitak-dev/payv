@@ -6,6 +6,7 @@ import com.payv.asset.application.query.AssetQueryService;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.asset.presentation.dto.request.CreateAssetRequest;
 import com.payv.asset.presentation.dto.request.UpdateAssetRequest;
+import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Controller
@@ -65,12 +64,8 @@ public class AssetViewController {
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateAssetRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.create(request.toCommand(), ownerUserId);
-            return okRedirect("/asset/assets?created=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.create(request.toCommand(), ownerUserId);
+        return AjaxResponses.okRedirect("/asset/assets?created=true");
     }
 
     @PutMapping(path = "/{assetId}", consumes = "application/json", produces = "application/json")
@@ -79,12 +74,8 @@ public class AssetViewController {
                                                        @PathVariable String assetId,
                                                        @RequestBody UpdateAssetRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.update(request.toCommand(assetId), ownerUserId);
-            return okRedirect("/asset/assets?updated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.update(request.toCommand(assetId), ownerUserId);
+        return AjaxResponses.okRedirect("/asset/assets?updated=true");
     }
 
     @DeleteMapping(path = "/{assetId}", produces = "application/json")
@@ -92,25 +83,7 @@ public class AssetViewController {
     public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
                                                            @PathVariable String assetId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.deactivate(new DeactivateAssetCommand(AssetId.of(assetId)), ownerUserId);
-            return okRedirect("/asset/assets?deactivated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
-    }
-
-    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("redirectUrl", redirectPath);
-        return ResponseEntity.ok(body);
-    }
-
-    private ResponseEntity<Map<String, Object>> badRequest(String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message == null ? "request failed" : message);
-        return ResponseEntity.badRequest().body(body);
+        commandService.deactivate(new DeactivateAssetCommand(AssetId.of(assetId)), ownerUserId);
+        return AjaxResponses.okRedirect("/asset/assets?deactivated=true");
     }
 }

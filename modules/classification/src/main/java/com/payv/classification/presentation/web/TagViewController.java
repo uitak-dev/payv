@@ -6,6 +6,7 @@ import com.payv.classification.application.command.model.DeactivateTagCommand;
 import com.payv.classification.application.query.TagQueryService;
 import com.payv.classification.domain.model.TagId;
 import com.payv.classification.presentation.dto.request.RenameTagRequest;
+import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Controller
@@ -68,12 +67,8 @@ public class TagViewController {
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                       @RequestParam String name) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.create(new CreateTagCommand(name), ownerUserId);
-            return okRedirect("/classification/tags?created=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.create(new CreateTagCommand(name), ownerUserId);
+        return AjaxResponses.okRedirect("/classification/tags?created=true");
     }
 
     @PutMapping(path = "/{tagId}", consumes = "application/json", produces = "application/json")
@@ -82,12 +77,8 @@ public class TagViewController {
                                                        @PathVariable String tagId,
                                                        @RequestBody RenameTagRequest request) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.rename(request.toCommand(tagId), ownerUserId);
-            return okRedirect("/classification/tags?renamed=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
+        commandService.rename(request.toCommand(tagId), ownerUserId);
+        return AjaxResponses.okRedirect("/classification/tags?renamed=true");
     }
 
     @DeleteMapping(path = "/{tagId}", produces = "application/json")
@@ -95,25 +86,7 @@ public class TagViewController {
     public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
                                                           @PathVariable String tagId) {
         String ownerUserId = userDetails.getUserId();
-        try {
-            commandService.deactivate(new DeactivateTagCommand(TagId.of(tagId)), ownerUserId);
-            return okRedirect("/classification/tags?deactivated=true");
-        } catch (RuntimeException e) {
-            return badRequest(e.getMessage());
-        }
-    }
-
-    private ResponseEntity<Map<String, Object>> okRedirect(String redirectPath) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("redirectUrl", redirectPath);
-        return ResponseEntity.ok(body);
-    }
-
-    private ResponseEntity<Map<String, Object>> badRequest(String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message == null ? "request failed" : message);
-        return ResponseEntity.badRequest().body(body);
+        commandService.deactivate(new DeactivateTagCommand(TagId.of(tagId)), ownerUserId);
+        return AjaxResponses.okRedirect("/classification/tags?deactivated=true");
     }
 }
