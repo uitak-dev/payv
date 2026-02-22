@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="${ctx}/assets/styles.css"/>
 </head>
-<body data-page="report" class="bg-slate-100 text-slate-900">
+<body data-page="ledger" class="bg-slate-100 text-slate-900">
 <div class="app-shell shadow-sm">
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">

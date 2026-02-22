@@ -11,19 +11,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="${ctx}/assets/styles.css"/>
 </head>
-<body data-page="report" class="bg-slate-100 text-slate-900">
+<body data-page="ledger" class="bg-slate-100 text-slate-900">
 <div class="app-shell shadow-sm">
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
-            <h1 class="text-base font-semibold">거래 목록</h1>
-            <div class="flex items-center gap-2">
-                <a href="${ctx}/ledger/transfers" class="rounded-xl border border-slate-200 px-3 py-1.5 text-sm">이체 목록</a>
-                <a href="${ctx}/ledger/transactions/new" class="rounded-xl bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white">거래 추가</a>
-            </div>
+            <h1 class="text-base font-semibold">거래/이체</h1>
+            <a href="${ctx}/ledger/transactions/new" class="rounded-xl bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white">거래 추가</a>
         </div>
     </header>
 
     <main class="px-4 pt-4 pv-safe-bottom">
+        <section class="mb-3">
+            <div class="inline-flex rounded-full bg-slate-100 p-1">
+                <a href="${ctx}/ledger/transactions" class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-900 shadow-sm">거래 목록</a>
+                <a href="${ctx}/ledger/transfers" class="rounded-full px-4 py-1.5 text-sm text-slate-500">이체 목록</a>
+            </div>
+        </section>
+
         <c:if test="${not empty notice.created}">
             <p class="mb-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">거래가 생성되었습니다.</p>
         </c:if>

@@ -15,8 +15,7 @@
 <div class="app-shell shadow-sm">
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
-            <h1 class="text-base font-semibold">홈 / 원장</h1>
-            <a href="${ctx}/ledger/transactions/new" class="rounded-xl bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white">거래 추가</a>
+            <h1 class="text-base font-semibold">홈</h1>
         </div>
     </header>
 
