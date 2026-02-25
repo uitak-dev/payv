@@ -59,7 +59,7 @@
         </section>
 
         <form class="mt-4" method="post" action="${ctx}/classification/categories/roots/${root.categoryId}" data-ajax="true" data-method="DELETE">
-            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700">1단계 카테고리 삭제</button>
+            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700 transition hover:bg-red-50">1단계 카테고리 삭제</button>
         </form>
     </main>
 </div>

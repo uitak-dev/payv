@@ -45,7 +45,7 @@
                         <div class="flex items-center gap-2">
                             <a href="${ctx}/asset/assets/${asset.assetId}/edit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">수정</a>
                             <form method="post" action="${ctx}/asset/assets/${asset.assetId}" data-ajax="true" data-method="DELETE">
-                                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">삭제</button>
+                                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm transition hover:bg-slate-50">삭제</button>
                             </form>
                         </div>
                     </div>

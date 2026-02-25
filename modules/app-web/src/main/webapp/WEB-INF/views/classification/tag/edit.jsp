@@ -36,7 +36,7 @@
         </form>
 
         <form class="mt-4" method="post" action="${ctx}/classification/tags/${tag.tagId}" data-ajax="true" data-method="DELETE">
-            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700">태그 삭제</button>
+            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700 transition hover:bg-red-50">태그 삭제</button>
         </form>
     </main>
 </div>

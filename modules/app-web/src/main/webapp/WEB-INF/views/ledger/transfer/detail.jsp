@@ -51,7 +51,7 @@
             </div>
 
             <form method="post" action="${ctx}/ledger/transfers/${transfer.transferId}" class="mt-4" data-ajax="true" data-method="DELETE">
-                <button type="submit" class="w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">삭제</button>
+                <button type="submit" class="w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50">삭제</button>
             </form>
         </section>
     </main>

@@ -67,12 +67,8 @@
             </c:if>
         </section>
 
-        <form method="post"
-              action="${ctx}/budget/budgets/${budget.budgetId}"
-              class="mt-4"
-              data-ajax="true"
-              data-method="DELETE">
-            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700">예산 해제</button>
+        <form method="post" action="${ctx}/budget/budgets/${budget.budgetId}" class="mt-4" data-ajax="true" data-method="DELETE">
+            <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700 transition hover:bg-red-50">예산 해제</button>
         </form>
     </main>
 </div>
