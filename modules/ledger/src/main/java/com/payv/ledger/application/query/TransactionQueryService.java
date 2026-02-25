@@ -9,6 +9,7 @@ import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.AttachmentId;
 import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
+import com.payv.ledger.domain.model.TransactionSourceType;
 import com.payv.ledger.domain.repository.AttachmentRepository;
 import com.payv.ledger.domain.repository.TransactionRepository;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapper;
@@ -71,7 +72,9 @@ public class TransactionQueryService {
                     assetNames.get(r.getAssetId()),
                     r.getCategoryIdLevel1(),
                     categoryNames.get(r.getCategoryIdLevel1()),
-                    r.getMemo()
+                    r.getMemo(),
+                    r.getSourceType(),
+                    toSourceDisplayName(r.getSourceType())
             ));
         }
 
@@ -133,6 +136,9 @@ public class TransactionQueryService {
                 categoryNames.get(tr.getCategoryIdLevel1()),
                 tr.getCategoryIdLevel2(),
                 categoryNames.get(tr.getCategoryIdLevel2()),
+                tr.getSourceType(),
+                toSourceDisplayName(tr.getSourceType()),
+                tr.getFixedCostTemplateId(),
                 tags,
                 attachments
         );
@@ -156,5 +162,16 @@ public class TransactionQueryService {
     public long sumAmountByType(String ownerUserId, LocalDate from, LocalDate to, String transactionType) {
         Long value = txMapper.sumAmountByType(ownerUserId, from, to, transactionType);
         return value == null ? 0L : value;
+    }
+
+    private String toSourceDisplayName(String sourceType) {
+        if (sourceType == null || sourceType.trim().isEmpty()) {
+            return TransactionSourceType.MANUAL.getDisplayName();
+        }
+        try {
+            return TransactionSourceType.valueOf(sourceType).getDisplayName();
+        } catch (IllegalArgumentException e) {
+            return sourceType;
+        }
     }
 }

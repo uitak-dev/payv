@@ -37,6 +37,7 @@ create table if not exists batch_job_execution (
     version bigint,
     job_instance_id bigint not null,
     create_time timestamp not null,
+    job_configuration_location varchar(2500),
     start_time timestamp,
     end_time timestamp,
     status varchar(10),
@@ -112,3 +113,8 @@ create index if not exists batch_job_exec_step_fk_idx
 
 create index if not exists batch_job_exec_params_fk_idx
     on batch_job_execution_params (job_execution_id);
+
+-- Spring Batch 4.3+ 조회 쿼리에서 필요.
+-- 기존 스키마(컬럼 없는 버전)에서 점진적으로 적용될 수 있도록 보정한다.
+alter table if exists batch_job_execution
+    add column if not exists job_configuration_location varchar(2500);

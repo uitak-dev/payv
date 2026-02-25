@@ -24,6 +24,9 @@ public class TransactionDetailView {
     private final String categoryNameLevel1;
     private final String categoryIdLevel2;
     private final String categoryNameLevel2;
+    private final String sourceType;
+    private final String sourceDisplayName;
+    private final String fixedCostTemplateId;
 
     private final List<TagView> tags;
     private final List<AttachmentView> attachments;

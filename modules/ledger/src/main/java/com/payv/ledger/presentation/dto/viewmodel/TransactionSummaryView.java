@@ -22,5 +22,7 @@ public class TransactionSummaryView {
     private final String categoryNameLevel1;    // ACL로 주입
 
     private final String memo;
+    private final String sourceType;
+    private final String sourceDisplayName;
 
 }

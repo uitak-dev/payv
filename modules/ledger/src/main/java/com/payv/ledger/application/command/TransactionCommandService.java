@@ -1,6 +1,7 @@
 package com.payv.ledger.application.command;
 
 import com.payv.ledger.application.command.model.CreateTransactionCommand;
+import com.payv.ledger.application.command.model.CreateAutoFixedExpenseTransactionCommand;
 import com.payv.ledger.application.command.model.UpdateTransactionCommand;
 import com.payv.ledger.application.exception.TransactionNotFoundException;
 import com.payv.ledger.application.port.AssetValidationPort;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +58,32 @@ public class TransactionCommandService {
         transaction.updateTags(command.getTagIds());
 
         // 4) 저장.
+        transactionRepository.save(transaction);
+        return transaction.getId();
+    }
+
+    @Transactional
+    public TransactionId createFixedCostAuto(CreateAutoFixedExpenseTransactionCommand command, String ownerUserId) {
+        Objects.requireNonNull(command, "command");
+
+        classificationValidationPort.validateCategorization(
+                buildCategoryIds(command.getCategoryIdLevel1(), command.getCategoryIdLevel2()),
+                ownerUserId
+        );
+        assetValidationPort.validateAssertId(command.getAssetId(), ownerUserId);
+
+        Transaction transaction = Transaction.createFixedCostAuto(
+                ownerUserId,
+                command.getFixedExpenseDefinitionId(),
+                com.payv.ledger.domain.model.TransactionType.EXPENSE,
+                command.getAmount(),
+                command.getTransactionDate(),
+                command.getAssetId(),
+                command.getCategoryIdLevel1()
+        );
+        transaction.updateMemo(command.getMemo());
+        transaction.updateCategorize(command.getCategoryIdLevel1(), command.getCategoryIdLevel2());
+
         transactionRepository.save(transaction);
         return transaction.getId();
     }

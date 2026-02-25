@@ -27,6 +27,10 @@
             <groupId>com.payv</groupId>
             <artifactId>classification</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>ledger</artifactId>
+        </dependency>
 
         <!-- Spring Core -->
         <dependency>

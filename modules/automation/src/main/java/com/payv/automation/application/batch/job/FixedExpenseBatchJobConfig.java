@@ -1,5 +1,6 @@
 package com.payv.automation.application.batch.job;
 
+import com.payv.automation.application.port.LedgerTransactionPort;
 import com.payv.automation.domain.model.FixedExpenseDefinition;
 import com.payv.automation.domain.repository.FixedExpenseDefinitionRepository;
 import com.payv.automation.domain.repository.FixedExpenseExecutionRepository;
@@ -41,6 +42,7 @@ public class FixedExpenseBatchJobConfig {
     private final StepBuilderFactory stepBuilderFactory;
     private final FixedExpenseDefinitionRepository definitionRepository;
     private final FixedExpenseExecutionRepository executionRepository;
+    private final LedgerTransactionPort ledgerTransactionPort;
 
     /**
      * 배치 잡 진입점.
@@ -98,7 +100,7 @@ public class FixedExpenseBatchJobConfig {
      */
     @Bean
     public ItemWriter<FixedExpenseExecutionPlanItem> fixedExpenseExecutionWriter() {
-        return new FixedExpenseExecutionItemWriter(executionRepository);
+        return new FixedExpenseExecutionItemWriter(executionRepository, ledgerTransactionPort);
     }
 
     private LocalDate parseRunDate(String runDate) {
