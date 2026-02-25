@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>고정비 추가</title>
+    <title>${mode == 'edit' ? '고정비 수정' : '고정비 추가'}</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="${ctx}/assets/styles.css"/>
 </head>
@@ -14,8 +14,9 @@
 <div class="app-shell shadow-sm">
     <header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div class="flex items-center justify-between px-4 py-3">
-            <a href="${ctx}/automation/fixed-expenses" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">뒤로</a>
-            <h1 class="text-base font-semibold">고정비 추가</h1>
+            <a href="${ctx}/automation/fixed-expenses${mode == 'edit' ? '/' : ''}${mode == 'edit' ? fixedExpense.definitionId : ''}"
+               class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">뒤로</a>
+            <h1 class="text-base font-semibold">${mode == 'edit' ? '고정비 수정' : '고정비 추가'}</h1>
             <span class="w-12"></span>
         </div>
     </header>
@@ -25,17 +26,32 @@
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>
         </c:if>
 
-        <form method="post" action="${ctx}/automation/fixed-expenses" class="space-y-4" data-ajax="true">
+        <form method="post"
+              action="${ctx}${action}"
+              class="space-y-4"
+              data-ajax="true"
+              data-method="${mode == 'edit' ? 'PUT' : 'POST'}"
+              data-json="${mode == 'edit' ? 'true' : 'false'}">
             <section class="pv-card p-4">
                 <div class="grid gap-4">
                     <label>
                         <div class="text-sm font-medium">이름</div>
-                        <input name="name" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="예: 통신비"/>
+                        <input name="name"
+                               required
+                               class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                               placeholder="예: 통신비"
+                               value="${mode == 'edit' ? fixedExpense.name : ''}"/>
                     </label>
 
                     <label>
                         <div class="text-sm font-medium">금액</div>
-                        <input name="amount" type="number" min="1" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="0"/>
+                        <input name="amount"
+                               type="number"
+                               min="1"
+                               required
+                               class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                               placeholder="0"
+                               value="${mode == 'edit' ? fixedExpense.amount : ''}"/>
                     </label>
 
                     <label>
@@ -43,7 +59,7 @@
                         <select name="assetId" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                             <option value="">선택</option>
                             <c:forEach var="asset" items="${assets}">
-                                <option value="${asset.assetId}">${asset.name}</option>
+                                <option value="${asset.assetId}" ${mode == 'edit' && asset.assetId == fixedExpense.assetId ? 'selected' : ''}>${asset.name}</option>
                             </c:forEach>
                         </select>
                     </label>
@@ -53,7 +69,7 @@
                         <select id="categoryLevel1" name="categoryIdLevel1" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                             <option value="">선택</option>
                             <c:forEach var="root" items="${categories}">
-                                <option value="${root.categoryId}">${root.name}</option>
+                                <option value="${root.categoryId}" ${mode == 'edit' && root.categoryId == fixedExpense.categoryIdLevel1 ? 'selected' : ''}>${root.name}</option>
                             </c:forEach>
                         </select>
                     </label>
@@ -64,7 +80,9 @@
                             <option value="">선택</option>
                             <c:forEach var="root" items="${categories}">
                                 <c:forEach var="child" items="${root.children}">
-                                    <option value="${child.categoryId}" data-parent="${root.categoryId}">${root.name} / ${child.name}</option>
+                                    <option value="${child.categoryId}"
+                                            data-parent="${root.categoryId}"
+                                            ${mode == 'edit' && child.categoryId == fixedExpense.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
                                 </c:forEach>
                             </c:forEach>
                         </select>
@@ -72,12 +90,22 @@
 
                     <div>
                         <div class="text-sm font-medium">실행일</div>
-                        <input id="scheduleType" name="scheduleType" type="hidden" value="DAY"/>
+                        <input id="scheduleType" name="scheduleType" type="hidden" value="${mode == 'edit' && fixedExpense.endOfMonth ? 'EOM' : 'DAY'}"/>
                         <div class="mt-2 flex items-center gap-3">
-                            <input id="dayOfMonth" name="dayOfMonth" type="number" min="1" max="31" required class="w-32 rounded-xl border border-slate-200 px-3 py-2 text-sm" value="1"/>
+                            <input id="dayOfMonth"
+                                   name="dayOfMonth"
+                                   type="number"
+                                   min="1"
+                                   max="31"
+                                   required
+                                   class="w-32 rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                                   value="${mode == 'edit' && fixedExpense.dayOfMonth != null ? fixedExpense.dayOfMonth : '1'}"/>
                             <label for="endOfMonthCheck" class="inline-flex items-center gap-2 text-sm text-slate-700">
-                                <input id="endOfMonthCheck" type="checkbox" class="h-4 w-4 rounded border-slate-300"/>
-                                <span>End Of Month( 매월 말일 )</span>
+                                <input id="endOfMonthCheck"
+                                       type="checkbox"
+                                       class="h-4 w-4 rounded border-slate-300"
+                                       ${mode == 'edit' && fixedExpense.endOfMonth ? 'checked' : ''}/>
+                                <span>EOM(매월 말일)</span>
                             </label>
                         </div>
                         <p class="mt-1 text-xs text-slate-500">EOM을 체크하면 실행일 입력값은 무시됩니다.</p>
@@ -85,12 +113,15 @@
 
                     <label>
                         <div class="text-sm font-medium">메모</div>
-                        <textarea name="memo" rows="3" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="메모를 입력하세요"></textarea>
+                        <textarea name="memo"
+                                  rows="3"
+                                  class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                                  placeholder="메모를 입력하세요">${mode == 'edit' ? fixedExpense.memo : ''}</textarea>
                     </label>
                 </div>
             </section>
 
-            <button type="submit" class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">저장</button>
+            <button type="submit" class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">${submitLabel}</button>
         </form>
     </main>
 </div>

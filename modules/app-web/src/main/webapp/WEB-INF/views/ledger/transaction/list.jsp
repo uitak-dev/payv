@@ -72,12 +72,14 @@
                     <a href="${ctx}/ledger/transactions/${item.transactionId}" class="block">
                         <div class="flex items-start justify-between">
                             <div>
-                                <div class="text-xs text-slate-500">${item.transactionDate}</div>
-                                <c:if test="${item.sourceType == 'FIXED_COST_AUTO'}">
-                                    <div class="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                                        ${item.sourceDisplayName} 자동 생성
-                                    </div>
-                                </c:if>
+                                <div class="flex items-center gap-2 text-xs text-slate-500">
+                                    <span>${item.transactionDate}</span>
+                                    <c:if test="${item.sourceType == 'FIXED_COST_AUTO'}">
+                                        <span class="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                                            ${item.sourceDisplayName}
+                                        </span>
+                                    </c:if>
+                                </div>
                                 <div class="mt-1 text-sm font-semibold">${item.categoryNameLevel1}</div>
                                 <div class="mt-1 text-xs text-slate-500">${item.assetName}</div>
                                 <div class="mt-1 text-xs text-slate-500">${item.memo}</div>

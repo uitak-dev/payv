@@ -43,12 +43,14 @@
             <section class="pv-card p-4">
                 <div class="flex items-start justify-between">
                     <div>
-                        <div class="text-xs text-slate-500">${tx.transactionDate}</div>
-                        <c:if test="${tx.sourceType == 'FIXED_COST_AUTO'}">
-                            <div class="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                                ${tx.sourceDisplayName} 자동 생성
-                            </div>
-                        </c:if>
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                            <span>${tx.transactionDate}</span>
+                            <c:if test="${tx.sourceType == 'FIXED_COST_AUTO'}">
+                                <span class="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                                    ${tx.sourceDisplayName}
+                                </span>
+                            </c:if>
+                        </div>
                         <div class="mt-1 text-lg font-semibold">${tx.categoryNameLevel1} ${not empty tx.categoryNameLevel2 ? '·' : ''} ${tx.categoryNameLevel2}</div>
                         <div class="mt-1 text-sm text-slate-600">${tx.assetName}</div>
                     </div>
@@ -64,9 +66,6 @@
                 <div class="mt-4 grid gap-2 text-sm">
                     <div class="flex justify-between"><span class="text-slate-500">거래유형</span><span>${tx.transactionType}</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">생성방식</span><span>${tx.sourceDisplayName}</span></div>
-                    <c:if test="${not empty tx.fixedCostTemplateId}">
-                        <div class="flex justify-between"><span class="text-slate-500">고정비 마스터 ID</span><span>${tx.fixedCostTemplateId}</span></div>
-                    </c:if>
                     <div class="flex justify-between"><span class="text-slate-500">메모</span><span>${tx.memo}</span></div>
                 </div>
 

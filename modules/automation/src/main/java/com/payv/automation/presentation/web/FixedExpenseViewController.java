@@ -7,6 +7,7 @@ import com.payv.automation.application.query.FixedExpenseQueryService;
 import com.payv.automation.application.query.model.FixedExpenseView;
 import com.payv.automation.domain.model.FixedExpenseDefinitionId;
 import com.payv.automation.presentation.dto.request.CreateFixedExpenseRequest;
+import com.payv.automation.presentation.dto.request.FixedExpenseDetailNoticeRequest;
 import com.payv.automation.presentation.dto.request.FixedExpenseListNoticeRequest;
 import com.payv.automation.presentation.dto.request.UpdateFixedExpenseRequest;
 import com.payv.common.presentation.api.AjaxResponses;
@@ -46,7 +47,23 @@ public class FixedExpenseViewController {
         model.addAttribute("assets", queryService.getAssetOptions(ownerUserId));
         model.addAttribute("categories", queryService.getCategoryOptions(ownerUserId));
         model.addAttribute("error", error);
-        return "automation/fixed-expense/create";
+        model.addAttribute("mode", "create");
+        model.addAttribute("action", "/automation/fixed-expenses");
+        model.addAttribute("submitLabel", "저장");
+        return "automation/fixed-expense/form";
+    }
+
+    @GetMapping("/{definitionId}")
+    public String detail(@AuthenticationPrincipal IamUserDetails userDetails,
+                         @PathVariable String definitionId,
+                         @ModelAttribute("notice") FixedExpenseDetailNoticeRequest notice,
+                         Model model) {
+        String ownerUserId = userDetails.getUserId();
+        FixedExpenseView fixedExpense = queryService.get(FixedExpenseDefinitionId.of(definitionId), ownerUserId)
+                .orElseThrow(FixedExpenseNotFoundException::new);
+        model.addAttribute("fixedExpense", fixedExpense);
+        model.addAttribute("notice", notice);
+        return "automation/fixed-expense/detail";
     }
 
     @GetMapping("/{definitionId}/edit")
@@ -63,7 +80,10 @@ public class FixedExpenseViewController {
         model.addAttribute("assets", queryService.getAssetOptions(ownerUserId));
         model.addAttribute("categories", queryService.getCategoryOptions(ownerUserId));
         model.addAttribute("error", error);
-        return "automation/fixed-expense/edit";
+        model.addAttribute("mode", "edit");
+        model.addAttribute("action", "/automation/fixed-expenses/" + definitionId);
+        model.addAttribute("submitLabel", "수정");
+        return "automation/fixed-expense/form";
     }
 
     @PostMapping(produces = "application/json")
@@ -71,8 +91,8 @@ public class FixedExpenseViewController {
     public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
                                                        @ModelAttribute CreateFixedExpenseRequest request) {
         String ownerUserId = userDetails.getUserId();
-        commandService.create(request.toCommand(), ownerUserId);
-        return AjaxResponses.okRedirect("/automation/fixed-expenses?created=true");
+        FixedExpenseDefinitionId definitionId = commandService.create(request.toCommand(), ownerUserId);
+        return AjaxResponses.okRedirect("/automation/fixed-expenses/" + definitionId.getValue() + "?created=true");
     }
 
     @PutMapping(path = "/{definitionId}", consumes = "application/json", produces = "application/json")
@@ -82,7 +102,7 @@ public class FixedExpenseViewController {
                                                        @RequestBody UpdateFixedExpenseRequest request) {
         String ownerUserId = userDetails.getUserId();
         commandService.update(request.toCommand(definitionId), ownerUserId);
-        return AjaxResponses.okRedirect("/automation/fixed-expenses?updated=true");
+        return AjaxResponses.okRedirect("/automation/fixed-expenses/" + definitionId + "?updated=true");
     }
 
     @DeleteMapping(path = "/{definitionId}", produces = "application/json")

@@ -39,33 +39,18 @@
             <div class="mt-4 space-y-3">
                 <c:forEach var="item" items="${fixedExpenses}">
                     <article class="rounded-xl border border-slate-200 p-3">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="text-sm font-semibold">${item.name}</div>
-                                <div class="mt-1 text-xs text-slate-500">${item.scheduleLabel}</div>
+                        <a href="${ctx}/automation/fixed-expenses/${item.definitionId}" class="block">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="text-sm font-semibold">${item.name}</div>
+                                    <div class="mt-1 text-xs text-slate-500">${item.scheduleLabel}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xs text-slate-500">금액</div>
+                                    <div class="text-sm font-semibold"><fmt:formatNumber value="${item.amount}" pattern="#,##0"/></div>
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-xs text-slate-500">금액</div>
-                                <div class="text-sm font-semibold"><fmt:formatNumber value="${item.amount}" pattern="#,##0"/></div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 grid grid-cols-1 gap-1 text-xs text-slate-600">
-                            <div>자산: ${empty item.assetName ? '-' : item.assetName}</div>
-                            <div>카테고리: ${empty item.categoryNameLevel1 ? '-' : item.categoryNameLevel1}
-                                <c:if test="${not empty item.categoryNameLevel2}"> / ${item.categoryNameLevel2}</c:if>
-                            </div>
-                            <c:if test="${not empty item.memo}">
-                                <div>메모: ${item.memo}</div>
-                            </c:if>
-                        </div>
-
-                        <div class="mt-3 flex items-center justify-end gap-2">
-                            <a href="${ctx}/automation/fixed-expenses/${item.definitionId}/edit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">수정</a>
-                            <form method="post" action="${ctx}/automation/fixed-expenses/${item.definitionId}" data-ajax="true" data-method="DELETE">
-                                <button type="submit" class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm">삭제</button>
-                            </form>
-                        </div>
+                        </a>
                     </article>
                 </c:forEach>
                 <c:if test="${empty fixedExpenses}">
