@@ -70,18 +70,18 @@
                         </select>
                     </label>
 
-                    <label>
-                        <div class="text-sm font-medium">실행 주기</div>
-                        <select id="scheduleType" name="scheduleType" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                            <option value="DAY">매월 특정일</option>
-                            <option value="EOM">매월 말일</option>
-                        </select>
-                    </label>
-
-                    <label id="dayOfMonthWrap">
-                        <div class="text-sm font-medium">실행일(1~31)</div>
-                        <input id="dayOfMonth" name="dayOfMonth" type="number" min="1" max="31" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" value="1"/>
-                    </label>
+                    <div>
+                        <div class="text-sm font-medium">실행일</div>
+                        <input id="scheduleType" name="scheduleType" type="hidden" value="DAY"/>
+                        <div class="mt-2 flex items-center gap-3">
+                            <input id="dayOfMonth" name="dayOfMonth" type="number" min="1" max="31" required class="w-32 rounded-xl border border-slate-200 px-3 py-2 text-sm" value="1"/>
+                            <label for="endOfMonthCheck" class="inline-flex items-center gap-2 text-sm text-slate-700">
+                                <input id="endOfMonthCheck" type="checkbox" class="h-4 w-4 rounded border-slate-300"/>
+                                <span>End Of Month( 매월 말일 )</span>
+                            </label>
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500">EOM을 체크하면 실행일 입력값은 무시됩니다.</p>
+                    </div>
 
                     <label>
                         <div class="text-sm font-medium">메모</div>
@@ -103,7 +103,7 @@
         const level1 = document.getElementById('categoryLevel1');
         const level2 = document.getElementById('categoryLevel2');
         const scheduleType = document.getElementById('scheduleType');
-        const dayOfMonthWrap = document.getElementById('dayOfMonthWrap');
+        const endOfMonthCheck = document.getElementById('endOfMonthCheck');
         const dayOfMonth = document.getElementById('dayOfMonth');
 
         if (level1 && level2) {
@@ -125,14 +125,14 @@
             filterLevel2();
         }
 
-        if (scheduleType && dayOfMonthWrap && dayOfMonth) {
+        if (scheduleType && endOfMonthCheck && dayOfMonth) {
             const applyScheduleType = function() {
-                const eom = scheduleType.value === 'EOM';
-                dayOfMonthWrap.classList.toggle('hidden', eom);
+                const eom = endOfMonthCheck.checked;
+                scheduleType.value = eom ? 'EOM' : 'DAY';
                 dayOfMonth.disabled = eom;
                 dayOfMonth.required = !eom;
             };
-            scheduleType.addEventListener('change', applyScheduleType);
+            endOfMonthCheck.addEventListener('change', applyScheduleType);
             applyScheduleType();
         }
     })();
