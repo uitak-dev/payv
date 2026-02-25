@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.automation.infrastructure.persistence.mybatis.mapper.FixedExpenseExecutionMapper">
+
+    <resultMap id="FixedExpenseExecutionRecordMap" type="com.payv.automation.infrastructure.persistence.mybatis.record.FixedExpenseExecutionRecord">
+        <id property="executionId" column="execution_id"/>
+        <result property="definitionId" column="definition_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="definitionName" column="definition_name"/>
+        <result property="amount" column="amount"/>
+        <result property="assetId" column="asset_id"/>
+        <result property="categoryIdLevel1" column="category_id_level1"/>
+        <result property="categoryIdLevel2" column="category_id_level2"/>
+        <result property="memo" column="memo"/>
+        <result property="scheduledDate" column="scheduled_date"/>
+        <result property="status" column="status"/>
+        <result property="transactionId" column="transaction_id"/>
+        <result property="failureReason" column="failure_reason"/>
+        <result property="batchJobExecutionId" column="batch_job_execution_id"/>
+        <result property="processedAt" column="processed_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- execution_id 기준 upsert -->
+    <insert id="upsert" parameterType="com.payv.automation.infrastructure.persistence.mybatis.record.FixedExpenseExecutionRecord">
+        insert into fixed_expense_execution (
+            execution_id,
+            definition_id,
+            owner_user_id,
+            definition_name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            scheduled_date,
+            status,
+            transaction_id,
+            failure_reason,
+            batch_job_execution_id,
+            processed_at,
+            created_at,
+            updated_at
+        ) values (
+            #{executionId},
+            #{definitionId},
+            #{ownerUserId},
+            #{definitionName},
+            #{amount},
+            #{assetId},
+            #{categoryIdLevel1},
+            #{categoryIdLevel2},
+            #{memo},
+            #{scheduledDate},
+            #{status},
+            #{transactionId},
+            #{failureReason},
+            #{batchJobExecutionId},
+            #{processedAt},
+            coalesce(#{createdAt}, now()),
+            now()
+        )
+        on conflict (execution_id)
+        do update set
+            definition_id = excluded.definition_id,
+            owner_user_id = excluded.owner_user_id,
+            definition_name = excluded.definition_name,
+            amount = excluded.amount,
+            asset_id = excluded.asset_id,
+            category_id_level1 = excluded.category_id_level1,
+            category_id_level2 = excluded.category_id_level2,
+            memo = excluded.memo,
+            scheduled_date = excluded.scheduled_date,
+            status = excluded.status,
+            transaction_id = excluded.transaction_id,
+            failure_reason = excluded.failure_reason,
+            batch_job_execution_id = excluded.batch_job_execution_id,
+            processed_at = excluded.processed_at,
+            updated_at = now()
+    </insert>
+
+    <!-- 단건 조회: 소유자(owner_user_id)까지 같이 검증 -->
+    <select id="selectByIdAndOwner" resultMap="FixedExpenseExecutionRecordMap">
+        select
+            execution_id,
+            definition_id,
+            owner_user_id,
+            definition_name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            scheduled_date,
+            status,
+            transaction_id,
+            failure_reason,
+            batch_job_execution_id,
+            processed_at,
+            created_at,
+            updated_at
+        from fixed_expense_execution
+        where execution_id = #{executionId}
+          and owner_user_id = #{ownerUserId}
+    </select>
+
+    <!-- (owner, definition, scheduled_date) 중복 존재 여부 확인 -->
+    <select id="countByDefinitionAndScheduledDate" resultType="int">
+        select count(*)
+        from fixed_expense_execution
+        where owner_user_id = #{ownerUserId}
+          and definition_id = #{definitionId}
+          and scheduled_date = #{scheduledDate}
+    </select>
+
+    <!-- 특정 날짜의 실행 예정(PLANNED) 목록 -->
+    <select id="selectPlannedByDate" resultMap="FixedExpenseExecutionRecordMap">
+        select
+            execution_id,
+            definition_id,
+            owner_user_id,
+            definition_name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            scheduled_date,
+            status,
+            transaction_id,
+            failure_reason,
+            batch_job_execution_id,
+            processed_at,
+            created_at,
+            updated_at
+        from fixed_expense_execution
+        where scheduled_date = #{scheduledDate}
+          and status = 'PLANNED'
+        order by execution_id asc
+    </select>
+
+</mapper>

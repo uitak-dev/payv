@@ -15,7 +15,6 @@
 
     <dependencies>
         <!-- 모듈 간 참조 (버전은 reactor/parent가 관리) -->
-        <!--
         <dependency>
             <groupId>com.payv</groupId>
             <artifactId>common</artifactId>
@@ -24,7 +23,10 @@
             <groupId>com.payv</groupId>
             <artifactId>asset</artifactId>
         </dependency>
-        -->
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>classification</artifactId>
+        </dependency>
 
         <!-- Spring Core -->
         <dependency>
@@ -38,6 +40,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
+        </dependency>
+
+        <!-- -->
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
         </dependency>
 
         <!-- MyBatis-Spring은 보통 infrastructure 구현에서 필요 -->

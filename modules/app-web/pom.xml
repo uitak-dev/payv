@@ -22,7 +22,7 @@
         <dependency><groupId>com.payv</groupId><artifactId>classification</artifactId></dependency>
 <!--        <dependency><groupId>com.payv</groupId><artifactId>transfer</artifactId></dependency>-->
         <dependency><groupId>com.payv</groupId><artifactId>budget</artifactId></dependency>
-<!--        <dependency><groupId>com.payv</groupId><artifactId>automation</artifactId></dependency>-->
+        <dependency><groupId>com.payv</groupId><artifactId>automation</artifactId></dependency>
         <dependency><groupId>com.payv</groupId><artifactId>reporting</artifactId></dependency>
 
         <!-- Spring MVC -->

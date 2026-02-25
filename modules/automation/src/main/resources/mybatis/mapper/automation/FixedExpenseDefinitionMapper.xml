@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.automation.infrastructure.persistence.mybatis.mapper.FixedExpenseDefinitionMapper">
+
+    <resultMap id="FixedExpenseDefinitionRecordMap" type="com.payv.automation.infrastructure.persistence.mybatis.record.FixedExpenseDefinitionRecord">
+        <id property="definitionId" column="definition_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="name" column="name"/>
+        <result property="amount" column="amount"/>
+        <result property="assetId" column="asset_id"/>
+        <result property="categoryIdLevel1" column="category_id_level1"/>
+        <result property="categoryIdLevel2" column="category_id_level2"/>
+        <result property="memo" column="memo"/>
+        <result property="cycle" column="cycle"/>
+        <result property="dayOfMonth" column="day_of_month"/>
+        <result property="endOfMonth" column="is_end_of_month"/>
+        <result property="active" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- definition_id 기준 upsert: 신규/수정 공통 처리 -->
+    <insert id="upsert" parameterType="com.payv.automation.infrastructure.persistence.mybatis.record.FixedExpenseDefinitionRecord">
+        insert into fixed_expense_definition (
+            definition_id,
+            owner_user_id,
+            name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            cycle,
+            day_of_month,
+            is_end_of_month,
+            is_active,
+            created_at,
+            updated_at
+        ) values (
+            #{definitionId},
+            #{ownerUserId},
+            #{name},
+            #{amount},
+            #{assetId},
+            #{categoryIdLevel1},
+            #{categoryIdLevel2},
+            #{memo},
+            #{cycle},
+            #{dayOfMonth},
+            #{endOfMonth},
+            #{active},
+            coalesce(#{createdAt}, now()),
+            now()
+        )
+        on conflict (definition_id)
+        do update set
+            owner_user_id = excluded.owner_user_id,
+            name = excluded.name,
+            amount = excluded.amount,
+            asset_id = excluded.asset_id,
+            category_id_level1 = excluded.category_id_level1,
+            category_id_level2 = excluded.category_id_level2,
+            memo = excluded.memo,
+            cycle = excluded.cycle,
+            day_of_month = excluded.day_of_month,
+            is_end_of_month = excluded.is_end_of_month,
+            is_active = excluded.is_active,
+            updated_at = now()
+    </insert>
+
+    <!-- 단건 조회: 소유자(owner_user_id)까지 같이 검증 -->
+    <select id="selectByIdAndOwner" resultMap="FixedExpenseDefinitionRecordMap">
+        select
+            definition_id,
+            owner_user_id,
+            name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            cycle,
+            day_of_month,
+            is_end_of_month,
+            is_active,
+            created_at,
+            updated_at
+        from fixed_expense_definition
+        where definition_id = #{definitionId}
+          and owner_user_id = #{ownerUserId}
+    </select>
+
+    <!-- 사용자의 활성 마스터 목록 -->
+    <select id="selectAllActiveByOwner" resultMap="FixedExpenseDefinitionRecordMap">
+        select
+            definition_id,
+            owner_user_id,
+            name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            cycle,
+            day_of_month,
+            is_end_of_month,
+            is_active,
+            created_at,
+            updated_at
+        from fixed_expense_definition
+        where owner_user_id = #{ownerUserId}
+          and is_active = true
+        order by definition_id asc
+    </select>
+
+    <!-- runDate 기준 실행 대상 활성 마스터만 조회 -->
+    <select id="selectAllActiveScheduledOn" resultMap="FixedExpenseDefinitionRecordMap">
+        select
+            definition_id,
+            owner_user_id,
+            name,
+            amount,
+            asset_id,
+            category_id_level1,
+            category_id_level2,
+            memo,
+            cycle,
+            day_of_month,
+            is_end_of_month,
+            is_active,
+            created_at,
+            updated_at
+        from fixed_expense_definition
+        where is_active = true
+          and (
+            (is_end_of_month = true and #{runDateIsEom} = true)
+            or
+            (is_end_of_month = false and least(day_of_month, #{lastDayOfMonth}) = #{runDay})
+          )
+        order by definition_id asc
+    </select>
+
+</mapper>
