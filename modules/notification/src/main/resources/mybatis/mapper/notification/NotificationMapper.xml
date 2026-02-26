@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.notification.infrastructure.persistence.mybatis.mapper.NotificationMapper">
+
+    <resultMap id="NotificationRecordMap" type="com.payv.notification.infrastructure.persistence.mybatis.record.NotificationRecord">
+        <id     property="notificationId"   column="notification_id"/>
+        <result property="ownerUserId"      column="owner_user_id"/>
+        <result property="notificationType" column="notification_type"/>
+        <result property="title"            column="title"/>
+        <result property="message"          column="message"/>
+        <result property="referenceType"    column="reference_type"/>
+        <result property="referenceId"      column="reference_id"/>
+        <result property="isRead"           column="is_read"/>
+        <result property="readAt"           column="read_at"/>
+        <result property="createdAt"        column="created_at"/>
+        <result property="updatedAt"        column="updated_at"/>
+    </resultMap>
+
+    <insert id="upsert" parameterType="com.payv.notification.infrastructure.persistence.mybatis.record.NotificationRecord">
+        insert into notification (
+            notification_id,
+            owner_user_id,
+            notification_type,
+            title,
+            message,
+            reference_type,
+            reference_id,
+            is_read,
+            read_at,
+            created_at,
+            updated_at
+        ) values (
+            #{notificationId},
+            #{ownerUserId},
+            #{notificationType},
+            #{title},
+            #{message},
+            #{referenceType},
+            #{referenceId},
+            #{isRead},
+            #{readAt},
+            coalesce(#{createdAt}, now()),
+            now()
+        )
+        on conflict (notification_id)
+        do update set
+            owner_user_id = excluded.owner_user_id,
+            notification_type = excluded.notification_type,
+            title = excluded.title,
+            message = excluded.message,
+            reference_type = excluded.reference_type,
+            reference_id = excluded.reference_id,
+            is_read = excluded.is_read,
+            read_at = excluded.read_at,
+            updated_at = now()
+    </insert>
+
+    <select id="selectByIdAndOwner" resultMap="NotificationRecordMap">
+        select
+            notification_id,
+            owner_user_id,
+            notification_type,
+            title,
+            message,
+            reference_type,
+            reference_id,
+            is_read,
+            read_at,
+            created_at,
+            updated_at
+        from notification
+        where notification_id = #{notificationId}
+          and owner_user_id = #{ownerUserId}
+    </select>
+
+    <select id="selectListByOwner" resultMap="NotificationRecordMap">
+        select
+            notification_id,
+            owner_user_id,
+            notification_type,
+            title,
+            message,
+            reference_type,
+            reference_id,
+            is_read,
+            read_at,
+            created_at,
+            updated_at
+        from notification
+        where owner_user_id = #{ownerUserId}
+        order by created_at desc, notification_id desc
+        offset #{offset} limit #{limit}
+    </select>
+
+    <select id="countByOwner" resultType="int">
+        select count(*)
+        from notification
+        where owner_user_id = #{ownerUserId}
+    </select>
+
+    <select id="countUnreadByOwner" resultType="int">
+        select count(*)
+        from notification
+        where owner_user_id = #{ownerUserId}
+          and is_read = false
+    </select>
+
+    <update id="markAllAsRead">
+        update notification
+        set is_read = true,
+            read_at = now(),
+            updated_at = now()
+        where owner_user_id = #{ownerUserId}
+          and is_read = false
+    </update>
+
+</mapper>

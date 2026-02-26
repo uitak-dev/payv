@@ -42,6 +42,9 @@
                     <a href="${ctx}/automation/fixed-expenses" class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
                         <span class="text-sm font-medium">고정비 관리</span><img src="${ctx}/assets/icons/chevron-right.svg" alt="" class="h-4 w-4 opacity-70" aria-hidden="true"/>
                     </a>
+                    <a href="${ctx}/notifications" class="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
+                        <span class="text-sm font-medium">알림함</span><img src="${ctx}/assets/icons/chevron-right.svg" alt="" class="h-4 w-4 opacity-70" aria-hidden="true"/>
+                    </a>
                 </div>
             </section>
 

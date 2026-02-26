@@ -20,7 +20,8 @@
         com.payv.transfer,
         com.payv.budget,
         com.payv.automation,
-        com.payv.reporting"
+        com.payv.reporting,
+        com.payv.notification"
     >
         <context:exclude-filter type="regex" expression="com\\.payv\\..*\\.presentation\\..*"/>
     </context:component-scan>
@@ -65,7 +66,8 @@
           com.payv.transfer.infrastructure.persistence.mybatis.mapper,
           com.payv.budget.infrastructure.persistence.mybatis.mapper,
           com.payv.automation.infrastructure.persistence.mybatis.mapper,
-          com.payv.reporting.infrastructure.persistence.mybatis.mapper"/>
+          com.payv.reporting.infrastructure.persistence.mybatis.mapper,
+          com.payv.notification.infrastructure.persistence.mybatis.mapper"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
 

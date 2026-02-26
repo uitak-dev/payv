@@ -4,6 +4,7 @@ import com.payv.budget.application.command.BudgetCommandService;
 import com.payv.budget.application.command.model.DeactivateBudgetCommand;
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.query.BudgetQueryService;
+import com.payv.budget.application.query.model.BudgetView;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.presentation.dto.request.BudgetListConditionRequest;
 import com.payv.budget.presentation.dto.request.BudgetListNoticeRequest;
@@ -66,7 +67,7 @@ public class BudgetViewController {
                          @RequestParam(required = false) String error,
                          Model model) {
         String ownerUserId = userDetails.getUserId();
-        BudgetQueryService.BudgetView budget = queryService.get(BudgetId.of(budgetId), ownerUserId)
+        BudgetView budget = queryService.get(BudgetId.of(budgetId), ownerUserId)
                 .orElseThrow(() -> new IllegalStateException("budget not found"));
 
         model.addAttribute("budget", budget);
@@ -81,7 +82,7 @@ public class BudgetViewController {
                            @RequestParam(required = false) String error,
                            Model model) {
         String ownerUserId = userDetails.getUserId();
-        BudgetQueryService.BudgetView budget = queryService.get(BudgetId.of(budgetId), ownerUserId)
+        BudgetView budget = queryService.get(BudgetId.of(budgetId), ownerUserId)
                 .orElseThrow(() -> new IllegalStateException("budget not found"));
 
         model.addAttribute("budget", budget);

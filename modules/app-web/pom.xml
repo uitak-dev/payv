@@ -24,6 +24,7 @@
         <dependency><groupId>com.payv</groupId><artifactId>budget</artifactId></dependency>
         <dependency><groupId>com.payv</groupId><artifactId>automation</artifactId></dependency>
         <dependency><groupId>com.payv</groupId><artifactId>reporting</artifactId></dependency>
+        <dependency><groupId>com.payv</groupId><artifactId>notification</artifactId></dependency>
 
         <!-- Spring MVC -->
         <dependency>

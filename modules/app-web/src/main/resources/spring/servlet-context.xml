@@ -45,7 +45,9 @@
         com.payv.automation.presentation.api,
         com.payv.automation.presentation.web,
         com.payv.reporting.presentation.api,
-        com.payv.reporting.presentation.web"
+        com.payv.reporting.presentation.web,
+        com.payv.notification.presentation.api,
+        com.payv.notification.presentation.web"
     />
 
     <!-- JSP ViewResolver -->

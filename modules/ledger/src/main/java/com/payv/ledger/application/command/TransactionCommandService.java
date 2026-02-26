@@ -1,5 +1,8 @@
 package com.payv.ledger.application.command;
 
+import com.payv.common.event.ledger.LedgerTransactionChangeType;
+import com.payv.common.event.ledger.LedgerTransactionChangedEvent;
+import com.payv.common.event.ledger.LedgerTransactionSnapshot;
 import com.payv.ledger.application.command.model.CreateTransactionCommand;
 import com.payv.ledger.application.command.model.CreateAutoFixedExpenseTransactionCommand;
 import com.payv.ledger.application.command.model.UpdateTransactionCommand;
@@ -12,9 +15,11 @@ import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.domain.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -28,6 +33,7 @@ public class TransactionCommandService {
     private final ClassificationValidationPort classificationValidationPort;
     private final AssetValidationPort assetValidationPort;
     private final AttachmentStoragePort attachmentStoragePort;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public TransactionId createManual(CreateTransactionCommand command, String ownerUserId) {
@@ -59,6 +65,12 @@ public class TransactionCommandService {
 
         // 4) 저장.
         transactionRepository.save(transaction);
+        publishTransactionChangedEvent(
+                ownerUserId,
+                LedgerTransactionChangeType.CREATED,
+                null,
+                toSnapshot(transaction)
+        );
         return transaction.getId();
     }
 
@@ -85,6 +97,12 @@ public class TransactionCommandService {
         transaction.updateCategorize(command.getCategoryIdLevel1(), command.getCategoryIdLevel2());
 
         transactionRepository.save(transaction);
+        publishTransactionChangedEvent(
+                ownerUserId,
+                LedgerTransactionChangeType.CREATED,
+                null,
+                toSnapshot(transaction)
+        );
         return transaction.getId();
     }
 
@@ -101,6 +119,7 @@ public class TransactionCommandService {
 
         Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
                 .orElseThrow(TransactionNotFoundException::new);
+        LedgerTransactionSnapshot beforeSnapshot = toSnapshot(tx);
 
         tx.updateBasics(
                 command.getTransactionType(),
@@ -113,12 +132,19 @@ public class TransactionCommandService {
         tx.updateTags(command.getTagIds());
 
         transactionRepository.save(tx);
+        publishTransactionChangedEvent(
+                ownerUserId,
+                LedgerTransactionChangeType.UPDATED,
+                beforeSnapshot,
+                toSnapshot(tx)
+        );
     }
 
     @Transactional
     public void deleteTransaction(TransactionId transactionId, String ownerUserId) {
         Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
                 .orElseThrow(TransactionNotFoundException::new);
+        LedgerTransactionSnapshot beforeSnapshot = toSnapshot(tx);
 
         // 첨부 파일(메타) 삭제 전에 첨부 파일(바이너리) 정리.
         for (Attachment attachment : tx.getAttachments()) {
@@ -136,6 +162,12 @@ public class TransactionCommandService {
         }
 
         transactionRepository.deleteById(transactionId, ownerUserId);
+        publishTransactionChangedEvent(
+                ownerUserId,
+                LedgerTransactionChangeType.DELETED,
+                beforeSnapshot,
+                null
+        );
     }
 
     private static Collection<String> buildCategoryIds(String categoryIdLevel1, String categoryIdLevel2) {
@@ -147,5 +179,40 @@ public class TransactionCommandService {
             ids.add(categoryIdLevel2);
         }
         return ids;
+    }
+
+    private void publishTransactionChangedEvent(String ownerUserId,
+                                                LedgerTransactionChangeType changeType,
+                                                LedgerTransactionSnapshot before,
+                                                LedgerTransactionSnapshot after) {
+        eventPublisher.publishEvent(
+                LedgerTransactionChangedEvent.builder()
+                        .ownerUserId(ownerUserId)
+                        .changeType(changeType)
+                        .before(before)
+                        .after(after)
+                        .occurredAt(OffsetDateTime.now())
+                        .build()
+        );
+    }
+
+    private LedgerTransactionSnapshot toSnapshot(Transaction tx) {
+        if (tx == null) {
+            return null;
+        }
+        String sourceType = tx.getTransactionSource() == null || tx.getTransactionSource().getType() == null
+                ? null : tx.getTransactionSource().getType().name();
+        String sourceReference = tx.getTransactionSource() == null
+                ? null : tx.getTransactionSource().getOriginalReference();
+
+        return LedgerTransactionSnapshot.builder()
+                .transactionId(tx.getId().getValue())
+                .ownerUserId(tx.getOwnerUserId())
+                .transactionType(tx.getTransactionType().name())
+                .transactionDate(tx.getTransactionDate())
+                .amount(tx.getAmount() == null || tx.getAmount().getAmount() == null ? 0L : tx.getAmount().getAmount())
+                .sourceType(sourceType)
+                .sourceReference(sourceReference)
+                .build();
     }
 }

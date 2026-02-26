@@ -32,7 +32,8 @@ public class TransactionCommandServiceTest {
                 repository,
                 new NoOpClassificationValidationPort(),
                 new NoOpAssetValidationPort(),
-                new NoOpAttachmentStoragePort()
+                new NoOpAttachmentStoragePort(),
+                event -> { }
         );
     }
 

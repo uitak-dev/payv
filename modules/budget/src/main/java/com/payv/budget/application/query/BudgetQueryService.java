@@ -2,11 +2,10 @@ package com.payv.budget.application.query;
 
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.LedgerSpendingQueryPort;
+import com.payv.budget.application.query.model.BudgetView;
 import com.payv.budget.domain.model.Budget;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.domain.repository.BudgetRepository;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,19 +105,5 @@ public class BudgetQueryService {
                             usageRate
                     );
                 });
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public static class BudgetView {
-        private final String budgetId;
-        private final String targetMonth;
-        private final String categoryId;
-        private final String categoryName;
-        private final long amountLimit;
-        private final String memo;
-        private final long spentAmount;
-        private final long remainingAmount;
-        private final int usageRate;
     }
 }
