@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans   https://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/rabbit  https://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+
+    <!-- 1) 연결 및 인프라 설정 -->
+    <bean id="rabbitConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+        <constructor-arg value="${rabbitmq.host:localhost}"/>
+        <property name="port" value="${rabbitmq.port:5672}"/>
+        <property name="username" value="${rabbitmq.username:guest}"/>
+        <property name="password" value="${rabbitmq.password:guest}"/>
+        <property name="virtualHost" value="${rabbitmq.virtual-host:/}"/>
+    </bean>
+
+    <bean id="rabbitMessageConverter" class="org.springframework.amqp.support.converter.SimpleMessageConverter">
+        <property name="allowedListPatterns">
+            <list>
+                <value>com.payv.common.event.ledger.*</value>
+                <value>java.time.*</value>
+                <value>java.util.*</value>
+                <value>java.lang.*</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
+        <property name="connectionFactory" ref="rabbitConnectionFactory"/>
+        <property name="messageConverter" ref="rabbitMessageConverter"/>
+    </bean>
+
+    <bean id="rabbitAdmin" class="org.springframework.amqp.rabbit.core.RabbitAdmin">
+        <constructor-arg ref="rabbitConnectionFactory"/>
+        <property name="autoStartup" value="true"/>
+    </bean>
+
+    <!-- queue: 메시지가 실제로 쌓이는 '대기열' -->
+    <rabbit:queue id="ledgerTransactionChangedQueue"
+                  name="${rabbitmq.queue.notification.ledger-transaction-changed:payv.notification.ledger.transaction.changed}"
+                  durable="true"/>
+
+    <!-- exchange: 메시지를 받아서 어느 큐로 보낼지 결정하는 '라우터' 역할 -->
+    <rabbit:topic-exchange id="ledgerEventsExchange"
+                           name="${rabbitmq.exchange.ledger.events:payv.ledger.events}"
+                           durable="true"
+                           auto-delete="false">
+
+        <!-- binding: 익스체인지와 큐를 연결하는 '연결 고리' -->
+        <rabbit:bindings>
+            <rabbit:binding queue="ledgerTransactionChangedQueue"
+                            pattern="${rabbitmq.routing-key.ledger-transaction-changed:ledger.transaction.changed}"/>
+        </rabbit:bindings>
+    </rabbit:topic-exchange>
+
+    <!-- 3) 메시지 수신(Consumer) 설정 -->
+    <rabbit:listener-container connection-factory="rabbitConnectionFactory"
+                               message-converter="rabbitMessageConverter"
+                               acknowledge="auto"
+                               concurrency="${rabbitmq.listener.concurrency:1}"
+                               max-concurrency="${rabbitmq.listener.max-concurrency:3}"
+                               requeue-rejected="false">
+        <rabbit:listener ref="notificationRabbitConsumer"
+                         method="handleLedgerTransactionChanged"
+                         queue-names="${rabbitmq.queue.notification.ledger-transaction-changed:payv.notification.ledger.transaction.changed}"/>
+    </rabbit:listener-container>
+
+</beans>

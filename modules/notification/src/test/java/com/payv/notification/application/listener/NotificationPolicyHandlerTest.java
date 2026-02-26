@@ -61,7 +61,7 @@ public class NotificationPolicyHandlerTest {
                 )));
         when(dispatchLogRepository.appendIfAbsent(any())).thenReturn(true);
 
-        handler.onLedgerTransactionChanged(event);
+        handler.handleLedgerTransactionChanged(event);
 
         verify(notificationCommandService, times(2)).createInApp(
                 eq("usr-1"),
@@ -85,7 +85,7 @@ public class NotificationPolicyHandlerTest {
                 .thenReturn(Collections.emptyList());
         when(dispatchLogRepository.appendIfAbsent(any())).thenReturn(true);
 
-        handler.onLedgerTransactionChanged(event);
+        handler.handleLedgerTransactionChanged(event);
 
         verify(notificationCommandService).createInApp(
                 eq("usr-1"),
@@ -117,7 +117,7 @@ public class NotificationPolicyHandlerTest {
                 )));
         when(dispatchLogRepository.appendIfAbsent(any())).thenReturn(false);
 
-        handler.onLedgerTransactionChanged(event);
+        handler.handleLedgerTransactionChanged(event);
 
         verify(notificationCommandService, never()).createInApp(
                 eq("usr-1"),
@@ -141,7 +141,7 @@ public class NotificationPolicyHandlerTest {
         when(budgetUsageQueryPort.findMonthlyBudgetUsages(anyString(), any(YearMonth.class)))
                 .thenReturn(Collections.emptyList());
 
-        handler.onLedgerTransactionChanged(event);
+        handler.handleLedgerTransactionChanged(event);
 
         ArgumentCaptor<YearMonth> monthCaptor = ArgumentCaptor.forClass(YearMonth.class);
         verify(budgetUsageQueryPort, times(2)).findMonthlyBudgetUsages(eq("usr-1"), monthCaptor.capture());

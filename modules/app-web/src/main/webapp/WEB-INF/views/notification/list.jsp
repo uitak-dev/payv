@@ -44,9 +44,6 @@
                         <div>
                             <div class="text-sm font-semibold">${item.title}</div>
                             <div class="mt-1 text-xs text-slate-600">${item.message}</div>
-                            <div class="mt-2 text-xs text-slate-500">
-                                ${item.type} · ${item.createdAt}
-                            </div>
                         </div>
                         <c:if test="${not item.read}">
                             <form action="${ctx}/notifications/${item.notificationId}?page=${result.page}&size=${result.size}" method="post" data-ajax="true" data-method="PUT">
