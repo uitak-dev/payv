@@ -23,30 +23,40 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <spring.version>5.3.39</spring.version>
         <spring.security.version>5.8.16</spring.security.version>
         <spring.batch.version>4.3.10</spring.batch.version>
         <spring.amqp.version>2.4.17</spring.amqp.version>
+
         <mybatis.version>3.5.16</mybatis.version>
         <mybatis.spring.version>2.1.2</mybatis.spring.version>
         <hikari.version>4.0.3</hikari.version>
+
         <postgresql.driver.version>42.7.4</postgresql.driver.version>
-        <junit.version>4.13.2</junit.version>
-        <mockito.version>3.12.4</mockito.version>
-        <log4j2.version>2.17.2</log4j2.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.32</lombok.version>
+        <h2.version>2.2.224</h2.version>
+
         <validation.api.version>2.0.1.Final</validation.api.version>
         <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
         <jakarta.el.version>3.0.3</jakarta.el.version>
+
+        <servlet.api.version>3.1.0</servlet.api.version>
+        <jsp.api.version>2.3.3</jsp.api.version>
+        <jstl.version>1.2</jstl.version>
+
         <jackson.version>2.15.2</jackson.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <junit.version>4.13.2</junit.version>
+        <mockito.version>3.12.4</mockito.version>
+        <lombok.version>1.18.32</lombok.version>
+
+        <slf4j.version>1.7.36</slf4j.version>
+        <log4j2.version>2.17.2</log4j2.version>
     </properties>
 
-    <!-- 공통 버전 중앙 집중: 자식은 버전 없이 의존성 선언 -->
     <dependencyManagement>
         <dependencies>
-            <!-- 내부 모듈 버전 중앙 관리 (필수) -->
             <dependency>
                 <groupId>com.payv</groupId>
                 <artifactId>common</artifactId>
@@ -93,11 +103,14 @@
                 <version>${project.version}</version>
             </dependency>
 
-
-            <!-- Spring Framework -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
@@ -120,6 +133,7 @@
                 <artifactId>spring-test</artifactId>
                 <version>${spring.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.springframework.batch</groupId>
                 <artifactId>spring-batch-core</artifactId>
@@ -147,7 +161,6 @@
                 <version>${spring.security.version}</version>
             </dependency>
 
-            <!-- MyBatis -->
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
@@ -159,43 +172,39 @@
                 <version>${mybatis.spring.version}</version>
             </dependency>
 
-            <!-- Pool -->
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
             </dependency>
 
-            <!-- DB Driver -->
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>2.2.224</version>
-            </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.driver.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
 
-            <!-- Web APIs -->
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <version>${servlet.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet.jsp</groupId>
                 <artifactId>javax.servlet.jsp-api</artifactId>
-                <version>2.3.3</version>
+                <version>${jsp.api.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>jstl</artifactId>
-                <version>1.2</version>
+                <version>${jstl.version}</version>
             </dependency>
 
-            <!-- Bean Validation API (JSR-380) -->
             <dependency>
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>
@@ -212,7 +221,6 @@
                 <version>${jakarta.el.version}</version>
             </dependency>
 
-            <!-- to JSON Converter -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -229,16 +237,10 @@
                 <version>${jackson.version}</version>
             </dependency>
 
-            <!-- Test -->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>3.24.2</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -246,14 +248,14 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
+
             <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
             </dependency>
 
-            <!-- Logging -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -269,18 +271,9 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j2.version}</version>
             </dependency>
-
-            <!-- Lombok (compile-time only) -->
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-                <scope>provided</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <!-- 공통 플러그인: 컴파일러/테스트/워 등 -->
     <build>
         <pluginManagement>
             <plugins>
@@ -322,5 +315,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
 </project>

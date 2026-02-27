@@ -14,29 +14,47 @@
     <packaging>war</packaging>
 
     <dependencies>
-        <!-- 내부 모듈 -->
-        <dependency><groupId>com.payv</groupId><artifactId>ledger</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>common</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>iam</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>asset</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>classification</artifactId></dependency>
-<!--        <dependency><groupId>com.payv</groupId><artifactId>transfer</artifactId></dependency>-->
-        <dependency><groupId>com.payv</groupId><artifactId>budget</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>automation</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>reporting</artifactId></dependency>
-        <dependency><groupId>com.payv</groupId><artifactId>notification</artifactId></dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>iam</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>asset</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>classification</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>ledger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>budget</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>automation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>reporting</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
+            <artifactId>notification</artifactId>
+        </dependency>
 
-        <!-- Spring MVC -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-
-        <!-- Spring Security -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
@@ -46,7 +64,6 @@
             <artifactId>spring-security-config</artifactId>
         </dependency>
 
-        <!-- DataSource/Tx 조립을 app-web에서 한다면 -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
@@ -60,7 +77,6 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
 
-        <!-- MyBatis + MyBatis-Spring -->
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
@@ -70,7 +86,32 @@
             <artifactId>mybatis-spring</artifactId>
         </dependency>
 
-        <!-- DB Driver -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -82,7 +123,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- JSP/JSTL (컨테이너 제공 범위 정책에 따라 조정) -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -96,6 +136,19 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
     </dependencies>
 
