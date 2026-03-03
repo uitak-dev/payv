@@ -3,6 +3,7 @@ package com.payv.ledger.application.command;
 import com.payv.common.event.ledger.LedgerTransactionChangeType;
 import com.payv.common.event.ledger.LedgerTransactionChangedEvent;
 import com.payv.common.event.ledger.LedgerTransactionSnapshot;
+import com.payv.common.cache.CacheNames;
 import com.payv.ledger.application.command.model.CreateTransactionCommand;
 import com.payv.ledger.application.command.model.CreateAutoFixedExpenseTransactionCommand;
 import com.payv.ledger.application.command.model.UpdateTransactionCommand;
@@ -10,12 +11,14 @@ import com.payv.ledger.application.exception.TransactionNotFoundException;
 import com.payv.ledger.application.port.AssetValidationPort;
 import com.payv.ledger.application.port.AttachmentStoragePort;
 import com.payv.ledger.application.port.ClassificationValidationPort;
+import com.payv.ledger.application.port.TransactionChangedEventOutboxPort;
 import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.domain.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,8 +36,14 @@ public class TransactionCommandService {
     private final ClassificationValidationPort classificationValidationPort;
     private final AssetValidationPort assetValidationPort;
     private final AttachmentStoragePort attachmentStoragePort;
-    private final ApplicationEventPublisher eventPublisher;
+    private final TransactionChangedEventOutboxPort transactionChangedEventOutboxPort;
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     @Transactional
     public TransactionId createManual(CreateTransactionCommand command, String ownerUserId) {
 
@@ -74,6 +83,12 @@ public class TransactionCommandService {
         return transaction.getId();
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     @Transactional
     public TransactionId createFixedCostAuto(CreateAutoFixedExpenseTransactionCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
@@ -106,6 +121,12 @@ public class TransactionCommandService {
         return transaction.getId();
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     @Transactional
     public void updateTransaction(TransactionId transactionId, UpdateTransactionCommand command, String ownerUserId) {
         if (command.getTagIds() != null && !command.getTagIds().isEmpty()) {
@@ -140,6 +161,12 @@ public class TransactionCommandService {
         );
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     @Transactional
     public void deleteTransaction(TransactionId transactionId, String ownerUserId) {
         Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
@@ -185,7 +212,7 @@ public class TransactionCommandService {
                                                 LedgerTransactionChangeType changeType,
                                                 LedgerTransactionSnapshot before,
                                                 LedgerTransactionSnapshot after) {
-        eventPublisher.publishEvent(
+        transactionChangedEventOutboxPort.enqueue(
                 LedgerTransactionChangedEvent.builder()
                         .ownerUserId(ownerUserId)
                         .changeType(changeType)

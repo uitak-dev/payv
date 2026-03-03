@@ -84,3 +84,24 @@ create index if not exists idx_attachment_tx
 
 create index if not exists idx_attachment_owner
     on attachment (owner_user_id);
+
+create table if not exists ledger_event_outbox (
+    outbox_id        varchar(64) primary key,
+    event_type       varchar(80) not null,
+    owner_user_id    varchar(64) not null,
+    exchange_name    varchar(120) not null,
+    routing_key      varchar(120) not null,
+    payload          bytea not null,
+    status           varchar(20) not null,
+    retry_count      integer not null default 0,
+    next_retry_at    timestamptz not null default now(),
+    published_at     timestamptz,
+    last_error       varchar(1000),
+    created_at       timestamptz not null default now(),
+    updated_at       timestamptz not null default now(),
+    constraint chk_ledger_event_outbox_status
+        check (status in ('PENDING', 'RETRY', 'PUBLISHED'))
+);
+
+create index if not exists idx_ledger_event_outbox_status_retry
+    on ledger_event_outbox (status, next_retry_at, created_at);

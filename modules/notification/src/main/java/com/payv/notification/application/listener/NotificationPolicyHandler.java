@@ -10,6 +10,7 @@ import com.payv.notification.domain.model.NotificationType;
 import com.payv.notification.domain.repository.NotificationDispatchLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 import java.util.List;
@@ -26,6 +27,7 @@ public class NotificationPolicyHandler {
     private final NotificationDispatchLogRepository dispatchLogRepository;
     private final NotificationCommandService notificationCommandService;
 
+    @Transactional
     public void handleLedgerTransactionChanged(LedgerTransactionChangedEvent event) {
         if (event == null || event.getOwnerUserId() == null || event.getOwnerUserId().trim().isEmpty()) {
             return;

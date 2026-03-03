@@ -13,6 +13,8 @@
         <property name="username" value="${rabbitmq.username:guest}"/>
         <property name="password" value="${rabbitmq.password:guest}"/>
         <property name="virtualHost" value="${rabbitmq.virtual-host:/}"/>
+        <property name="publisherConfirmType" value="CORRELATED"/>
+        <property name="publisherReturns" value="true"/>
     </bean>
 
     <bean id="rabbitMessageConverter" class="org.springframework.amqp.support.converter.SimpleMessageConverter">
@@ -29,6 +31,7 @@
     <bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
         <property name="connectionFactory" ref="rabbitConnectionFactory"/>
         <property name="messageConverter" ref="rabbitMessageConverter"/>
+        <property name="mandatory" value="true"/>
     </bean>
 
     <bean id="rabbitAdmin" class="org.springframework.amqp.rabbit.core.RabbitAdmin">
@@ -57,10 +60,10 @@
     <!-- 3) 메시지 수신(Consumer) 설정 -->
     <rabbit:listener-container connection-factory="rabbitConnectionFactory"
                                message-converter="rabbitMessageConverter"
-                               acknowledge="auto"
+                               acknowledge="manual"
                                concurrency="${rabbitmq.listener.concurrency:1}"
                                max-concurrency="${rabbitmq.listener.max-concurrency:3}"
-                               requeue-rejected="false">
+                               requeue-rejected="true">
         <rabbit:listener ref="notificationRabbitConsumer"
                          method="handleLedgerTransactionChanged"
                          queue-names="${rabbitmq.queue.notification.ledger-transaction-changed:payv.notification.ledger.transaction.changed}"/>
