@@ -2,21 +2,21 @@ package com.payv.ledger.application.query;
 
 import com.payv.common.application.query.PageRequest;
 import com.payv.common.application.query.PagedResult;
+import com.payv.common.cache.CacheNames;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.port.ClassificationQueryPort;
 import com.payv.ledger.application.exception.TransactionNotFoundException;
 import com.payv.ledger.domain.model.Attachment;
 import com.payv.ledger.domain.model.AttachmentId;
-import com.payv.ledger.domain.model.Transaction;
 import com.payv.ledger.domain.model.TransactionId;
 import com.payv.ledger.domain.model.TransactionSourceType;
 import com.payv.ledger.domain.repository.AttachmentRepository;
-import com.payv.ledger.domain.repository.TransactionRepository;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapper;
 import com.payv.ledger.infrastructure.persistence.mybatis.record.TransactionRecord;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionDetailView;
 import com.payv.ledger.presentation.dto.viewmodel.TransactionSummaryView;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +34,11 @@ public class TransactionQueryService {
     private final ClassificationQueryPort classificationQueryPort;
     private final AssetQueryPort assetQueryPort;
 
+    @Cacheable(
+            cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE,
+            key = "T(com.payv.common.cache.CacheKeys).ledgerRecentFirstPageKey(#ownerUserId, #from, #to, #size)",
+            condition = "#page <= 1 && (#assetId == null || #assetId.trim().isEmpty())"
+    )
     @Transactional(readOnly = true)
     public PagedResult<TransactionSummaryView> list(String ownerUserId,
                                                     LocalDate from, LocalDate to,

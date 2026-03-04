@@ -4,11 +4,14 @@ package com.payv.ledger.presentation.dto.viewmodel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
-public class TransactionSummaryView {
+public class TransactionSummaryView implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String transactionId;
     private final String transactionType;

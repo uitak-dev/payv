@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.payv.ledger.infrastructure.persistence.mybatis.mapper.LedgerEventOutboxMapper">
+
+    <resultMap id="LedgerEventOutboxRecordMap" type="com.payv.ledger.infrastructure.persistence.mybatis.record.LedgerEventOutboxRecord">
+        <id property="outboxId"         column="outbox_id"/>
+        <result property="eventType"    column="event_type"/>
+        <result property="ownerUserId"  column="owner_user_id"/>
+        <result property="exchangeName" column="exchange_name"/>
+        <result property="routingKey"   column="routing_key"/>
+        <result property="payload"      column="payload"/>
+        <result property="status"       column="status"/>
+        <result property="retryCount"   column="retry_count"/>
+        <result property="nextRetryAt"  column="next_retry_at"/>
+        <result property="publishedAt"  column="published_at"/>
+        <result property="lastError"    column="last_error"/>
+        <result property="createdAt"    column="created_at"/>
+        <result property="updatedAt"    column="updated_at"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.payv.ledger.infrastructure.persistence.mybatis.record.LedgerEventOutboxRecord">
+        insert into ledger_event_outbox (
+            outbox_id,
+            event_type,
+            owner_user_id,
+            exchange_name,
+            routing_key,
+            payload,
+            status,
+            retry_count,
+            next_retry_at,
+            published_at,
+            last_error,
+            created_at,
+            updated_at
+        ) values (
+            #{outboxId},
+            #{eventType},
+            #{ownerUserId},
+            #{exchangeName},
+            #{routingKey},
+            #{payload},
+            #{status},
+            #{retryCount},
+            #{nextRetryAt},
+            #{publishedAt},
+            #{lastError},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <select id="selectPending" resultMap="LedgerEventOutboxRecordMap">
+        select
+            outbox_id,
+            event_type,
+            owner_user_id,
+            exchange_name,
+            routing_key,
+            payload,
+            status,
+            retry_count,
+            next_retry_at,
+            published_at,
+            last_error,
+            created_at,
+            updated_at
+        from ledger_event_outbox
+        where status in ('PENDING', 'RETRY')
+          and next_retry_at &lt;= #{now}
+        order by created_at asc
+        limit #{limit}
+    </select>
+
+    <update id="markPublished">
+        update ledger_event_outbox
+        set status = 'PUBLISHED',
+            published_at = #{publishedAt},
+            updated_at = now(),
+            last_error = null
+        where outbox_id = #{outboxId}
+    </update>
+
+    <update id="markRetry">
+        update ledger_event_outbox
+        set status = 'RETRY',
+            retry_count = #{retryCount},
+            next_retry_at = #{nextRetryAt},
+            last_error = #{lastError},
+            updated_at = now()
+        where outbox_id = #{outboxId}
+    </update>
+
+</mapper>
