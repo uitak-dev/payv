@@ -1,15 +1,17 @@
 package com.payv.reporting.application.query.model;
 
-import com.payv.reporting.application.query.ReportingQueryService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.time.YearMonth;
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class MonthlyReportView {
+public class MonthlyReportView implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final YearMonth month;
     private final long totalExpense;

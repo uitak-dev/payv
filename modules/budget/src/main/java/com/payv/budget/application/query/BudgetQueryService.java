@@ -3,10 +3,12 @@ package com.payv.budget.application.query;
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.LedgerSpendingQueryPort;
 import com.payv.budget.application.query.model.BudgetView;
+import com.payv.common.cache.CacheNames;
 import com.payv.budget.domain.model.Budget;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.domain.repository.BudgetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,10 @@ public class BudgetQueryService {
     private final ClassificationQueryPort classificationQueryPort;
     private final LedgerSpendingQueryPort ledgerSpendingQueryPort;
 
+    @Cacheable(
+            cacheNames = CacheNames.BUDGET_MONTHLY_STATUS,
+            key = "T(com.payv.common.cache.CacheKeys).budgetMonthlyStatusKey(#ownerUserId, #yearMonth)"
+    )
     public List<BudgetView> getMonthlyBudgets(String ownerUserId, YearMonth yearMonth) {
         YearMonth targetMonth = yearMonth == null ? YearMonth.now() : yearMonth;
         LocalDate monthStart = targetMonth.atDay(1);

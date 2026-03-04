@@ -3,11 +3,14 @@ package com.payv.reporting.application.query.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
-public class RecentTransactionView {
+public class RecentTransactionView implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String transactionId;
     private final String transactionType;

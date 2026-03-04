@@ -7,11 +7,14 @@ import com.payv.budget.application.exception.BudgetNotFoundException;
 import com.payv.budget.application.exception.DuplicateBudgetException;
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.ClassificationValidationPort;
+import com.payv.common.cache.CacheNames;
 import com.payv.common.error.InvalidRequestException;
 import com.payv.budget.domain.model.Budget;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.domain.repository.BudgetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,11 @@ public class BudgetCommandService {
     private final ClassificationValidationPort classificationValidationPort;
     private final ClassificationQueryPort classificationQueryPort;
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     public BudgetId create(CreateBudgetCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
         requireOwner(ownerUserId);
@@ -52,6 +60,11 @@ public class BudgetCommandService {
         return budget.getId();
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     public void update(UpdateBudgetCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
         requireOwner(ownerUserId);
@@ -73,6 +86,11 @@ public class BudgetCommandService {
         budgetRepository.save(budget, ownerUserId);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.REPORTING_HOME_DASHBOARD, allEntries = true)
+    })
     public void deactivate(DeactivateBudgetCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
         requireOwner(ownerUserId);

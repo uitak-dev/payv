@@ -8,8 +8,10 @@ import com.payv.reporting.application.port.dto.AmountByIdDto;
 import com.payv.reporting.application.port.dto.OverallBudgetSnapshotDto;
 import com.payv.reporting.application.port.dto.RecentTransactionDto;
 import com.payv.reporting.application.query.model.*;
+import com.payv.common.cache.CacheNames;
 import com.payv.reporting.domain.model.MonthlyReport;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,10 @@ public class ReportingQueryService {
      * @param month 조회 대상 월. {@code null}이면 현재 월
      * @return 월간 리포트 뷰
      */
+    @Cacheable(
+            cacheNames = CacheNames.REPORTING_MONTHLY_SUMMARY,
+            key = "T(com.payv.common.cache.CacheKeys).reportingMonthlySummaryKey(#ownerUserId, #month)"
+    )
     public MonthlyReportView getMonthlyReport(String ownerUserId, YearMonth month) {
         YearMonth targetMonth = month == null ? YearMonth.now() : month;
         LocalDate from = targetMonth.atDay(1);
@@ -94,6 +100,10 @@ public class ReportingQueryService {
      * @param month 조회 대상 월. {@code null}이면 현재 월
      * @return 홈 대시보드 뷰
      */
+    @Cacheable(
+            cacheNames = CacheNames.REPORTING_HOME_DASHBOARD,
+            key = "T(com.payv.common.cache.CacheKeys).reportingHomeDashboardKey(#ownerUserId, #month)"
+    )
     public HomeDashboardView getHomeDashboard(String ownerUserId, YearMonth month) {
         YearMonth targetMonth = month == null ? YearMonth.now() : month;
         LocalDate from = targetMonth.atDay(1);
