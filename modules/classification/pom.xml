@@ -20,6 +20,10 @@
         </dependency>
         <dependency>
             <groupId>com.payv</groupId>
+            <artifactId>contracts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.payv</groupId>
             <artifactId>iam</artifactId>
         </dependency>
 

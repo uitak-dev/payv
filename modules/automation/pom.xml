@@ -20,15 +20,11 @@
         </dependency>
         <dependency>
             <groupId>com.payv</groupId>
-            <artifactId>asset</artifactId>
+            <artifactId>contracts</artifactId>
         </dependency>
         <dependency>
             <groupId>com.payv</groupId>
-            <artifactId>classification</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.payv</groupId>
-            <artifactId>ledger</artifactId>
+            <artifactId>iam</artifactId>
         </dependency>
 
         <dependency>
