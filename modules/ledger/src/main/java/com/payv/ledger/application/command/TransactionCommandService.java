@@ -24,20 +24,41 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * 거래(Transaction) 쓰기 시나리오를 담당하는 서비스.
+ * - 수기 거래/자동 고정비 거래 생성, 거래 수정/삭제를 처리한다.
+ * - 거래 변경 이벤트를 Outbox에 적재한다.
+ * - 분류/자산 검증과 이벤트 발행(Outbox)을 동일 트랜잭션 경계에서 처리해
+ *   데이터 정합성과 메시지 전달 신뢰성을 동시에 확보한다.
+ */
 public class TransactionCommandService {
 
     private final TransactionRepository transactionRepository;
 
     private final ClassificationValidationPort classificationValidationPort;
     private final AssetValidationPort assetValidationPort;
+
     private final AttachmentStoragePort attachmentStoragePort;
+
     private final TransactionChangedEventOutboxPort transactionChangedEventOutboxPort;
 
+    /**
+     * 수기 거래를 생성한다.
+     *
+     * Business logic:
+     * - 태그/카테고리/자산 유효성 검증 후 도메인 엔티티를 생성한다.
+     * - 저장 성공 시 변경 이벤트를 Outbox에 적재한다.
+     *
+     * @param command 생성 요청(거래 유형/금액/일자/분류/태그/메모)
+     * @param ownerUserId 소유 사용자 ID
+     * @return 생성된 거래 ID
+     */
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
             @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
@@ -55,7 +76,7 @@ public class TransactionCommandService {
                 buildCategoryIds(command.getCategoryIdLevel1(), command.getCategoryIdLevel2()),
                 ownerUserId
         );
-        assetValidationPort.validateAssertId(command.getAssetId(), ownerUserId);
+        assetValidationPort.validateAssetIds(Collections.singleton(command.getAssetId()), ownerUserId);
 
         // 2) 도메인 생성( Mandatory Fields )
         Transaction transaction = Transaction.createManual(
@@ -83,6 +104,13 @@ public class TransactionCommandService {
         return transaction.getId();
     }
 
+    /**
+     * 자동 생성된 고정비 거래를 생성한다.
+     *
+     * @param command 고정비 자동 생성 요청(정의 ID, 금액, 자산, 카테고리, 거래일)
+     * @param ownerUserId 소유 사용자 ID
+     * @return 생성된 거래 ID
+     */
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
             @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
@@ -97,7 +125,7 @@ public class TransactionCommandService {
                 buildCategoryIds(command.getCategoryIdLevel1(), command.getCategoryIdLevel2()),
                 ownerUserId
         );
-        assetValidationPort.validateAssertId(command.getAssetId(), ownerUserId);
+        assetValidationPort.validateAssetIds(Collections.singleton(command.getAssetId()), ownerUserId);
 
         Transaction transaction = Transaction.createFixedCostAuto(
                 ownerUserId,
@@ -121,6 +149,14 @@ public class TransactionCommandService {
         return transaction.getId();
     }
 
+    /**
+     * 기존 거래를 수정한다.
+     *
+     * @param transactionId 수정 대상 거래 ID
+     * @param command 수정 요청(거래 기본정보/분류/태그/메모)
+     * @param ownerUserId 소유 사용자 ID
+     * @throws TransactionNotFoundException 대상 거래를 찾지 못한 경우
+     */
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
             @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),
@@ -136,7 +172,7 @@ public class TransactionCommandService {
                 buildCategoryIds(command.getCategoryIdLevel1(), command.getCategoryIdLevel2()),
                 ownerUserId
         );
-        assetValidationPort.validateAssertId(command.getAssetId(), ownerUserId);
+        assetValidationPort.validateAssetIds(Collections.singleton(command.getAssetId()), ownerUserId);
 
         Transaction tx = transactionRepository.findById(transactionId, ownerUserId)
                 .orElseThrow(TransactionNotFoundException::new);
@@ -161,6 +197,17 @@ public class TransactionCommandService {
         );
     }
 
+    /**
+     * 거래를 삭제한다.
+     *
+     * Business logic:
+     * - 첨부파일 바이너리를 정리한 뒤 거래를 삭제한다.
+     * - 삭제 전 스냅샷을 Outbox 이벤트로 남겨 후속 정책(알림/집계 갱신)에 사용한다.
+     *
+     * @param transactionId 삭제 대상 거래 ID
+     * @param ownerUserId 소유 사용자 ID
+     * @throws TransactionNotFoundException 대상 거래를 찾지 못한 경우
+     */
     @Caching(evict = {
             @CacheEvict(cacheNames = CacheNames.LEDGER_RECENT_FIRST_PAGE, allEntries = true),
             @CacheEvict(cacheNames = CacheNames.BUDGET_MONTHLY_STATUS, allEntries = true),

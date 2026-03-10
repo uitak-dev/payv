@@ -18,10 +18,25 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Transactional
+/**
+ * Classification BC의 태그 변경 명령을 처리하는 서비스.
+ * - 태그 생성/이름 변경/비활성화를 수행한다.
+ * - 태그 최대 개수 및 이름 중복 규칙을 한 곳에서 강제해, 거래 태그 분류 체계의 일관성을 보장한다.
+ */
 public class TagCommandService {
 
     private final TagRepository tagRepository;
 
+    /**
+     * 태그를 생성한다.
+     *
+     * @param command 생성 요청(태그명)
+     * @param ownerUserId 소유 사용자 ID
+     * @return 생성된 태그 ID
+     * @throws NullPointerException {@code command}가 {@code null}인 경우
+     * @throws InvalidRequestException {@code ownerUserId}가 비어 있는 경우
+     * @throws DuplicateTagNameException 태그 이름이 중복된 경우
+     */
     public TagId create(CreateTagCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
         requireOwner(ownerUserId);
@@ -36,6 +51,16 @@ public class TagCommandService {
         return tag.getId();
     }
 
+    /**
+     * 태그 이름을 변경한다.
+     *
+     * @param command 변경 요청(태그 ID, 새 이름)
+     * @param ownerUserId 소유 사용자 ID
+     * @throws NullPointerException {@code command}가 {@code null}인 경우
+     * @throws InvalidRequestException {@code ownerUserId}가 비어 있는 경우
+     * @throws TagNotFoundException 태그를 찾지 못한 경우
+     * @throws DuplicateTagNameException 새 이름이 중복된 경우
+     */
     public void rename(RenameTagCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
         requireOwner(ownerUserId);
@@ -49,6 +74,15 @@ public class TagCommandService {
         tagRepository.save(tag, ownerUserId);
     }
 
+    /**
+     * 태그를 비활성화한다.
+     *
+     * @param command 비활성화 요청(태그 ID)
+     * @param ownerUserId 소유 사용자 ID
+     * @throws NullPointerException {@code command}가 {@code null}인 경우
+     * @throws InvalidRequestException {@code ownerUserId}가 비어 있는 경우
+     * @throws TagNotFoundException 태그를 찾지 못한 경우
+     */
     public void deactivate(DeactivateTagCommand command, String ownerUserId) {
         Objects.requireNonNull(command, "command");
         requireOwner(ownerUserId);

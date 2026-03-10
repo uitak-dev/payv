@@ -19,9 +19,8 @@ import java.util.Set;
 
 /**
  * 고정비 계획 배치를 자동 실행하는 스케줄러.
- *
- * - cron/zone은 application.properties에서 조정 가능
- * - 같은 Job이 이미 실행 중이면 중복 실행을 건너뜀
+ * - cron/zone은 application.properties에서 조정.
+ * - 같은 Job이 이미 실행 중이면 중복 실행을 건너뜀.
  * - runDate(비즈니스 기준일) + launchedAt(잡 인스턴스 구분값) 파라미터 전달
  */
 @Slf4j
@@ -43,29 +42,39 @@ public class FixedExpenseBatchScheduler {
     @Value("${automation.batch.fixed-expense.zone:}")
     private String zone;
 
+    /**
+     * 설정된 스케줄(기본값: 매일 00:05)에 따라 고정 지출 계획 배치 작업을 실행.
+     */
     @Scheduled(
             cron = "${automation.batch.fixed-expense.cron:0 5 0 * * *}",
             zone = "${automation.batch.fixed-expense.zone:}"
     )
     public void scheduleFixedExpensePlanningJob() {
+        // 1) 배치 활성화 여부 확인. (설정 파일의 enabled 값에 따라 실행 여부 결정)
         if (!enabled) {
             return;
         }
 
         try {
+            // 2) 중복 실행 방지: 현재 같은 이름의 Job이 실행 중인지 확인.
             Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions(JOB_NAME);
             if (runningExecutions != null && !runningExecutions.isEmpty()) {
                 log.info("Skip {} launch: already running {} execution(s)", JOB_NAME, runningExecutions.size());
                 return;
             }
 
+            // 3) 실행 파라미터 생성
+            // - runDate: 배치 기준 날짜
+            // - launchedAt: 동일 파라미터로 인한 재실행 방지 및 고유 인스턴스 생성을 위한 타임스탬프
             LocalDate runDate = LocalDate.now(resolveZone());
             JobParameters params = new JobParametersBuilder()
                     .addString("runDate", runDate.toString())
                     .addLong("launchedAt", System.currentTimeMillis())
                     .toJobParameters();
 
+            // 4) Batch Job 실행
             JobExecution execution = jobLauncher.run(fixedExpensePlanningJob, params);
+
             log.info("Launched {} with executionId={}, runDate={}, status={}",
                     JOB_NAME,
                     execution.getId(),

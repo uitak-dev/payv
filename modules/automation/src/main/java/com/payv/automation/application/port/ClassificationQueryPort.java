@@ -1,14 +1,14 @@
 package com.payv.automation.application.port;
 
-import com.payv.automation.application.port.dto.CategoryTreeOptionDto;
+import com.payv.contracts.classification.dto.CategoryTreePublicDto;
+import com.payv.contracts.common.dto.IdNamePublicDto;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public interface ClassificationQueryPort {
 
-    Map<String, String> getCategoryNames(Collection<String> categoryIds, String ownerUserId);
+    List<IdNamePublicDto> getCategoryNames(Collection<String> categoryIds, String ownerUserId);
 
-    List<CategoryTreeOptionDto> getAllCategories(String ownerUserId);
+    List<CategoryTreePublicDto> getAllCategories(String ownerUserId);
 }

@@ -4,6 +4,7 @@ import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.LedgerSpendingQueryPort;
 import com.payv.budget.application.query.model.BudgetView;
 import com.payv.common.cache.CacheNames;
+import com.payv.contracts.common.dto.IdNamePublicDto;
 import com.payv.budget.domain.model.Budget;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.domain.repository.BudgetRepository;
@@ -20,6 +21,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+/**
+ * 예산 조회 서비스.
+ * - 월별 예산 목록과 단건 예산의 소진 현황(사용액/잔여/사용률)을 계산한다.
+ * - 소진액은 저장 값이 아닌 Ledger 집계를 기준으로 조회 시점에 계산하여,
+ *   최신 거래 데이터와 정합성을 맞춘다.
+ */
 public class BudgetQueryService {
 
     private final BudgetRepository budgetRepository;
@@ -27,6 +34,13 @@ public class BudgetQueryService {
     private final ClassificationQueryPort classificationQueryPort;
     private final LedgerSpendingQueryPort ledgerSpendingQueryPort;
 
+    /**
+     * 월별 예산 목록과 소진 현황을 조회한다.
+     *
+     * @param ownerUserId 소유 사용자 ID
+     * @param yearMonth 대상 월({@code null}이면 현재 월)
+     * @return 월별 예산 뷰 목록(카테고리명/소진액/잔여액/사용률 포함)
+     */
     @Cacheable(
             cacheNames = CacheNames.BUDGET_MONTHLY_STATUS,
             key = "T(com.payv.common.cache.CacheKeys).budgetMonthlyStatusKey(#ownerUserId, #yearMonth)"
@@ -47,7 +61,7 @@ public class BudgetQueryService {
 
         Map<String, String> categoryNames = categoryIds.isEmpty()
                 ? Collections.emptyMap()
-                : classificationQueryPort.getCategoryNames(categoryIds, ownerUserId);
+                : toNameMap(classificationQueryPort.getCategoryNames(categoryIds, ownerUserId));
 
         List<BudgetView> ret = new ArrayList<>(budgets.size());
         for (Budget budget : budgets) {
@@ -78,6 +92,13 @@ public class BudgetQueryService {
         return ret;
     }
 
+    /**
+     * 예산 단건과 해당 월의 소진 현황을 조회한다.
+     *
+     * @param budgetId 예산 ID
+     * @param ownerUserId 소유 사용자 ID
+     * @return 예산 뷰. 없으면 {@link Optional#empty()}
+     */
     public Optional<BudgetView> get(BudgetId budgetId, String ownerUserId) {
         return budgetRepository.findById(budgetId, ownerUserId)
                 .map(budget -> {
@@ -88,7 +109,7 @@ public class BudgetQueryService {
                     String categoryId = budget.getCategoryId();
                     Map<String, String> categoryNames = categoryId == null
                             ? Collections.emptyMap()
-                            : classificationQueryPort.getCategoryNames(Collections.singleton(categoryId), ownerUserId);
+                            : toNameMap(classificationQueryPort.getCategoryNames(Collections.singleton(categoryId), ownerUserId));
 
                     long spent = ledgerSpendingQueryPort.sumExpenseAmount(
                             ownerUserId,
@@ -111,5 +132,16 @@ public class BudgetQueryService {
                             usageRate
                     );
                 });
+    }
+
+    private Map<String, String> toNameMap(List<IdNamePublicDto> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new LinkedHashMap<>();
+        for (IdNamePublicDto row : rows) {
+            result.put(row.getId(), row.getName());
+        }
+        return result;
     }
 }

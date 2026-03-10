@@ -9,6 +9,7 @@ import com.payv.reporting.application.port.dto.OverallBudgetSnapshotDto;
 import com.payv.reporting.application.port.dto.RecentTransactionDto;
 import com.payv.reporting.application.query.model.*;
 import com.payv.common.cache.CacheNames;
+import com.payv.contracts.common.dto.IdNamePublicDto;
 import com.payv.reporting.domain.model.MonthlyReport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,8 +28,15 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * 리포팅 화면에서 필요한 월간 집계/대시보드 조회를 조합하는 애플리케이션 서비스.
- * 외부 BC 데이터 접근은 포트(ACL)를 통해 수행한다.
+ * Reporting BC의 월간 리포트/대시보드 조회를 조합하는 서비스.
+ *
+ * What:
+ * - Ledger/Budget/Asset/Classification BC 데이터를 ACL 포트로 수집해
+ *   리포팅 화면용 읽기 모델을 생성한다.
+ *
+ * Why:
+ * - 집계/이름해석/비율 계산 로직을 한 곳에 모아 화면 계층을 단순화하고,
+ *   캐시 가능한 안정된 조회 경계를 제공하기 위함이다.
  */
 @Service
 @RequiredArgsConstructor
@@ -43,7 +51,12 @@ public class ReportingQueryService {
     private final ClassificationLookupPort classificationLookupPort;
 
     /**
-     * 리포트 화면용 월간 집계 뷰 모델을 생성한다.
+     * 리포트 화면용 월간 집계 뷰를 생성한다.
+     *
+     * Business logic:
+     * - 월 범위를 계산해 수입/지출 합계를 조회
+     * - 전체 예산 스냅샷을 결합해 사용률/잔여 예산 계산
+     * - 자산/카테고리/태그 집계를 이름 맵과 합성해 출력 모델 생성
      *
      * @param ownerUserId 소유 사용자 ID
      * @param month 조회 대상 월. {@code null}이면 현재 월
@@ -74,9 +87,9 @@ public class ReportingQueryService {
         List<AmountByIdDto> categoryRows = ledgerReportQueryPort.sumExpenseByCategoryLevel1(ownerUserId, from, to);
         List<AmountByIdDto> tagRows = ledgerReportQueryPort.sumExpenseByTag(ownerUserId, from, to);
 
-        Map<String, String> assetNames = assetLookupPort.getAssetNames(extractIds(assetRows), ownerUserId);
-        Map<String, String> categoryNames = classificationLookupPort.getCategoryNames(extractIds(categoryRows), ownerUserId);
-        Map<String, String> tagNames = classificationLookupPort.getTagNames(extractIds(tagRows), ownerUserId);
+        Map<String, String> assetNames = toNameMap(assetLookupPort.getAssetNames(extractIds(assetRows), ownerUserId));
+        Map<String, String> categoryNames = toNameMap(classificationLookupPort.getCategoryNames(extractIds(categoryRows), ownerUserId));
+        Map<String, String> tagNames = toNameMap(classificationLookupPort.getTagNames(extractIds(tagRows), ownerUserId));
 
         return new MonthlyReportView(
                 targetMonth,
@@ -94,7 +107,12 @@ public class ReportingQueryService {
     }
 
     /**
-     * 홈 화면용 대시보드 요약 뷰 모델을 생성한다.
+     * 홈 화면용 대시보드 요약 뷰를 생성한다.
+     *
+     * Business logic:
+     * - 월 범위의 수입/지출/순액을 계산
+     * - 전체 예산 존재 여부와 잔여 예산을 결합
+     * - 최근 거래 N건을 조회하고 자산/카테고리 이름을 해석해 반환
      *
      * @param ownerUserId 소유 사용자 ID
      * @param month 조회 대상 월. {@code null}이면 현재 월
@@ -129,8 +147,8 @@ public class ReportingQueryService {
             }
         }
 
-        Map<String, String> assetNames = assetLookupPort.getAssetNames(assetIds, ownerUserId);
-        Map<String, String> categoryNames = classificationLookupPort.getCategoryNames(categoryIds, ownerUserId);
+        Map<String, String> assetNames = toNameMap(assetLookupPort.getAssetNames(assetIds, ownerUserId));
+        Map<String, String> categoryNames = toNameMap(classificationLookupPort.getCategoryNames(categoryIds, ownerUserId));
 
         List<RecentTransactionView> recentTransactions = new ArrayList<>(recentRows.size());
         for (RecentTransactionDto row : recentRows) {
@@ -206,6 +224,17 @@ public class ReportingQueryService {
             ids.add(row.getRefId());
         }
         return ids;
+    }
+
+    private Map<String, String> toNameMap(List<IdNamePublicDto> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new java.util.LinkedHashMap<>();
+        for (IdNamePublicDto row : rows) {
+            result.put(row.getId(), row.getName());
+        }
+        return result;
     }
 
 }

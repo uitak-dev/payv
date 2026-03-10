@@ -1,15 +1,14 @@
 package com.payv.ledger.application.port;
 
-import com.payv.ledger.application.port.dto.CategoryTreeOptionDto;
-import com.payv.ledger.application.port.dto.TagOptionDto;
+import com.payv.contracts.common.dto.IdNamePublicDto;
+import com.payv.contracts.classification.dto.CategoryTreePublicDto;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public interface ClassificationQueryPort {
-    Map<String, String> getTagNames(Collection<String> tagIds, String ownerUserId);
-    Map<String, String> getCategoryNames(Collection<String> categoryIds, String ownerUserId);
-    List<TagOptionDto> getAllTags(String ownerUserId);
-    List<CategoryTreeOptionDto> getAllCategories(String ownerUserId);
+    List<IdNamePublicDto> getTagNames(Collection<String> tagIds, String ownerUserId);
+    List<IdNamePublicDto> getCategoryNames(Collection<String> categoryIds, String ownerUserId);
+    List<IdNamePublicDto> getAllTags(String ownerUserId);
+    List<CategoryTreePublicDto> getAllCategories(String ownerUserId);
 }

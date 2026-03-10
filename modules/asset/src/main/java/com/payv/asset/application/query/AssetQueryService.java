@@ -1,5 +1,6 @@
 package com.payv.asset.application.query;
 
+import com.payv.asset.application.query.model.AssetView;
 import com.payv.asset.domain.model.Asset;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.asset.domain.repository.AssetRepository;
@@ -18,42 +19,34 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+/**
+ * Asset BC의 조회 기능을 제공하는 읽기 전용 서비스.
+ * - 자산 목록/상세/ID 기반 이름 맵 조회를 제공한다.
+ */
 public class AssetQueryService {
 
     private final AssetRepository assetRepository;
 
+    /**
+     * 소유자의 전체 자산을 조회한다.
+     *
+     * @param ownerUserId 소유 사용자 ID
+     * @return 자산 뷰 목록
+     */
     public List<AssetView> getAll(String ownerUserId) {
         List<Asset> assets = assetRepository.findAllByOwner(ownerUserId);
         return assets.stream().map(AssetView::from).collect(Collectors.toList());
     }
 
+    /**
+     * 자산 단건을 조회한다.
+     *
+     * @param assetId 자산 ID
+     * @param ownerUserId 소유 사용자 ID
+     * @return 자산 뷰. 없으면 {@link Optional#empty()}
+     */
     public Optional<AssetView> get(AssetId assetId, String ownerUserId) {
         return assetRepository.findById(assetId, ownerUserId).map(AssetView::from);
     }
 
-    public Map<AssetId, String> getNamesByIds(String ownerUserId, Collection<AssetId> ids) {
-        if (ids == null || ids.isEmpty()) return Collections.emptyMap();
-        return assetRepository.findNamesByIds(ownerUserId, ids);
-    }
-
-    @Getter
-    public static class AssetView {
-        private final String assetId;
-        private final String name;
-        private final String assetType;
-
-        private AssetView(String assetId, String name, String assetType) {
-            this.assetId = assetId;
-            this.name = name;
-            this.assetType = assetType;
-        }
-
-        public static AssetView from(Asset asset) {
-            return new AssetView(
-                    asset.getId().getValue(),
-                    asset.getName(),
-                    asset.getAssetType().name()
-            );
-        }
-    }
 }

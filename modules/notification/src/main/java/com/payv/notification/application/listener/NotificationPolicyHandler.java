@@ -18,6 +18,17 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Ledger 이벤트 기반 알림 정책 집행기.
+ *
+ * What:
+ * - 거래 변경 이벤트를 받아 예산 임계치 알림/고정비 자동생성 알림을 판단한다.
+ * - 중복 발송 방지를 위해 dispatch log 기반 멱등 처리를 수행한다.
+ *
+ * Why:
+ * - 메시지는 at-least-once로 전달될 수 있으므로, 수신 측 정책은
+ *   동일 이벤트 재수신 시에도 안전하게 한 번만 발송되어야 한다.
+ */
 public class NotificationPolicyHandler {
 
     private static final String REF_TYPE_BUDGET = "BUDGET";
@@ -27,6 +38,16 @@ public class NotificationPolicyHandler {
     private final NotificationDispatchLogRepository dispatchLogRepository;
     private final NotificationCommandService notificationCommandService;
 
+    /**
+     * 거래 변경 이벤트를 기반으로 알림 정책을 적용한다.
+     *
+     * Business logic:
+     * - 예산 정책: 50%/100% 임계치 도달 시 최초 1회 발송
+     * - 고정비 정책: 자동 생성 거래 발생 시 즉시 1회 발송
+     * - 중복 메시지 재수신 시 dispatch log로 중복 발송을 방지
+     *
+     * @param event Ledger 거래 변경 이벤트
+     */
     @Transactional
     public void handleLedgerTransactionChanged(LedgerTransactionChangedEvent event) {
         if (event == null || event.getOwnerUserId() == null || event.getOwnerUserId().trim().isEmpty()) {

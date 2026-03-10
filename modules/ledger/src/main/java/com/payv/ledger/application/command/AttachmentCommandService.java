@@ -18,6 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * 첨부파일 업로드/삭제 명령 서비스.
+ * - 거래 첨부파일의 staging 저장, 메타데이터 저장, commit 후 최종 반영을 처리한다.
+ * - 파일 시스템과 DB가 동시에 변경되는 시나리오에서 트랜잭션 경계를 분리 일관성과 복구 가능성을 높인다.
+ */
 public class AttachmentCommandService {
 
     private static final int MAX_ATTACHMENTS = 2;
@@ -26,6 +31,22 @@ public class AttachmentCommandService {
     private final AttachmentStoragePort storagePort;
     private final TransactionTemplate txTemplate;
 
+    /**
+     * 거래 첨부파일을 업로드한다.
+     *
+     * Business logic:
+     * - 최대 개수(2개) 제한 확인
+     * - 파일을 staging에 먼저 저장
+     * - DB에는 UPLOADING 상태로 insert
+     * - DB 커밋 후 별도 트랜잭션에서 최종 경로로 move + STORED 갱신
+     * - 커밋 실패 시 staging 정리
+     *
+     * @param transactionId 첨부 대상 거래 ID
+     * @param ownerUserId 소유 사용자 ID
+     * @param file 업로드 파일
+     * @return 생성된 첨부파일 ID
+     * @throws AttachmentLimitExceededException 첨부파일 개수 제한(2개)을 초과한 경우
+     */
     @Transactional
     public AttachmentId upload(TransactionId transactionId, String ownerUserId, MultipartFile file) {
 
@@ -82,6 +103,8 @@ public class AttachmentCommandService {
                 });
             }
 
+            // 현재 진행 중인 트랜잭션(Committed 또는 Rolled Back)이 완전히 끝난 직후, 실행.
+            // `afterCommit()`보다 더 나중에 호출된다.
             @Override
             public void afterCompletion(int status) {
                 if (status == TransactionSynchronization.STATUS_ROLLED_BACK) {
@@ -93,6 +116,13 @@ public class AttachmentCommandService {
         return attachmentId;
     }
 
+    /**
+     * 첨부파일을 삭제한다.
+     *
+     * @param attachmentId 삭제할 첨부파일 ID
+     * @param ownerUserId 소유 사용자 ID
+     * @throws AttachmentNotFoundException 첨부파일이 없거나 소유자가 일치하지 않는 경우
+     */
     @Transactional
     public void delete(AttachmentId attachmentId, String ownerUserId) {
         Attachment attachment = attachmentRepository.findById(attachmentId, ownerUserId)
