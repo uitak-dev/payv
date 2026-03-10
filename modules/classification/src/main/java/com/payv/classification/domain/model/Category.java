@@ -159,7 +159,7 @@ public class Category {
     }
 
     public void ensureBelongsTo(String requesterOwnerUserId) {
-        // 시스템은 누구나 사용할 수 있다(정책). 사용자 카테고리는 owner만 가능.
+        // 시스템 카테고리는 누구나 사용할 수 있다(정책). 사용자 카테고리는 owner만 가능.
         if (isSystemCategory()) return;
         if (!Objects.equals(this.ownerUserId, requesterOwnerUserId)) {
             throw new IllegalStateException("category owner mismatch");

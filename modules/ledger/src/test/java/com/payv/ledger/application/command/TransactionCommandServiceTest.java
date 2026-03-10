@@ -171,7 +171,7 @@ public class TransactionCommandServiceTest {
 
     private static class NoOpAssetValidationPort implements AssetValidationPort {
         @Override
-        public void validateAssertId(String assetId, String ownerUserId) {
+        public void validateAssetIds(Collection<String> assetIds, String ownerUserId) {
         }
     }
 

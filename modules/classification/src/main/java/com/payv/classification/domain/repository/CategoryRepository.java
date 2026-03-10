@@ -29,10 +29,8 @@ public interface CategoryRepository {
     // 특정 parent의 children 수.
     int countChildren(CategoryId parentId, String ownerUserId);
 
-    /**
-     * Ledger 연동: id -> name 매핑 반환.
-     * - Transaction 조회 응답 조립 시 사용.
-     */
-    Map<CategoryId, String> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds);
+
+    // ---- Public Service(다른 BC에 노출)를 위한, 메서드 ----
+    List<Category> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds);
 
 }

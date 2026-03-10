@@ -1,6 +1,6 @@
 package com.payv.reporting.infrastructure.adapter;
 
-import com.payv.budget.application.query.BudgetQueryService;
+import com.payv.contracts.budget.BudgetPublicApi;
 import com.payv.reporting.application.port.BudgetSnapshotPort;
 import com.payv.reporting.application.port.dto.OverallBudgetSnapshotDto;
 import lombok.RequiredArgsConstructor;
@@ -13,19 +13,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InProcessBudgetAclAdapter implements BudgetSnapshotPort {
 
-    private final BudgetQueryService budgetQueryService;
+    private final BudgetPublicApi budgetPublicService;
 
     @Override
     public Optional<OverallBudgetSnapshotDto> findOverallBudget(String ownerUserId, YearMonth targetMonth) {
-        return budgetQueryService.getMonthlyBudgets(ownerUserId, targetMonth).stream()
-                .filter(budget -> budget.getCategoryId() == null)
-                .findFirst()
-                .map(budget -> new OverallBudgetSnapshotDto(
-                        budget.getBudgetId(),
-                        budget.getAmountLimit(),
-                        budget.getSpentAmount(),
-                        budget.getRemainingAmount(),
-                        budget.getUsageRate()
+        return budgetPublicService.getOverallBudgetUsage(ownerUserId, targetMonth)
+                .map(overallBudget -> new OverallBudgetSnapshotDto(
+                        overallBudget.getBudgetId(),
+                        overallBudget.getAmountLimit(),
+                        overallBudget.getSpentAmount(),
+                        overallBudget.getRemainingAmount(),
+                        overallBudget.getUsageRate()
                 ));
     }
 }

@@ -3,13 +3,14 @@ package com.payv.appweb.cache;
 import com.payv.appweb.config.RedisCacheConfig;
 import com.payv.budget.application.port.ClassificationQueryPort;
 import com.payv.budget.application.port.LedgerSpendingQueryPort;
-import com.payv.budget.application.port.dto.CategoryTreeOptionDto;
 import com.payv.budget.application.query.BudgetQueryService;
 import com.payv.budget.domain.model.Budget;
 import com.payv.budget.domain.model.BudgetId;
 import com.payv.budget.domain.repository.BudgetRepository;
 import com.payv.common.application.query.PagedResult;
 import com.payv.common.cache.CacheNames;
+import com.payv.contracts.classification.dto.CategoryTreePublicDto;
+import com.payv.contracts.common.dto.IdNamePublicDto;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.query.TransactionQueryService;
 import com.payv.ledger.infrastructure.persistence.mybatis.mapper.TransactionMapper;
@@ -230,34 +231,20 @@ public class RedisCacheVerificationTest {
 
         @Bean
         public com.payv.reporting.application.port.AssetLookupPort fixedAssetLookupPort() {
-            return (assetIds, ownerUserId) -> {
-                Map<String, String> ret = new HashMap<>();
-                for (String id : assetIds) {
-                    ret.put(id, "asset-" + id);
-                }
-                return ret;
-            };
+            return (assetIds, ownerUserId) -> toRows(assetIds, "asset-");
         }
 
         @Bean
         public ClassificationLookupPort fixedClassificationLookupPort() {
             return new ClassificationLookupPort() {
                 @Override
-                public Map<String, String> getCategoryNames(Collection<String> categoryIds, String ownerUserId) {
-                    Map<String, String> ret = new HashMap<>();
-                    for (String id : categoryIds) {
-                        ret.put(id, "cat-" + id);
-                    }
-                    return ret;
+                public List<IdNamePublicDto> getCategoryNames(Collection<String> categoryIds, String ownerUserId) {
+                    return toRows(categoryIds, "cat-");
                 }
 
                 @Override
-                public Map<String, String> getTagNames(Collection<String> tagIds, String ownerUserId) {
-                    Map<String, String> ret = new HashMap<>();
-                    for (String id : tagIds) {
-                        ret.put(id, "tag-" + id);
-                    }
-                    return ret;
+                public List<IdNamePublicDto> getTagNames(Collection<String> tagIds, String ownerUserId) {
+                    return toRows(tagIds, "tag-");
                 }
             };
         }
@@ -266,26 +253,22 @@ public class RedisCacheVerificationTest {
         public com.payv.ledger.application.port.ClassificationQueryPort fixedLedgerClassificationQueryPort() {
             return new com.payv.ledger.application.port.ClassificationQueryPort() {
                 @Override
-                public Map<String, String> getTagNames(Collection<String> tagIds, String ownerUserId) {
-                    return Collections.emptyMap();
-                }
-
-                @Override
-                public Map<String, String> getCategoryNames(Collection<String> categoryIds, String ownerUserId) {
-                    Map<String, String> ret = new HashMap<>();
-                    for (String id : categoryIds) {
-                        ret.put(id, "cat-" + id);
-                    }
-                    return ret;
-                }
-
-                @Override
-                public List<com.payv.ledger.application.port.dto.TagOptionDto> getAllTags(String ownerUserId) {
+                public List<IdNamePublicDto> getTagNames(Collection<String> tagIds, String ownerUserId) {
                     return Collections.emptyList();
                 }
 
                 @Override
-                public List<com.payv.ledger.application.port.dto.CategoryTreeOptionDto> getAllCategories(String ownerUserId) {
+                public List<IdNamePublicDto> getCategoryNames(Collection<String> categoryIds, String ownerUserId) {
+                    return toRows(categoryIds, "cat-");
+                }
+
+                @Override
+                public List<IdNamePublicDto> getAllTags(String ownerUserId) {
+                    return Collections.emptyList();
+                }
+
+                @Override
+                public List<CategoryTreePublicDto> getAllCategories(String ownerUserId) {
                     return Collections.emptyList();
                 }
             };
@@ -295,16 +278,12 @@ public class RedisCacheVerificationTest {
         public AssetQueryPort fixedLedgerAssetQueryPort() {
             return new AssetQueryPort() {
                 @Override
-                public Map<String, String> getAssetNames(Collection<String> assetIds, String ownerUserId) {
-                    Map<String, String> ret = new HashMap<>();
-                    for (String id : assetIds) {
-                        ret.put(id, "asset-" + id);
-                    }
-                    return ret;
+                public List<IdNamePublicDto> getAssetNames(Collection<String> assetIds, String ownerUserId) {
+                    return toRows(assetIds, "asset-");
                 }
 
                 @Override
-                public List<com.payv.ledger.application.port.dto.AssetOptionDto> getAllActiveAssets(String ownerUserId) {
+                public List<IdNamePublicDto> getAllActiveAssets(String ownerUserId) {
                     return Collections.emptyList();
                 }
             };
@@ -314,16 +293,12 @@ public class RedisCacheVerificationTest {
         public ClassificationQueryPort fixedBudgetClassificationQueryPort() {
             return new ClassificationQueryPort() {
                 @Override
-                public Map<String, String> getCategoryNames(Collection<String> categoryIds, String ownerUserId) {
-                    Map<String, String> ret = new HashMap<>();
-                    for (String id : categoryIds) {
-                        ret.put(id, "cat-" + id);
-                    }
-                    return ret;
+                public List<IdNamePublicDto> getCategoryNames(Collection<String> categoryIds, String ownerUserId) {
+                    return toRows(categoryIds, "cat-");
                 }
 
                 @Override
-                public List<CategoryTreeOptionDto> getAllCategories(String ownerUserId) {
+                public List<CategoryTreePublicDto> getAllCategories(String ownerUserId) {
                     return Collections.emptyList();
                 }
             };
@@ -332,6 +307,17 @@ public class RedisCacheVerificationTest {
         @Bean
         public LedgerSpendingQueryPort fixedLedgerSpendingQueryPort() {
             return (ownerUserId, from, to, categoryIdLevel1) -> 10000L;
+        }
+
+        private List<IdNamePublicDto> toRows(Collection<String> ids, String prefix) {
+            if (ids == null || ids.isEmpty()) {
+                return Collections.emptyList();
+            }
+            List<IdNamePublicDto> result = new ArrayList<>();
+            for (String id : ids) {
+                result.add(new IdNamePublicDto(id, prefix + id));
+            }
+            return result;
         }
     }
 

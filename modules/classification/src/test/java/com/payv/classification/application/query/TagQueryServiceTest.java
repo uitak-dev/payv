@@ -1,5 +1,6 @@
 package com.payv.classification.application.query;
 
+import com.payv.classification.application.query.model.TagView;
 import com.payv.classification.domain.model.Tag;
 import com.payv.classification.domain.model.TagId;
 import com.payv.classification.domain.repository.TagRepository;
@@ -30,7 +31,7 @@ public class TagQueryServiceTest {
         repository.save(tag, OWNER);
 
         // When
-        List<TagQueryService.TagView> views = service.getAll(OWNER);
+        List<TagView> views = service.getAll(OWNER);
 
         // Then
         assertEquals(1, views.size());
@@ -44,26 +45,11 @@ public class TagQueryServiceTest {
         repository.save(tag, OWNER);
 
         // When
-        Optional<TagQueryService.TagView> view = service.get(tag.getId(), OWNER);
+        Optional<TagView> view = service.get(tag.getId(), OWNER);
 
         // Then
         assertTrue(view.isPresent());
         assertEquals(tag.getId().getValue(), view.get().getTagId());
-    }
-
-    @Test
-    public void getNamesByIds_returnsNameMap() {
-        // Given
-        Tag tag = TagTestDataBuilder.tag("Cafe");
-        repository.save(tag, OWNER);
-
-        // When
-        Map<TagId, String> names = service.getNamesByIds(
-                OWNER, Collections.singletonList(tag.getId())
-        );
-
-        // Then
-        assertEquals("Cafe", names.get(tag.getId()));
     }
 
     private static class TagTestDataBuilder {
@@ -110,13 +96,13 @@ public class TagQueryServiceTest {
         }
 
         @Override
-        public Map<TagId, String> findNamesByIds(String ownerUserId, Collection<TagId> tagIds) {
-            Map<TagId, String> result = new HashMap<>();
+        public List<Tag> findNamesByIds(String ownerUserId, Collection<TagId> tagIds) {
+            List<Tag> result = new ArrayList<>();
             if (tagIds == null || tagIds.isEmpty()) return result;
 
             for (Tag tag : findAllByOwner(ownerUserId)) {
                 if (tagIds.contains(tag.getId())) {
-                    result.put(tag.getId(), tag.getName());
+                    result.add(tag);
                 }
             }
             return result;

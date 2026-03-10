@@ -20,6 +20,8 @@ public interface TagMapper {
                                  @Param("ownerUserId") String ownerUserId);
 
     List<TagRecord> selectAllByOwner(@Param("ownerUserId") String ownerUserId);
+    List<TagRecord> selectByIds(@Param("ownerUserId") String ownerUserId,
+                                @Param("ids") List<String> ids);
 
     int countByOwner(@Param("ownerUserId") String ownerUserId);
 }

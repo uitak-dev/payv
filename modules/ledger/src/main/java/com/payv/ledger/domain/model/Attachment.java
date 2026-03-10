@@ -106,16 +106,6 @@ public final class Attachment {
         return Objects.hash(getId());
     }
 
-    public void markFailed(String reason) {
-        this.status = Status.FAILED;
-        this.failureReason = reason;
-    }
-
-    public void markStored() {
-        this.status = Status.STORED;
-        this.failureReason = null;
-    }
-
     public enum Status {
         UPLOADING, STORED, FAILED
     }

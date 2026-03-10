@@ -2,9 +2,8 @@ package com.payv.automation.infrastructure.adapter;
 
 import com.payv.automation.application.port.LedgerTransactionPort;
 import com.payv.automation.domain.model.FixedExpenseExecution;
-import com.payv.ledger.application.command.TransactionCommandService;
-import com.payv.ledger.application.command.model.CreateAutoFixedExpenseTransactionCommand;
-import com.payv.ledger.domain.model.Money;
+import com.payv.contracts.ledger.LedgerPublicApi;
+import com.payv.contracts.ledger.dto.CreateFixedExpenseAutoTransactionPublicRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,19 +11,19 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class InProcessLedgerAclAdapter implements LedgerTransactionPort {
 
-    private final TransactionCommandService transactionCommandService;
+    private final LedgerPublicApi ledgerPublicService;
 
     @Override
     public String createFixedExpenseAutoTransaction(FixedExpenseExecution execution, String ownerUserId) {
-        CreateAutoFixedExpenseTransactionCommand command = new CreateAutoFixedExpenseTransactionCommand(
+        CreateFixedExpenseAutoTransactionPublicRequest request = new CreateFixedExpenseAutoTransactionPublicRequest(
                 execution.getDefinitionId().getValue(),
-                Money.generate(execution.getAmount()),
+                execution.getAmount(),
                 execution.getScheduledDate(),
                 execution.getAssetId(),
                 execution.getCategoryIdLevel1(),
                 execution.getCategoryIdLevel2(),
                 execution.getMemo()
         );
-        return transactionCommandService.createFixedCostAuto(command, ownerUserId).getValue();
+        return ledgerPublicService.createFixedExpenseAutoTransaction(ownerUserId, request);
     }
 }

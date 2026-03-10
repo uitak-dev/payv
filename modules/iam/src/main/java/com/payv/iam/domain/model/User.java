@@ -53,10 +53,6 @@ public class User {
         }
     }
 
-    public boolean matchesPasswordHash(String hashedPassword) {
-        return Objects.equals(this.passwordHash, requirePasswordHash(hashedPassword));
-    }
-
     public void deactivate() {
         this.isActive = false;
     }

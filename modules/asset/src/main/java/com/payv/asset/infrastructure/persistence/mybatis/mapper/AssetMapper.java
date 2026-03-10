@@ -10,12 +10,12 @@ import java.util.List;
 public interface AssetMapper {
 
     int upsert(AssetRecord record);
-
     AssetRecord selectByIdAndOwner(@Param("assetId") String assetId,
                                    @Param("ownerUserId") String ownerUserId);
-
     List<AssetRecord> selectAllByOwner(@Param("ownerUserId") String ownerUserId);
+
 
     List<AssetRecord> selectNamesByIds(@Param("ownerUserId") String ownerUserId,
                                        @Param("ids") List<String> ids);
+    List<AssetRecord> selectNamesByOwner(@Param("ownerUserId") String ownerUserId);
 }

@@ -205,17 +205,17 @@ public class CategoryCommandServiceTest {
         }
 
         @Override
-        public Map<CategoryId, String> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
-            Map<CategoryId, String> result = new HashMap<>();
+        public List<Category> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
+            List<Category> result = new ArrayList<>();
             if (categoryIds == null || categoryIds.isEmpty()) return result;
 
             for (Category root : findAllCategory(ownerUserId)) {
                 if (categoryIds.contains(root.getId())) {
-                    result.put(root.getId(), root.getName());
+                    result.add(root);
                 }
                 for (Category child : root.getChildren()) {
                     if (categoryIds.contains(child.getId())) {
-                        result.put(child.getId(), child.getName());
+                        result.add(child);
                     }
                 }
             }

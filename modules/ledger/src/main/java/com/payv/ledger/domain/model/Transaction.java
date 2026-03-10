@@ -104,6 +104,10 @@ public final class Transaction {
         return transaction;
     }
 
+    /** * * * * * * * * * * * * * * * * *  *
+     * Policy / Commands (domain behavior) *
+     * * * * * * * * * * * * * * * * * * * */
+
     public void updateMemo(String memo) {
         this.memo = memo;
     }

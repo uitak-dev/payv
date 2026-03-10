@@ -13,11 +13,6 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
-    <resultMap id="AssetNameMap" type="com.payv.asset.infrastructure.persistence.mybatis.record.AssetRecord">
-        <id     property="assetId" column="asset_id"/>
-        <result property="name" column="name"/>
-    </resultMap>
-
     <insert id="upsert" parameterType="com.payv.asset.infrastructure.persistence.mybatis.record.AssetRecord">
         INSERT INTO asset (
             asset_id,
@@ -75,7 +70,7 @@
         ORDER BY created_at ASC
     </select>
 
-    <select id="selectNamesByIds" resultMap="AssetNameMap">
+    <select id="selectNamesByIds" resultMap="AssetRecordMap">
         SELECT
             asset_id,
             name
@@ -86,6 +81,16 @@
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
+    </select>
+
+    <select id="selectNamesByOwner" resultMap="AssetRecordMap">
+        SELECT
+            asset_id,
+            name
+        FROM asset
+        WHERE owner_user_id = #{ownerUserId}
+        AND is_active = TRUE
+        ORDER BY created_at ASC
     </select>
 
 </mapper>

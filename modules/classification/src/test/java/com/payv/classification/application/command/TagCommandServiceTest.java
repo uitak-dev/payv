@@ -124,13 +124,13 @@ public class TagCommandServiceTest {
         }
 
         @Override
-        public Map<TagId, String> findNamesByIds(String ownerUserId, Collection<TagId> tagIds) {
-            Map<TagId, String> result = new HashMap<>();
+        public List<Tag> findNamesByIds(String ownerUserId, Collection<TagId> tagIds) {
+            List<Tag> result = new ArrayList<>();
             if (tagIds == null || tagIds.isEmpty()) return result;
 
             for (Tag tag : findAllByOwner(ownerUserId)) {
                 if (tagIds.contains(tag.getId())) {
-                    result.put(tag.getId(), tag.getName());
+                    result.add(tag);
                 }
             }
             return result;

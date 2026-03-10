@@ -31,18 +31,11 @@ public final class FixedExpenseDefinition {
     private boolean active;
 
     @Builder
-    private FixedExpenseDefinition(FixedExpenseDefinitionId id,
-                                   String ownerUserId,
-                                   String name,
-                                   long amount,
-                                   String assetId,
-                                   String categoryIdLevel1,
-                                   String categoryIdLevel2,
-                                   String memo,
-                                   FixedExpenseCycle cycle,
-                                   Integer dayOfMonth,
-                                   boolean endOfMonth,
-                                   boolean active) {
+    private FixedExpenseDefinition(FixedExpenseDefinitionId id, String ownerUserId,
+                                   String name, long amount, String assetId,
+                                   String categoryIdLevel1, String categoryIdLevel2,
+                                   String memo, FixedExpenseCycle cycle, Integer dayOfMonth,
+                                   boolean endOfMonth, boolean active) {
         this.id = requireId(id);
         this.ownerUserId = requireText(ownerUserId, "ownerUserId");
         this.name = requireText(name, "name");
@@ -57,15 +50,10 @@ public final class FixedExpenseDefinition {
         this.active = active;
     }
 
-    public static FixedExpenseDefinition create(String ownerUserId,
-                                                String name,
-                                                long amount,
-                                                String assetId,
-                                                String categoryIdLevel1,
-                                                String categoryIdLevel2,
-                                                String memo,
-                                                Integer dayOfMonth,
-                                                boolean endOfMonth) {
+    public static FixedExpenseDefinition create(String ownerUserId, String name,
+                                                long amount, String assetId,
+                                                String categoryIdLevel1, String categoryIdLevel2,
+                                                String memo, Integer dayOfMonth, boolean endOfMonth) {
         return FixedExpenseDefinition.builder()
                 .id(FixedExpenseDefinitionId.generate())
                 .ownerUserId(ownerUserId)
@@ -82,17 +70,11 @@ public final class FixedExpenseDefinition {
                 .build();
     }
 
-    public static FixedExpenseDefinition of(FixedExpenseDefinitionId id,
-                                            String ownerUserId,
-                                            String name,
-                                            long amount,
-                                            String assetId,
-                                            String categoryIdLevel1,
-                                            String categoryIdLevel2,
-                                            String memo,
-                                            FixedExpenseCycle cycle,
-                                            Integer dayOfMonth,
-                                            boolean endOfMonth,
+    public static FixedExpenseDefinition of(FixedExpenseDefinitionId id, String ownerUserId,
+                                            String name, long amount, String assetId,
+                                            String categoryIdLevel1, String categoryIdLevel2,
+                                            String memo, FixedExpenseCycle cycle,
+                                            Integer dayOfMonth, boolean endOfMonth,
                                             boolean active) {
         return FixedExpenseDefinition.builder()
                 .id(id)
@@ -109,6 +91,10 @@ public final class FixedExpenseDefinition {
                 .active(active)
                 .build();
     }
+
+    /** * * * * * * * * * * * * * * * * *  *
+     * Policy / Commands (domain behavior) *
+     * * * * * * * * * * * * * * * * * * * */
 
     /**
      * runDate가 이 definition의 실행일인지 판단한다.
@@ -154,6 +140,11 @@ public final class FixedExpenseDefinition {
     public void deactivate() {
         this.active = false;
     }
+
+
+    /** * * * * * * * * * * *
+     * Internal validations *
+     * * * * * * * * * * *  */
 
     private void requireActive() {
         if (!active) {

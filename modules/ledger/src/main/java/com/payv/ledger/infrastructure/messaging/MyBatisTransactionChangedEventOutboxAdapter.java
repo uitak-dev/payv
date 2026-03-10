@@ -13,6 +13,12 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * 거래 변경 이벤트 Outbox 적재 어댑터(MyBatis 구현).
+ * - 이벤트를 직렬화하여 Outbox 테이블에 PENDING 상태로 저장한다.
+ * - 거래 트랜잭션 커밋 시점에 이벤트를 안전하게 보관하고,
+ *   실제 브로커 전송은 별도 릴레이가 재시도 가능하게 처리한다.
+ */
 public class MyBatisTransactionChangedEventOutboxAdapter implements TransactionChangedEventOutboxPort {
 
     private final LedgerEventOutboxMapper ledgerEventOutboxMapper;
@@ -23,6 +29,11 @@ public class MyBatisTransactionChangedEventOutboxAdapter implements TransactionC
     @Value("${rabbitmq.routing-key.ledger-transaction-changed:ledger.transaction.changed}")
     private String routingKey;
 
+    /**
+     * 거래 변경 이벤트를 Outbox에 적재한다.
+     *
+     * @param event 거래 변경 이벤트
+     */
     @Override
     public void enqueue(LedgerTransactionChangedEvent event) {
         if (event == null) {

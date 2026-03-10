@@ -3,8 +3,6 @@ package com.payv.asset.domain.model;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.Objects;
-
 @Getter
 public class Asset {
 
@@ -59,12 +57,6 @@ public class Asset {
 
     public void deactivate() {
         this.isActive = false;
-    }
-
-    public void ensureBelongsTo(String requesterOwnerUserId) {
-        if (!Objects.equals(this.ownerUserId, requesterOwnerUserId)) {
-            throw new IllegalStateException("asset owner mismatch");
-        }
     }
 
     private void requireActive() {

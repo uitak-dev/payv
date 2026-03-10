@@ -10,9 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,20 +41,27 @@ public class MyBatisAssetRepository implements AssetRepository {
     }
 
     @Override
-    public Map<AssetId, String> findNamesByIds(String ownerUserId, Collection<AssetId> assetIds) {
-        if (assetIds == null || assetIds.isEmpty()) return Collections.emptyMap();
+    public List<Asset> findNamesByIds(String ownerUserId, Collection<AssetId> assetIds) {
+        if (assetIds == null || assetIds.isEmpty()) return Collections.emptyList();
 
         List<String> ids = assetIds.stream()
                 .filter(Objects::nonNull)
                 .map(AssetId::getValue)
                 .collect(Collectors.toList());
-        if (ids.isEmpty()) return Collections.emptyMap();
+        if (ids.isEmpty()) return Collections.emptyList();
 
         List<AssetRecord> rows = assetMapper.selectNamesByIds(ownerUserId, ids);
-        Map<AssetId, String> ret = new HashMap<>();
-        for (AssetRecord row : rows) {
-            ret.put(AssetId.of(row.getAssetId()), row.getName());
-        }
-        return ret;
+        if (rows == null || rows.isEmpty()) return Collections.emptyList();
+        return rows.stream().map(AssetRecord::toEntity).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Asset> findNamesByOwner(String ownerUserId) {
+        if (ownerUserId == null || ownerUserId.isEmpty()) return Collections.emptyList();
+
+        List<AssetRecord> rows = assetMapper.selectNamesByOwner(ownerUserId);
+        if (rows == null || rows.isEmpty()) return Collections.emptyList();
+        return rows.stream().map(AssetRecord::toEntity).collect(Collectors.toList());
+    }
+
 }

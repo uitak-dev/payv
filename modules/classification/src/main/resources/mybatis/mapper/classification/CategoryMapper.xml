@@ -16,11 +16,6 @@
         <result property="updatedAt"  column="updated_at"/>
     </resultMap>
 
-    <resultMap id="CategoryNameMap" type="com.payv.classification.infrastructure.persistence.mybatis.record.CategoryRecord">
-        <id     property="categoryId" column="category_id"/>
-        <result property="name"       column="name"/>
-    </resultMap>
-
     <insert id="upsert" parameterType="com.payv.classification.infrastructure.persistence.mybatis.record.CategoryRecord">
         INSERT INTO category (
             category_id,
@@ -136,10 +131,17 @@
         AND is_active = TRUE
     </select>
 
-    <select id="selectNamesByIds" resultMap="CategoryNameMap">
+    <select id="selectNamesByIds" resultMap="CategoryRecordMap">
         SELECT
             category_id,
-            name
+            owner_user_id,
+            name,
+            parent_id,
+            depth,
+            is_system,
+            is_active,
+            created_at,
+            updated_at
         FROM category
         WHERE owner_user_id = #{ownerUserId}
         AND is_active = TRUE

@@ -3,6 +3,7 @@ package com.payv.asset.application.command;
 import com.payv.asset.application.command.model.CreateAssetCommand;
 import com.payv.asset.application.command.model.DeactivateAssetCommand;
 import com.payv.asset.application.command.model.UpdateAssetCommand;
+import com.payv.asset.application.exception.DuplicateAssetNameException;
 import com.payv.asset.domain.model.Asset;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.asset.domain.model.AssetType;
@@ -49,7 +50,7 @@ public class AssetCommandServiceTest {
         assertTrue(saved.isActive());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = DuplicateAssetNameException.class)
     public void create_rejectsDuplicateName() {
         // Given
         repository.save(Asset.create(OWNER, "신한카드", AssetType.CARD), OWNER);
@@ -123,16 +124,25 @@ public class AssetCommandServiceTest {
         }
 
         @Override
-        public Map<AssetId, String> findNamesByIds(String ownerUserId, Collection<AssetId> assetIds) {
-            if (assetIds == null || assetIds.isEmpty()) return Collections.emptyMap();
+        public List<Asset> findNamesByIds(String ownerUserId, Collection<AssetId> assetIds) {
+            if (assetIds == null || assetIds.isEmpty()) return Collections.emptyList();
 
-            Map<AssetId, String> result = new LinkedHashMap<>();
+            List<Asset> result = new ArrayList<>();
             for (Asset asset : findAllByOwner(ownerUserId)) {
                 if (assetIds.contains(asset.getId())) {
-                    result.put(asset.getId(), asset.getName());
+                    result.add(asset);
                 }
             }
             return result;
+        }
+
+        @Override
+        public List<Asset> findNamesByOwner(String ownerUserId) {
+            if (ownerUserId == null || ownerUserId.trim().isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return findAllByOwner(ownerUserId);
         }
     }
 }

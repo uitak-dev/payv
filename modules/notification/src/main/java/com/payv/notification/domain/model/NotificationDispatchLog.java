@@ -21,9 +21,9 @@ public final class NotificationDispatchLog {
         this.notificationType = notificationType;
     }
 
-    public static NotificationDispatchLog of(String dispatchKey,
-                                             String ownerUserId,
+    public static NotificationDispatchLog of(String dispatchKey, String ownerUserId,
                                              NotificationType type) {
+
         return NotificationDispatchLog.builder()
                 .dispatchKey(dispatchKey)
                 .ownerUserId(ownerUserId)

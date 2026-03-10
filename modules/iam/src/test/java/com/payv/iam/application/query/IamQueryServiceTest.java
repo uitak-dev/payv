@@ -1,5 +1,6 @@
 package com.payv.iam.application.query;
 
+import com.payv.iam.application.query.model.UserProfileView;
 import com.payv.iam.domain.model.User;
 import com.payv.iam.domain.model.UserId;
 import com.payv.iam.domain.repository.UserRepository;
@@ -30,7 +31,7 @@ public class IamQueryServiceTest {
         User user = User.create("me@example.com", "hashed", "me");
         userRepository.save(user);
 
-        Optional<IamQueryService.UserProfileView> result = service.getUserProfile(user.getId().getValue());
+        Optional<UserProfileView> result = service.getUserProfile(user.getId().getValue());
 
         assertTrue(result.isPresent());
         assertEquals(user.getId().getValue(), result.get().getUserId());
@@ -39,13 +40,8 @@ public class IamQueryServiceTest {
 
     @Test
     public void getUserProfile_returnsEmptyWhenIdBlank() {
-        Optional<IamQueryService.UserProfileView> result = service.getUserProfile(" ");
+        Optional<UserProfileView> result = service.getUserProfile(" ");
         assertFalse(result.isPresent());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void validateOwnership_throwsWhenOwnerMismatch() {
-        service.validateOwnership("user-1", "user-2");
     }
 
     private static class InMemoryUserRepository implements UserRepository {

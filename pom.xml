@@ -17,6 +17,7 @@
         <module>modules/reporting</module>
         <module>modules/notification</module>
         <module>modules/common</module>
+        <module>modules/contracts</module>
         <module>modules/ledger</module>
         <module>modules/app-web</module>
     </modules>
@@ -62,6 +63,11 @@
             <dependency>
                 <groupId>com.payv</groupId>
                 <artifactId>common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.payv</groupId>
+                <artifactId>contracts</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

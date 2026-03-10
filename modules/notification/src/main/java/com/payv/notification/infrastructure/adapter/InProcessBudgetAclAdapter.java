@@ -1,7 +1,7 @@
 package com.payv.notification.infrastructure.adapter;
 
-import com.payv.budget.application.query.BudgetQueryService;
-import com.payv.budget.application.query.model.BudgetView;
+import com.payv.contracts.budget.BudgetPublicApi;
+import com.payv.contracts.budget.dto.BudgetUsagePublicDto;
 import com.payv.notification.application.port.BudgetUsageQueryPort;
 import com.payv.notification.application.port.dto.BudgetUsageSnapshot;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InProcessBudgetAclAdapter implements BudgetUsageQueryPort {
 
-    private final BudgetQueryService budgetQueryService;
+    private final BudgetPublicApi budgetPublicService;
 
     @Override
     public List<BudgetUsageSnapshot> findMonthlyBudgetUsages(String ownerUserId, YearMonth targetMonth) {
@@ -24,21 +24,21 @@ public class InProcessBudgetAclAdapter implements BudgetUsageQueryPort {
             return Collections.emptyList();
         }
 
-        List<BudgetView> views = budgetQueryService.getMonthlyBudgets(ownerUserId, targetMonth);
-        if (views == null || views.isEmpty()) {
+        List<BudgetUsagePublicDto> rows = budgetPublicService.getMonthlyBudgetUsages(ownerUserId, targetMonth);
+        if (rows == null || rows.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<BudgetUsageSnapshot> snapshots = new ArrayList<>(views.size());
-        for (BudgetView view : views) {
+        List<BudgetUsageSnapshot> snapshots = new ArrayList<>(rows.size());
+        for (BudgetUsagePublicDto row : rows) {
             snapshots.add(new BudgetUsageSnapshot(
-                    view.getBudgetId(),
-                    targetMonth,
-                    view.getCategoryId(),
-                    view.getCategoryName(),
-                    view.getAmountLimit(),
-                    view.getSpentAmount(),
-                    view.getUsageRate()
+                    row.getBudgetId(),
+                    row.getTargetMonth(),
+                    row.getCategoryId(),
+                    row.getCategoryName(),
+                    row.getAmountLimit(),
+                    row.getSpentAmount(),
+                    row.getUsageRate()
             ));
         }
         return snapshots;

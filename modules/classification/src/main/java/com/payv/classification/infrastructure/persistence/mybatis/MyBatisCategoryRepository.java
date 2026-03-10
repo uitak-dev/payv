@@ -80,22 +80,19 @@ public class MyBatisCategoryRepository implements CategoryRepository {
     }
 
     @Override
-    public Map<CategoryId, String> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
-
-        if (categoryIds == null || categoryIds.isEmpty()) return Collections.emptyMap();
+    public List<Category> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) return Collections.emptyList();
 
         List<String> ids = categoryIds.stream()
                 .filter(Objects::nonNull)
                 .map(CategoryId::getValue)
                 .collect(Collectors.toList());
-        if (ids.isEmpty()) return Collections.emptyMap();
+        if (ids.isEmpty()) return Collections.emptyList();
 
         List<CategoryRecord> rows = categoryMapper.selectNamesByIds(ownerUserId, ids);
-
-        Map<CategoryId, String> ret = new HashMap<>();
-        for (CategoryRecord r : rows) {
-            ret.put(CategoryId.of(r.getCategoryId()), r.getName());
-        }
-        return ret;
+        if (rows == null || rows.isEmpty()) return Collections.emptyList();
+        return rows.stream()
+                .map(assembler::toEntityShallow)
+                .collect(Collectors.toList());
     }
 }

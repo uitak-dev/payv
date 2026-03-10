@@ -9,7 +9,7 @@ import java.util.Objects;
 public final class TransactionSource {
 
     private final TransactionSourceType type;
-    private final String originalReference;
+    private final String originalReference;     // 고정비 정의(FixedExpenseDefinitionId)
 
     @Builder
     private TransactionSource(TransactionSourceType type, String originalReference) {

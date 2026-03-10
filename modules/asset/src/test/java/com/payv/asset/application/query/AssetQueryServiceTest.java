@@ -1,9 +1,11 @@
 package com.payv.asset.application.query;
 
+import com.payv.asset.application.query.model.AssetView;
 import com.payv.asset.domain.model.Asset;
 import com.payv.asset.domain.model.AssetId;
 import com.payv.asset.domain.model.AssetType;
 import com.payv.asset.domain.repository.AssetRepository;
+import com.payv.contracts.common.dto.IdNamePublicDto;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,6 +21,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class AssetQueryServiceTest {
 
@@ -26,11 +29,13 @@ public class AssetQueryServiceTest {
 
     private InMemoryAssetRepository repository;
     private AssetQueryService service;
+    private AssetPublicService publicService;
 
     @Before
     public void setUp() {
         repository = new InMemoryAssetRepository();
         service = new AssetQueryService(repository);
+        publicService = new AssetPublicService(repository);
     }
 
     @Test
@@ -40,7 +45,7 @@ public class AssetQueryServiceTest {
         repository.save(Asset.create(OWNER, "신한카드", AssetType.CARD), OWNER);
 
         // When
-        List<AssetQueryService.AssetView> result = service.getAll(OWNER);
+        List<AssetView> result = service.getAll(OWNER);
 
         // Then
         assertEquals(2, result.size());
@@ -56,16 +61,35 @@ public class AssetQueryServiceTest {
         repository.save(cash, OWNER);
         repository.save(card, OWNER);
 
-        Set<AssetId> ids = new LinkedHashSet<>();
-        ids.add(cash.getId());
-        ids.add(AssetId.of("missing-id"));
+        Set<String> ids = new LinkedHashSet<>();
+        ids.add(cash.getId().getValue());
+        ids.add("missing-id");
 
         // When
-        Map<AssetId, String> names = service.getNamesByIds(OWNER, ids);
+        List<IdNamePublicDto> rows = publicService.getAssetsByIds(OWNER, ids);
 
         // Then
-        assertEquals(1, names.size());
-        assertEquals("현금", names.get(cash.getId()));
+        assertEquals(1, rows.size());
+        assertEquals(cash.getId().getValue(), rows.get(0).getId());
+        assertEquals("현금", rows.get(0).getName());
+    }
+
+    @Test
+    public void getAssetsByOwner_returnsAllActiveAssetsAsDto() {
+        // Given
+        Asset cash = Asset.create(OWNER, "현금", AssetType.CASH);
+        Asset card = Asset.create(OWNER, "카드", AssetType.CARD);
+        repository.save(cash, OWNER);
+        repository.save(card, OWNER);
+
+        // When
+        List<IdNamePublicDto> rows = publicService.getAssetsByOwner(OWNER);
+
+        // Then
+        assertEquals(2, rows.size());
+        assertEquals(cash.getId().getValue(), rows.get(0).getId());
+        assertEquals("현금", rows.get(0).getName());
+        assertTrue(rows.stream().anyMatch(row -> row.getId().equals(card.getId().getValue())));
     }
 
     @Test
@@ -77,7 +101,7 @@ public class AssetQueryServiceTest {
         repository.save(asset, OWNER);
 
         // When
-        Optional<AssetQueryService.AssetView> result = service.get(asset.getId(), OWNER);
+        Optional<AssetView> result = service.get(asset.getId(), OWNER);
 
         // Then
         assertFalse(result.isPresent());
@@ -119,16 +143,25 @@ public class AssetQueryServiceTest {
         }
 
         @Override
-        public Map<AssetId, String> findNamesByIds(String ownerUserId, Collection<AssetId> assetIds) {
-            if (assetIds == null || assetIds.isEmpty()) return Collections.emptyMap();
+        public List<Asset> findNamesByIds(String ownerUserId, Collection<AssetId> assetIds) {
+            if (assetIds == null || assetIds.isEmpty()) return Collections.emptyList();
 
-            Map<AssetId, String> result = new LinkedHashMap<>();
+            List<Asset> result = new ArrayList<>();
             for (Asset asset : findAllByOwner(ownerUserId)) {
                 if (assetIds.contains(asset.getId())) {
-                    result.put(asset.getId(), asset.getName());
+                    result.add(asset);
                 }
             }
             return result;
+        }
+
+        @Override
+        public List<Asset> findNamesByOwner(String ownerUserId) {
+            if (ownerUserId == null || ownerUserId.trim().isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return findAllByOwner(ownerUserId);
         }
     }
 }

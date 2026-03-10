@@ -23,17 +23,13 @@ public final class Notification {
     private OffsetDateTime updatedAt;
 
     @Builder
-    private Notification(NotificationId id,
-                         String ownerUserId,
+    private Notification(NotificationId id, String ownerUserId,
                          NotificationType type,
-                         String title,
-                         String message,
-                         String referenceType,
-                         String referenceId,
-                         boolean isRead,
-                         OffsetDateTime readAt,
-                         OffsetDateTime createdAt,
-                         OffsetDateTime updatedAt) {
+                         String title, String message,
+                         String referenceType, String referenceId,
+                         boolean isRead, OffsetDateTime readAt,
+                         OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+
         this.id = requireId(id);
         this.ownerUserId = requireOwner(ownerUserId);
         this.type = requireType(type);
@@ -47,12 +43,10 @@ public final class Notification {
         this.updatedAt = updatedAt;
     }
 
-    public static Notification create(String ownerUserId,
-                                      NotificationType type,
-                                      String title,
-                                      String message,
-                                      String referenceType,
-                                      String referenceId) {
+    public static Notification create(String ownerUserId, NotificationType type,
+                                      String title, String message,
+                                      String referenceType, String referenceId) {
+
         return Notification.builder()
                 .id(NotificationId.generate())
                 .ownerUserId(ownerUserId)
@@ -65,17 +59,13 @@ public final class Notification {
                 .build();
     }
 
-    public static Notification of(NotificationId id,
-                                  String ownerUserId,
+    public static Notification of(NotificationId id, String ownerUserId,
                                   NotificationType type,
-                                  String title,
-                                  String message,
-                                  String referenceType,
-                                  String referenceId,
-                                  boolean isRead,
-                                  OffsetDateTime readAt,
-                                  OffsetDateTime createdAt,
-                                  OffsetDateTime updatedAt) {
+                                  String title, String message,
+                                  String referenceType, String referenceId,
+                                  boolean isRead, OffsetDateTime readAt,
+                                  OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+
         return Notification.builder()
                 .id(id)
                 .ownerUserId(ownerUserId)

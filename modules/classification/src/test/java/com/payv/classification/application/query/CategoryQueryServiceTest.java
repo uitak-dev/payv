@@ -54,24 +54,6 @@ public class CategoryQueryServiceTest {
         assertEquals(root.getId().getValue(), view.get().getCategoryId());
     }
 
-    @Test
-    public void getNamesByIds_returnsNameMap() {
-        // Given
-        Category root = CategoryTestDataBuilder.rootWithChild("Transport", "Taxi");
-        repository.save(root, OWNER);
-        CategoryId rootId = root.getId();
-        CategoryId childId = root.getChildren().get(0).getId();
-
-        // When
-        Map<CategoryId, String> names = service.getNamesByIds(
-                OWNER, Arrays.asList(rootId, childId)
-        );
-
-        // Then
-        assertEquals("Transport", names.get(rootId));
-        assertEquals("Taxi", names.get(childId));
-    }
-
     private static class CategoryTestDataBuilder {
         static Category root(String name) {
             return Category.createParent(OWNER, name);
@@ -127,17 +109,17 @@ public class CategoryQueryServiceTest {
         }
 
         @Override
-        public Map<CategoryId, String> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
-            Map<CategoryId, String> result = new HashMap<>();
+        public List<Category> findNamesByIds(String ownerUserId, Collection<CategoryId> categoryIds) {
+            List<Category> result = new ArrayList<>();
             if (categoryIds == null || categoryIds.isEmpty()) return result;
 
             for (Category root : findAllCategory(ownerUserId)) {
                 if (categoryIds.contains(root.getId())) {
-                    result.put(root.getId(), root.getName());
+                    result.add(root);
                 }
                 for (Category child : root.getChildren()) {
                     if (categoryIds.contains(child.getId())) {
-                        result.put(child.getId(), child.getName());
+                        result.add(child);
                     }
                 }
             }

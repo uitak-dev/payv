@@ -7,10 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 고정비 실제 실행(또는 실행 예정) 인스턴스.
+ * 고정비 실제 실행 인스턴스.
  *
  * definition은 "규칙", execution은 "특정 날짜의 실제 처리 단위"다.
- * 실행 시점의 이름/금액/분류를 snapshot으로 보관해
+ * 실행 시점의 이름/금액/분류를 snapshot으로 보관해,
  * 이후 definition이 바뀌어도 당시 이력을 재현할 수 있게 한다.
  */
 @Getter
@@ -41,13 +41,9 @@ public final class FixedExpenseExecution {
     private FixedExpenseExecution(FixedExpenseExecutionId id,
                                   FixedExpenseDefinitionId definitionId,
                                   String ownerUserId,
-                                  String definitionName,
-                                  long amount,
-                                  String assetId,
-                                  String categoryIdLevel1,
-                                  String categoryIdLevel2,
-                                  String memo,
-                                  LocalDate scheduledDate,
+                                  String definitionName, long amount, String assetId,
+                                  String categoryIdLevel1, String categoryIdLevel2,
+                                  String memo, LocalDate scheduledDate,
                                   FixedExpenseExecutionStatus status,
                                   String transactionId,
                                   String failureReason,
@@ -64,6 +60,7 @@ public final class FixedExpenseExecution {
         this.memo = normalizeNullable(memo);
         this.scheduledDate = requireDate(scheduledDate, "scheduledDate");
         this.status = status == null ? FixedExpenseExecutionStatus.PLANNED : status;
+
         this.transactionId = normalizeNullable(transactionId);
         this.failureReason = normalizeNullable(failureReason);
         this.batchJobExecutionId = batchJobExecutionId;
@@ -90,13 +87,9 @@ public final class FixedExpenseExecution {
     public static FixedExpenseExecution of(FixedExpenseExecutionId id,
                                            FixedExpenseDefinitionId definitionId,
                                            String ownerUserId,
-                                           String definitionName,
-                                           long amount,
-                                           String assetId,
-                                           String categoryIdLevel1,
-                                           String categoryIdLevel2,
-                                           String memo,
-                                           LocalDate scheduledDate,
+                                           String definitionName, long amount, String assetId,
+                                           String categoryIdLevel1, String categoryIdLevel2,
+                                           String memo, LocalDate scheduledDate,
                                            FixedExpenseExecutionStatus status,
                                            String transactionId,
                                            String failureReason,
@@ -120,6 +113,11 @@ public final class FixedExpenseExecution {
                 .processedAt(processedAt)
                 .build();
     }
+
+
+    /** * * * * * * * * * * * * * * * * *  *
+     * Policy / Commands (domain behavior) *
+     * * * * * * * * * * * * * * * * * * * */
 
     public void markSucceeded(String transactionId, Long batchJobExecutionId, LocalDateTime processedAt) {
         ensurePlanned();
@@ -155,6 +153,11 @@ public final class FixedExpenseExecution {
             throw new IllegalStateException("fixed expense execution is already finalized");
         }
     }
+
+
+    /** * * * * * * * * * * *
+     * Internal validations *
+     * * * * * * * * * * *  */
 
     private static FixedExpenseExecutionId requireId(FixedExpenseExecutionId value) {
         if (value == null) {
