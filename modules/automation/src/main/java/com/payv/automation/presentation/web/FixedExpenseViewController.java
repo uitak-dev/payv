@@ -1,32 +1,23 @@
 package com.payv.automation.presentation.web;
 
-import com.payv.automation.application.command.FixedExpenseCommandService;
-import com.payv.automation.application.command.model.DeactivateFixedExpenseCommand;
 import com.payv.automation.application.exception.FixedExpenseNotFoundException;
 import com.payv.automation.application.query.FixedExpenseQueryService;
 import com.payv.automation.application.query.model.FixedExpenseView;
 import com.payv.automation.domain.model.FixedExpenseDefinitionId;
-import com.payv.automation.presentation.dto.request.CreateFixedExpenseRequest;
 import com.payv.automation.presentation.dto.request.FixedExpenseDetailNoticeRequest;
 import com.payv.automation.presentation.dto.request.FixedExpenseListNoticeRequest;
-import com.payv.automation.presentation.dto.request.UpdateFixedExpenseRequest;
-import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Controller
 @RequestMapping("/automation/fixed-expenses")
 @RequiredArgsConstructor
 public class FixedExpenseViewController {
 
-    private final FixedExpenseCommandService commandService;
     private final FixedExpenseQueryService queryService;
 
     @GetMapping
@@ -48,7 +39,7 @@ public class FixedExpenseViewController {
         model.addAttribute("categories", queryService.getCategoryOptions(ownerUserId));
         model.addAttribute("error", error);
         model.addAttribute("mode", "create");
-        model.addAttribute("action", "/automation/fixed-expenses");
+        model.addAttribute("action", "/api/automation/fixed-expenses");
         model.addAttribute("submitLabel", "저장");
         return "automation/fixed-expense/form";
     }
@@ -81,36 +72,8 @@ public class FixedExpenseViewController {
         model.addAttribute("categories", queryService.getCategoryOptions(ownerUserId));
         model.addAttribute("error", error);
         model.addAttribute("mode", "edit");
-        model.addAttribute("action", "/automation/fixed-expenses/" + definitionId);
+        model.addAttribute("action", "/api/automation/fixed-expenses/" + definitionId);
         model.addAttribute("submitLabel", "수정");
         return "automation/fixed-expense/form";
-    }
-
-    @PostMapping(produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @ModelAttribute CreateFixedExpenseRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        FixedExpenseDefinitionId definitionId = commandService.create(request.toCommand(), ownerUserId);
-        return AjaxResponses.okRedirect("/automation/fixed-expenses/" + definitionId.getValue() + "?created=true");
-    }
-
-    @PutMapping(path = "/{definitionId}", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> update(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @PathVariable String definitionId,
-                                                       @RequestBody UpdateFixedExpenseRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.update(request.toCommand(definitionId), ownerUserId);
-        return AjaxResponses.okRedirect("/automation/fixed-expenses/" + definitionId + "?updated=true");
-    }
-
-    @DeleteMapping(path = "/{definitionId}", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                           @PathVariable String definitionId) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.deactivate(new DeactivateFixedExpenseCommand(FixedExpenseDefinitionId.of(definitionId)), ownerUserId);
-        return AjaxResponses.okRedirect("/automation/fixed-expenses?deactivated=true");
     }
 }

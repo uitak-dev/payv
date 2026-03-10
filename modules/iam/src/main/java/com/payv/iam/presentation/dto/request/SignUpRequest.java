@@ -1,5 +1,6 @@
 package com.payv.iam.presentation.dto.request;
 
+import com.payv.iam.application.command.model.SignUpCommand;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -16,4 +17,8 @@ public class SignUpRequest {
     private String password;
 
     private String displayName;
+
+    public SignUpCommand toCommand() {
+        return new SignUpCommand(email, password, displayName);
+    }
 }

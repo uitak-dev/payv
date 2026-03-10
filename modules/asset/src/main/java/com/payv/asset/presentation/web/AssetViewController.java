@@ -21,7 +21,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AssetViewController {
 
-    private final AssetCommandService commandService;
     private final AssetQueryService queryService;
 
     @GetMapping
@@ -59,31 +58,4 @@ public class AssetViewController {
         return "asset/edit";
     }
 
-    @PostMapping(produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @ModelAttribute CreateAssetRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.create(request.toCommand(), ownerUserId);
-        return AjaxResponses.okRedirect("/asset/assets?created=true");
-    }
-
-    @PutMapping(path = "/{assetId}", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> update(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @PathVariable String assetId,
-                                                       @RequestBody UpdateAssetRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.update(request.toCommand(assetId), ownerUserId);
-        return AjaxResponses.okRedirect("/asset/assets?updated=true");
-    }
-
-    @DeleteMapping(path = "/{assetId}", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                           @PathVariable String assetId) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.deactivate(new DeactivateAssetCommand(AssetId.of(assetId)), ownerUserId);
-        return AjaxResponses.okRedirect("/asset/assets?deactivated=true");
-    }
 }

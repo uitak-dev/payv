@@ -1,27 +1,20 @@
 package com.payv.ledger.presentation.web;
 
 import com.payv.iam.infrastructure.security.IamUserDetails;
-import com.payv.common.presentation.api.AjaxResponses;
-import com.payv.ledger.application.command.TransferCommandService;
 import com.payv.ledger.application.exception.TransferNotFoundException;
 import com.payv.ledger.application.port.AssetQueryPort;
 import com.payv.ledger.application.query.TransferQueryService;
-import com.payv.ledger.domain.model.TransferId;
-import com.payv.ledger.presentation.dto.request.CreateTransferRequest;
 import com.payv.ledger.presentation.dto.request.TransferDetailNoticeQueryRequest;
 import com.payv.ledger.presentation.dto.request.TransferListNoticeQueryRequest;
 import com.payv.ledger.presentation.dto.request.TransferListQueryRequest;
-import com.payv.ledger.presentation.dto.request.UpdateTransferRequest;
 import com.payv.ledger.presentation.dto.viewmodel.TransferDetailView;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/ledger/transfers")
@@ -29,7 +22,6 @@ import java.util.Map;
 public class TransferViewController {
 
     private final TransferQueryService queryService;
-    private final TransferCommandService commandService;
     private final AssetQueryPort assetQueryPort;
 
     @GetMapping
@@ -61,19 +53,10 @@ public class TransferViewController {
         model.addAttribute("assets", assetQueryPort.getAllActiveAssets(ownerUserId));
         model.addAttribute("error", error);
         model.addAttribute("mode", "create");
-        model.addAttribute("action", "/ledger/transfers");
+        model.addAttribute("action", "/api/ledger/transfers");
         model.addAttribute("submitLabel", "저장");
         model.addAttribute("today", LocalDate.now());
         return "ledger/transfer/form";
-    }
-
-    @PostMapping(produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                      @ModelAttribute CreateTransferRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        TransferId id = commandService.create(request.toCommand(), ownerUserId);
-        return AjaxResponses.okRedirect("/ledger/transfers/" + id.getValue() + "?created=true");
     }
 
     @GetMapping("/{transferId}")
@@ -103,30 +86,11 @@ public class TransferViewController {
             model.addAttribute("error", error);
             model.addAttribute("mode", "edit");
             model.addAttribute("transfer", transfer);
-            model.addAttribute("action", "/ledger/transfers/" + transferId);
+            model.addAttribute("action", "/api/ledger/transfers/" + transferId);
             model.addAttribute("submitLabel", "수정");
             return "ledger/transfer/form";
         } catch (TransferNotFoundException e) {
             return "redirect:/ledger/transfers?error=true";
         }
-    }
-
-    @PutMapping(path = "/{transferId}", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> update(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @PathVariable String transferId,
-                                                       @RequestBody UpdateTransferRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.update(TransferId.of(transferId), request.toCommand(), ownerUserId);
-        return AjaxResponses.okRedirect("/ledger/transfers/" + transferId + "?updated=true");
-    }
-
-    @DeleteMapping(path = "/{transferId}", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> delete(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @PathVariable String transferId) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.delete(TransferId.of(transferId), ownerUserId);
-        return AjaxResponses.okRedirect("/ledger/transfers?deleted=true");
     }
 }

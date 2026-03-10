@@ -1,27 +1,20 @@
 package com.payv.classification.presentation.web;
 
-import com.payv.classification.application.command.TagCommandService;
-import com.payv.classification.application.command.model.CreateTagCommand;
-import com.payv.classification.application.command.model.DeactivateTagCommand;
 import com.payv.classification.application.query.TagQueryService;
+import com.payv.classification.application.query.model.TagView;
 import com.payv.classification.domain.model.TagId;
-import com.payv.classification.presentation.dto.request.RenameTagRequest;
-import com.payv.common.presentation.api.AjaxResponses;
 import com.payv.iam.infrastructure.security.IamUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/classification/tags")
 @RequiredArgsConstructor
 public class TagViewController {
 
-    private final TagCommandService commandService;
     private final TagQueryService queryService;
 
     @GetMapping
@@ -53,40 +46,12 @@ public class TagViewController {
                            @RequestParam(required = false) String error,
                            Model model) {
         String ownerUserId = userDetails.getUserId();
-        TagQueryService.TagView tag = queryService.get(TagId.of(tagId), ownerUserId).orElse(null);
+        TagView tag = queryService.get(TagId.of(tagId), ownerUserId).orElse(null);
         if (tag == null) {
             return "redirect:/classification/tags?error=true";
         }
         model.addAttribute("tag", tag);
         model.addAttribute("error", error);
         return "classification/tag/edit";
-    }
-
-    @PostMapping(produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> create(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                      @RequestParam String name) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.create(new CreateTagCommand(name), ownerUserId);
-        return AjaxResponses.okRedirect("/classification/tags?created=true");
-    }
-
-    @PutMapping(path = "/{tagId}", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> rename(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                       @PathVariable String tagId,
-                                                       @RequestBody RenameTagRequest request) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.rename(request.toCommand(tagId), ownerUserId);
-        return AjaxResponses.okRedirect("/classification/tags?renamed=true");
-    }
-
-    @DeleteMapping(path = "/{tagId}", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> deactivate(@AuthenticationPrincipal IamUserDetails userDetails,
-                                                          @PathVariable String tagId) {
-        String ownerUserId = userDetails.getUserId();
-        commandService.deactivate(new DeactivateTagCommand(TagId.of(tagId)), ownerUserId);
-        return AjaxResponses.okRedirect("/classification/tags?deactivated=true");
     }
 }
