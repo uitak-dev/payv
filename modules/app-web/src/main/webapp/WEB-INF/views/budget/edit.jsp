@@ -26,7 +26,7 @@
         </c:if>
 
         <form method="post"
-              action="${ctx}/budget/budgets/${budget.budgetId}"
+              action="${ctx}/api/budget/budgets/${budget.budgetId}"
               class="space-y-4"
               data-ajax="true"
               data-method="PUT"

@@ -43,7 +43,7 @@
                         <select name="fromAssetId" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                             <option value="">선택</option>
                             <c:forEach var="asset" items="${assets}">
-                                <option value="${asset.assetId}" ${mode == 'edit' and asset.assetId == transfer.fromAssetId ? 'selected' : ''}>${asset.name}</option>
+                                <option value="${asset.id}" ${mode == 'edit' and asset.id == transfer.fromAssetId ? 'selected' : ''}>${asset.name}</option>
                             </c:forEach>
                         </select>
                     </label>
@@ -53,7 +53,7 @@
                         <select name="toAssetId" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                             <option value="">선택</option>
                             <c:forEach var="asset" items="${assets}">
-                                <option value="${asset.assetId}" ${mode == 'edit' and asset.assetId == transfer.toAssetId ? 'selected' : ''}>${asset.name}</option>
+                                <option value="${asset.id}" ${mode == 'edit' and asset.id == transfer.toAssetId ? 'selected' : ''}>${asset.name}</option>
                             </c:forEach>
                         </select>
                         <p class="mt-1 text-xs text-slate-500">출금/입금 자산은 동일할 수 없습니다.</p>

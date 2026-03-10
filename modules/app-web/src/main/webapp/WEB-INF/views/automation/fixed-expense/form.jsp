@@ -59,7 +59,7 @@
                         <select name="assetId" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                             <option value="">선택</option>
                             <c:forEach var="asset" items="${assets}">
-                                <option value="${asset.assetId}" ${mode == 'edit' && asset.assetId == fixedExpense.assetId ? 'selected' : ''}>${asset.name}</option>
+                                <option value="${asset.id}" ${mode == 'edit' && asset.id == fixedExpense.assetId ? 'selected' : ''}>${asset.name}</option>
                             </c:forEach>
                         </select>
                     </label>
@@ -80,9 +80,9 @@
                             <option value="">선택</option>
                             <c:forEach var="root" items="${categories}">
                                 <c:forEach var="child" items="${root.children}">
-                                    <option value="${child.categoryId}"
+                                    <option value="${child.id}"
                                             data-parent="${root.categoryId}"
-                                            ${mode == 'edit' && child.categoryId == fixedExpense.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
+                                            ${mode == 'edit' && child.id == fixedExpense.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
                                 </c:forEach>
                             </c:forEach>
                         </select>

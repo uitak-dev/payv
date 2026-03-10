@@ -25,7 +25,7 @@
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>
         </c:if>
 
-        <form class="space-y-4" method="post" action="${ctx}/classification/tags/${tag.tagId}" data-ajax="true" data-method="PUT" data-json="true">
+        <form class="space-y-4" method="post" action="${ctx}/api/classification/tags/${tag.tagId}" data-ajax="true" data-method="PUT" data-json="true">
             <section class="pv-card p-4">
                 <label>
                     <div class="text-sm font-medium">태그 이름</div>
@@ -35,7 +35,7 @@
             <button type="submit" class="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">수정</button>
         </form>
 
-        <form class="mt-4" method="post" action="${ctx}/classification/tags/${tag.tagId}" data-ajax="true" data-method="DELETE">
+        <form class="mt-4" method="post" action="${ctx}/api/classification/tags/${tag.tagId}" data-ajax="true" data-method="DELETE">
             <button type="submit" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-700 transition hover:bg-red-50">태그 삭제</button>
         </form>
     </main>

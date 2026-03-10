@@ -56,7 +56,7 @@
                             <select name="assetId" data-required-for="tx" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                                 <option value="">선택</option>
                                 <c:forEach var="asset" items="${assets}">
-                                    <option value="${asset.assetId}" ${mode == 'edit' and asset.assetId == tx.assetId ? 'selected' : ''}>${asset.name}</option>
+                                    <option value="${asset.id}" ${mode == 'edit' and asset.id == tx.assetId ? 'selected' : ''}>${asset.name}</option>
                                 </c:forEach>
                             </select>
                         </label>
@@ -77,7 +77,7 @@
                                 <option value="">선택</option>
                                 <c:forEach var="root" items="${categories}">
                                     <c:forEach var="child" items="${root.children}">
-                                        <option value="${child.categoryId}" data-parent="${root.categoryId}" ${mode == 'edit' and child.categoryId == tx.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
+                                        <option value="${child.id}" data-parent="${root.categoryId}" ${mode == 'edit' and child.id == tx.categoryIdLevel2 ? 'selected' : ''}>${root.name} / ${child.name}</option>
                                     </c:forEach>
                                 </c:forEach>
                             </select>
@@ -88,7 +88,7 @@
                             <div class="mt-2 grid grid-cols-2 gap-2">
                                 <c:forEach var="tag" items="${tags}">
                                     <label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                                        <input type="checkbox" name="tagIds" value="${tag.tagId}" ${selectedTagMap[tag.tagId] ? 'checked' : ''}/>
+                                        <input type="checkbox" name="tagIds" value="${tag.id}" ${selectedTagMap[tag.id] ? 'checked' : ''}/>
                                         <span>${tag.name}</span>
                                     </label>
                                 </c:forEach>
@@ -102,7 +102,7 @@
                             <select name="fromAssetId" data-required-for="transfer" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                                 <option value="">선택</option>
                                 <c:forEach var="asset" items="${assets}">
-                                    <option value="${asset.assetId}">${asset.name}</option>
+                                    <option value="${asset.id}">${asset.name}</option>
                                 </c:forEach>
                             </select>
                         </label>
@@ -112,7 +112,7 @@
                             <select name="toAssetId" data-required-for="transfer" class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                                 <option value="">선택</option>
                                 <c:forEach var="asset" items="${assets}">
-                                    <option value="${asset.assetId}">${asset.name}</option>
+                                    <option value="${asset.id}">${asset.name}</option>
                                 </c:forEach>
                             </select>
                             <p class="mt-1 text-xs text-slate-500">출금/입금 자산은 동일할 수 없습니다.</p>

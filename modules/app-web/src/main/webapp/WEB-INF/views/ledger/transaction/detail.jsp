@@ -69,7 +69,7 @@
                     <div class="flex justify-between"><span class="text-slate-500">메모</span><span>${tx.memo}</span></div>
                 </div>
 
-                <form method="post" action="${ctx}/ledger/transactions/${tx.transactionId}" class="mt-4" data-ajax="true" data-method="DELETE">
+                <form method="post" action="${ctx}/api/ledger/transactions/${tx.transactionId}" class="mt-4" data-ajax="true" data-method="DELETE">
                     <button type="submit" class="w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50">삭제</button>
                 </form>
             </section>
@@ -96,7 +96,7 @@
                     <form class="mt-3 flex items-center gap-2"
                           method="post"
                           enctype="multipart/form-data"
-                          action="${ctx}/ledger/transactions/${tx.transactionId}/attachments"
+                          action="${ctx}/api/ledger/transactions/${tx.transactionId}/attachments"
                           data-ajax="true">
                         <input type="file"
                                name="file"
@@ -112,7 +112,7 @@
 
                 <div class="mt-3 grid grid-cols-2 gap-3">
                     <c:forEach var="att" items="${tx.attachments}">
-                        <c:url var="attImageUrl" value="/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}/image"/>
+                        <c:url var="attImageUrl" value="/api/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}/image"/>
                         <div class="overflow-hidden rounded-xl border border-slate-200">
                             <a href="${attImageUrl}" target="_blank" rel="noopener noreferrer" class="block">
                                 <img src="${attImageUrl}" alt="${att.uploadFileName}" class="pv-thumb h-24 w-full object-cover"/>
@@ -120,7 +120,7 @@
                             <div class="flex items-center justify-between gap-2 px-3 py-2">
                                 <div class="truncate text-xs text-slate-600">${att.uploadFileName}</div>
                                 <form method="post"
-                                      action="${ctx}/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}"
+                                      action="${ctx}/api/ledger/transactions/${tx.transactionId}/attachments/${att.attachmentId}"
                                       data-ajax="true"
                                       data-method="DELETE">
                                     <button type="submit" class="text-xs text-slate-500 transition hover:text-slate-700 hover:underline underline-offset-2">삭제</button>

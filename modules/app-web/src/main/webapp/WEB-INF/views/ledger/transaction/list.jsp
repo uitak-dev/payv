@@ -58,7 +58,7 @@
                     <select name="assetId" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                         <option value="">전체</option>
                         <c:forEach var="asset" items="${assets}">
-                            <option value="${asset.assetId}" ${asset.assetId == assetId ? 'selected' : ''}>${asset.name}</option>
+                            <option value="${asset.id}" ${asset.id == assetId ? 'selected' : ''}>${asset.name}</option>
                         </c:forEach>
                     </select>
                 </label>

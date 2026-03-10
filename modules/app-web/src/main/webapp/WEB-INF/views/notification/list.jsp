@@ -32,7 +32,7 @@
         </c:if>
 
         <div class="mb-3 flex items-center justify-end">
-            <form action="${ctx}/notifications/read-all?page=${result.page}&size=${result.size}" method="post" data-ajax="true" data-method="PUT">
+            <form action="${ctx}/api/notification/notifications/read-all?page=${result.page}&size=${result.size}" method="post" data-ajax="true" data-method="PUT">
                 <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold hover:bg-slate-100">전체 읽음</button>
             </form>
         </div>
@@ -46,7 +46,7 @@
                             <div class="mt-1 text-xs text-slate-600">${item.message}</div>
                         </div>
                         <c:if test="${not item.read}">
-                            <form action="${ctx}/notifications/${item.notificationId}?page=${result.page}&size=${result.size}" method="post" data-ajax="true" data-method="PUT">
+                            <form action="${ctx}/api/notification/notifications/${item.notificationId}?page=${result.page}&size=${result.size}" method="post" data-ajax="true" data-method="PUT">
                                 <button type="submit" class="rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-semibold hover:bg-slate-100">읽음</button>
                             </form>
                         </c:if>

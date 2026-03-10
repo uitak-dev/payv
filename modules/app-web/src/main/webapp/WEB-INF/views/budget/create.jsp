@@ -25,7 +25,7 @@
             <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">요청 처리 중 오류가 발생했습니다.</p>
         </c:if>
 
-        <form method="post" action="${ctx}/budget/budgets" class="space-y-4" data-ajax="true">
+        <form method="post" action="${ctx}/api/budget/budgets" class="space-y-4" data-ajax="true">
             <section class="pv-card p-4">
                 <div class="grid gap-4">
                     <label>

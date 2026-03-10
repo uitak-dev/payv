@@ -31,7 +31,7 @@
                 <p class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">회원가입에 실패했습니다. 입력값 또는 중복 이메일을 확인해 주세요.</p>
             </c:if>
 
-            <form class="space-y-4" method="post" action="${ctx}/signup" data-ajax="true">
+            <form class="space-y-4" method="post" action="${ctx}/api/iam/signup" data-ajax="true">
                 <label class="block">
                     <div class="text-sm font-medium">이메일</div>
                     <input name="email" type="email" required class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" placeholder="example@example.com"/>
