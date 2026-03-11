@@ -13,6 +13,11 @@ import java.time.YearMonth;
 @RequiredArgsConstructor
 public class IamViewController {
 
+    @GetMapping("/")
+    public String root(@AuthenticationPrincipal IamUserDetails userDetails) {
+        return userDetails == null ? "redirect:/login" : "redirect:/home";
+    }
+
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error,
                         @RequestParam(required = false) String logout,

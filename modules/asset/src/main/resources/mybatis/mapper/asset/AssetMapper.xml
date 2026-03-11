@@ -73,7 +73,12 @@
     <select id="selectNamesByIds" resultMap="AssetRecordMap">
         SELECT
             asset_id,
-            name
+            owner_user_id,
+            name,
+            asset_type,
+            is_active,
+            created_at,
+            updated_at
         FROM asset
         WHERE owner_user_id = #{ownerUserId}
         AND is_active = TRUE
@@ -86,7 +91,12 @@
     <select id="selectNamesByOwner" resultMap="AssetRecordMap">
         SELECT
             asset_id,
-            name
+            owner_user_id,
+            name,
+            asset_type,
+            is_active,
+            created_at,
+            updated_at
         FROM asset
         WHERE owner_user_id = #{ownerUserId}
         AND is_active = TRUE

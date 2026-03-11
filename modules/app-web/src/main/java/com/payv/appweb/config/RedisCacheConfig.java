@@ -7,11 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -26,7 +29,7 @@ import java.util.Map;
 
 @Configuration
 @EnableCaching
-public class RedisCacheConfig {
+public class RedisCacheConfig extends CachingConfigurerSupport {
 
     private static final Logger log = LoggerFactory.getLogger(RedisCacheConfig.class);
 
@@ -44,6 +47,9 @@ public class RedisCacheConfig {
 
     @Value("${redis.command-timeout-ms:2000}")
     private long redisCommandTimeoutMs;
+
+    @Value("${redis.fail-fast:false}")
+    private boolean redisFailFast;
 
     @Value("${cache.ttl.default-seconds:300}")
     private long defaultTtlSeconds;
@@ -79,6 +85,21 @@ public class RedisCacheConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+        if (!isRedisAvailable(redisConnectionFactory)) {
+            if (redisFailFast) {
+                throw new IllegalStateException("Redis is not reachable and redis.fail-fast=true");
+            }
+            log.warn("Redis is not reachable. Falling back to in-memory cache manager.");
+            ConcurrentMapCacheManager fallback = new ConcurrentMapCacheManager(
+                    CacheNames.REPORTING_MONTHLY_SUMMARY,
+                    CacheNames.REPORTING_HOME_DASHBOARD,
+                    CacheNames.LEDGER_RECENT_FIRST_PAGE,
+                    CacheNames.BUDGET_MONTHLY_STATUS
+            );
+            fallback.setAllowNullValues(false);
+            return fallback;
+        }
+
         JdkSerializationRedisSerializer serializer = new JdkSerializationRedisSerializer();
         RedisSerializationContext.SerializationPair<Object> valuePair =
                 RedisSerializationContext.SerializationPair.fromSerializer(serializer);
@@ -113,8 +134,19 @@ public class RedisCacheConfig {
                 .build();
     }
 
+    private boolean isRedisAvailable(RedisConnectionFactory redisConnectionFactory) {
+        try (RedisConnection connection = redisConnectionFactory.getConnection()) {
+            connection.ping();
+            return true;
+        } catch (Exception e) {
+            log.warn("Redis availability check failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
     @Bean
-    public CacheErrorHandler cacheErrorHandler() {
+    @Override
+    public CacheErrorHandler errorHandler() {
         return new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {

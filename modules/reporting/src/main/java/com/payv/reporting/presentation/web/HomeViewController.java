@@ -15,7 +15,7 @@ public class HomeViewController {
 
     private final ReportingQueryService reportingQueryService;
 
-    @GetMapping({"/", "/home"})
+    @GetMapping("/home")
     public String home(@AuthenticationPrincipal IamUserDetails userDetails, Model model) {
         String ownerUserId = userDetails.getUserId();
 

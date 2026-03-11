@@ -7,6 +7,11 @@
     </Appenders>
 
     <Loggers>
+        <!-- Outbox polling SQL logs are too noisy at 2s interval; keep this mapper at INFO -->
+        <Logger name="com.payv.ledger.infrastructure.persistence.mybatis.mapper.LedgerEventOutboxMapper" level="info" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
         <Logger name="com.payv" level="debug" additivity="false">
             <AppenderRef ref="ConsoleAppender"/>
         </Logger>
