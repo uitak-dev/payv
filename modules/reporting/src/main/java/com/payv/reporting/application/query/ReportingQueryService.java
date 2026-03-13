@@ -43,7 +43,7 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class ReportingQueryService {
 
-    private static final int HOME_RECENT_LIMIT = 20;
+    private static final int HOME_RECENT_LIMIT = 6;
 
     private final LedgerReportQueryPort ledgerReportQueryPort;
     private final BudgetSnapshotPort budgetSnapshotPort;
@@ -133,8 +133,9 @@ public class ReportingQueryService {
         Optional<OverallBudgetSnapshotDto> overallBudget =
                 budgetSnapshotPort.findOverallBudget(ownerUserId, targetMonth);
 
+        // 최근 거래 목록은 월 경계를 두지 않고 전체 기간에서 최신순으로 조회한다.
         List<RecentTransactionDto> recentRows =
-                ledgerReportQueryPort.findRecentTransactions(ownerUserId, from, to, HOME_RECENT_LIMIT);
+                ledgerReportQueryPort.findRecentTransactions(ownerUserId, null, null, HOME_RECENT_LIMIT);
 
         Set<String> assetIds = new LinkedHashSet<>();
         Set<String> categoryIds = new LinkedHashSet<>();

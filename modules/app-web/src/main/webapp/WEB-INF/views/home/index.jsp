@@ -56,7 +56,7 @@
             </section>
 
             <section class="pv-card">
-                <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">최근 거래 (${monthStart} ~ ${monthEnd})</div>
+                <div class="border-b border-slate-200 px-4 py-3 text-sm font-semibold">최근 거래</div>
                 <div class="divide-y divide-slate-100">
                     <c:forEach var="item" items="${recentTransactions}">
                         <a href="${ctx}/ledger/transactions/${item.transactionId}" class="flex items-center justify-between px-4 py-3">
@@ -80,7 +80,7 @@
                         </a>
                     </c:forEach>
                     <c:if test="${empty recentTransactions}">
-                        <div class="px-4 py-3 text-sm text-slate-500">이번 달 거래가 없습니다.</div>
+                        <div class="px-4 py-3 text-sm text-slate-500">최근 거래가 없습니다.</div>
                     </c:if>
                 </div>
             </section>

@@ -86,13 +86,14 @@
     </select>
 
     <select id="selectRecentTransactions" resultMap="RecentTransactionRecordMap">
-        select transaction_id,
-               transaction_type,
-               amount,
-               transaction_date,
-               asset_id,
-               category_id_level1,
-               memo
+        select
+            transaction_id,
+            transaction_type,
+            amount,
+            transaction_date,
+            asset_id,
+            category_id_level1,
+            memo
         from transaction
         where owner_user_id = #{ownerUserId}
         <if test="from != null">
